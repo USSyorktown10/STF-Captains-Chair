@@ -3,7 +3,7 @@
 This shows the current version, and a guide on how to play the game.
 
 - ### Game Stats
-    - Current Version: `ALPHA`
+    - Current Version: `UNRELEASED`
     - Bug Ammount: High
     - Non-Optimized Code: High
     - Avalible Features: Approx. 5/11
