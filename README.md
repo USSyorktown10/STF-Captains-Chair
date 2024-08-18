@@ -7,9 +7,9 @@ Please open an issue if you find anything wrong with the game (There is a lot wr
     - Current Version: `ALPHA`
     - Bug Ammount: High
     - Non-Optimized Code: High
-    - Avalible Features: Approx. 5/11
+    - Avalible Features: Approx. 5/11 Features added
 - ### How to Play
-  - Choose between explore and drydock. I would start with drydock, because you dont have many `credits` (Game currcency) yet.
+  - Choose between explore and drydock. I would start with drydock, because you dont have many `credits` yet. (Credits are the game currcency)
   - Start with the `Alpha Sector`, where the hostiles are easier, and there is more to mine.
   - I would NOT start a battle between a ship until you have upgraded your ship.
   - How to Get Credits and upgrade your ship
