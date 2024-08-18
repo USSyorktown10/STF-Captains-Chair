@@ -567,7 +567,7 @@ while Yes == 1:
                         while Win == 0:
                             os.system('cls' if os.name == 'nt' else 'clear')
                             print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
-                            print(f'{Fore.BLUE}Vulcan Health:{Fore.WHITE}', KlingHealth)
+                            print(f'{Fore.BLUE}Vulcan Health:{Fore.WHITE}', VulcanHealth)
                             print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
                             print('(1) Attack or (2) Defend')
                             atordef = int(input('Option: '))
@@ -587,31 +587,31 @@ while Yes == 1:
                                     damdelt = (random.randint(100,200) * PhaserUpgrade)
                                     print('You Hit! Damage Dealt:', damdelt) 
                                     time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
+                                    VulcanHealth = VulcanHealth - damdelt
                                     continue
                                 elif damO == Close1:
                                     damdelt = (random.randint(50,100) * PhaserUpgrade)
                                     print('You Hit! Damage Dealt:', damdelt) 
                                     time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
+                                    VulcanHealth = VulcanHealth - damdelt
                                     continue
                                 elif damO == Close3:
                                     damdelt = (random.randint(50,100) * PhaserUpgrade)
                                     print('You Hit! Damage Dealt:', damdelt) 
                                     time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
+                                    VulcanHealth = VulcanHealth - damdelt
                                     continue   
                                 elif damO == Close2:
                                     damdelt = (random.randint(10,50) * PhaserUpgrade)
                                     print('You Hit! Damage Dealt:', damdelt) 
                                     time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
+                                    VulcanHealth = VulcanHealth - damdelt
                                     continue
                                 elif damO == Close4:
                                     damdelt = (random.randint(10,50) * PhaserUpgrade)
                                     print('You Hit! Damage Dealt:', damdelt) 
                                     time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
+                                    VulcanHealth = VulcanHealth - damdelt
                                     continue 
                                 else:
                                      print('You Missed! Klingon Ship Turn...') 
@@ -663,7 +663,7 @@ while Yes == 1:
                                      Health = Health - damrecieve
                                      time.sleep(1)
                                      continue 
-                            if KlingHealth <= 0:
+                            if VulcanHealth <= 0:
                                 os.system('cls' if os.name == 'nt' else 'clear')
                                 print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
                                 Win = 1
