@@ -1,7 +1,6 @@
 import time
 import random
 import os
-import keyboard
 from colorama import Fore
 os.system('cls' if os.name == 'nt' else 'clear')
 missionlist = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5

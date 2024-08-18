@@ -1,0 +1,6 @@
+Requirements
+
+about-time==4.2.1
+colorama==0.4.6
+pyobjc-framework-OSAKit==10.2
+pyobjc-framework-OSLog==10.2
