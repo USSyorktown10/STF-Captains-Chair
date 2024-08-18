@@ -5,6 +5,7 @@ Please open an issue if you find anything wrong with the game (There is a lot wr
 
 - ### Game Stats
     - Current Version: `ALPHA`
+    - Sub Version: ALPHA 0.2
     - Bug Ammount: High
     - Non-Optimized Code: High
     - Avalible Features: Approx. 5/11 Features added
