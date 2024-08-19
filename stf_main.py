@@ -20,7 +20,7 @@ while True:
     if Health <= 0:
         clear()
         print(f'{Fore.RED}Game over!{Fore.WHITE}')
-        break
+        exit()
     clear()
     print('What would you like to do?')
     OpList = ['1: Explore', '2: Drydock']
@@ -128,7 +128,7 @@ while True:
                             if Health <= 0:
                                 clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                break
+                                exit()
                             if atordef == 1:
                                 print('You are Attacking.')
                                 damO = int(input("Pick a number between 1 and 10: "))
@@ -293,7 +293,7 @@ while True:
                             if Health <= 0:
                                 clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                break
+                                exit()
                             if atordef == 1:
                                 print('You are Attacking.')
                                 damO = int(input("Pick a number between 1 and 10: "))
@@ -419,7 +419,7 @@ while True:
                             if Health <= 0:
                                 clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                break
+                                exit()
                             if atordef == 1:
                                 print('You are Attacking.')
                                 damO = int(input("Pick a number between 1 and 10: "))
@@ -575,7 +575,7 @@ while True:
                             if Health <= 0:
                                 clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                break
+                                exit()
                             if atordef == 1:
                                 print('You are Attacking.')
                                 damO = int(input("Pick a number between 1 and 10: "))
