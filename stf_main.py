@@ -2,39 +2,40 @@ import time
 import random
 import os
 from colorama import Fore
-os.system('cls' if os.name == 'nt' else 'clear')
+def clear():
+        os.system('cls' if os.name == 'nt' else 'clear')
+clear()
 missionlist = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
 Coin = 0
 Health = 1000
 Stamina = 100
 Materials = 5
-Yes = 1
 Win = 0
 LaserUpgrade = 1
 PhaserUpgrade = 1
 MaxHealth = 1000
 HealthUp = 10
-os.system('cls' if os.name == 'nt' else 'clear')
-while Yes == 1:
+clear()
+while True:
     if Health <= 0:
-        os.system('cls' if os.name == 'nt' else 'clear')
+        clear()
         print(f'{Fore.RED}Game over!{Fore.WHITE}')
         break
-    os.system('cls' if os.name == 'nt' else 'clear')
+    clear()
     print('What would you like to do?')
     OpList = ['1: Explore', '2: Drydock']
     print(*OpList, sep = '\n')
     Option = int(input('Option: '))
     time.sleep(0.1)
     if (Option == 1):
-        os.system('cls' if os.name == 'nt' else 'clear')
+        clear()
         print('Explore')
         Sectors = ['1: Alpha Sector', '2: Beta Sector', '3: Delta Sector'] #Alpha sector (mining, fed ships, planets and missions, sol) Beta Sector (Kilngon, Romulan, Mining, planet, mission) Delta Sec (Vulcan, mining, planet mission)
         print(*Sectors, sep = '\n')
         ChoiceSector = int(input('Option: '))
         if (ChoiceSector == 1):
-            os.system('cls' if os.name == 'nt' else 'clear')
-            op1 = ['Good', 'Good'] #Bad will be added later
+            clear()
+            op1 = ['Good', 'Good']
             selected_item = random.choice(op1) 
             if (selected_item == 'Good'):
                 op2 = ['Material Cluster', 'Trading Post', 'Federation Ship'] #, 'Mission Planet'
@@ -48,7 +49,7 @@ while Yes == 1:
                       mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
                       if (mine == "y"):
                             for i in range(DepositMat):
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print('Mining...')
                                 print('Materials Remaining:', a)
                                 print('Total Materials:', Materials)
@@ -66,7 +67,7 @@ while Yes == 1:
                           print(*Avalible, sep = '\n')
                           trade = int(input('Option: '))
                           if trade == 1:
-                              os.system('cls' if os.name == 'nt' else 'clear')
+                              clear()
                               if Coin > 10:
                                   Coin = Coin - 10
                                   LaserUpgrade = LaserUpgrade + 1
@@ -79,7 +80,7 @@ while Yes == 1:
                                   time.sleep(1)
                                   continue
                           if trade == 2:
-                              os.system('cls' if os.name == 'nt' else 'clear')
+                              clear()
                               if Materials >= 50:
                                   while Materials >= 50:
                                       Materials = Materials - 50
@@ -101,7 +102,7 @@ while Yes == 1:
                     time.sleep(1)
                     missplanet = input('Are you willing to accept a mission? Y/N: ')
                     if missplanet == 'y':
-                        os.system('cls' if os.name == 'nt' else 'clear')
+                        clear()
                         print('Missions Avalible:')
                 if (selecteditem == "Federation Ship"):
                     print('You have approached a Federation ship!')
@@ -111,21 +112,21 @@ while Yes == 1:
                     print(*op3, sep = '\n')
                     fedship = int(input('Option: '))
                     if fedship == 1:
-                        os.system('cls' if os.name == 'nt' else 'clear')
+                        clear()
                         print('You are attacking the Federation Ship!')
                         time.sleep(1)
                         FedHealth = random.randint(500,1000)
                         b = FedHealth
                         Win = 0
                         while Win == 0:
-                            os.system('cls' if os.name == 'nt' else 'clear')
+                            clear()
                             print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
                             print(f'{Fore.BLUE}Federation Health:{Fore.WHITE}', FedHealth)
                             print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
                             print('(1) Attack or (2) Defend')
                             atordef = int(input('Option: '))
                             if Health <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
                                 break
                             if atordef == 1:
@@ -217,11 +218,11 @@ while Yes == 1:
                                      time.sleep(1)
                                      continue 
                             if Health <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
                                 break
                             if FedHealth <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
                                 Win = 1
                                 Coin = Coin + random.randint(10,50)
@@ -230,22 +231,22 @@ while Yes == 1:
                                 time.sleep(1)
                                 continue
                         if fedship == -2: #This option will be avalible in v. 0.2 NOTE: Should be 2
-                            os.system('cls' if os.name == 'nt' else 'clear')
+                            clear()
                             print(f"{Fore.GREEN}Hailing Frequency Open{Fore.WHITE}")
                             hailing = random.randint(1,5)
                             if hailing == 1:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print('')
                             time.sleep(0)
                             continue
                         continue
                     continue
                 else: #Still trying to figure out what would be bad
-                    os.system('cls' if os.name == 'nt' else 'clear')
+                    clear()
                     print('')
             continue
         if ChoiceSector == 2: #Beta Sector (Kilngon, Romulan, Mining, planet, mission)
-            os.system('cls' if os.name == 'nt' else 'clear')
+            clear()
             op1 = ['Good', 'Good']
             selected_item = random.choice(op1) 
             if selected_item == 'Good':
@@ -260,7 +261,7 @@ while Yes == 1:
                       mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
                       if (mine == "y"):
                             for i in range(DepositMat):
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print('Mining...')
                                 print('Materials Remaining:', a)
                                 print('Total Materials:', Materials)
@@ -276,21 +277,21 @@ while Yes == 1:
                     print(*op3, sep = '\n')
                     klingship = int(input('Option: '))
                     if klingship == 1:
-                        os.system('cls' if os.name == 'nt' else 'clear')
+                        clear()
                         print('You are attacking the Federation Ship!')
                         time.sleep(1)
                         KlingHealth = random.randint(1000,2000)
                         b = KlingHealth
                         Win = 0
                         while Win == 0:
-                            os.system('cls' if os.name == 'nt' else 'clear')
+                            clear()
                             print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
                             print(f'{Fore.BLUE}Klingon Health:{Fore.WHITE}', KlingHealth)
                             print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
                             print('(1) Attack or (2) Defend')
                             atordef = int(input('Option: '))
                             if Health <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
                                 break
                             if atordef == 1:
@@ -382,11 +383,11 @@ while Yes == 1:
                                      time.sleep(1)
                                      continue 
                             if Health <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
                                 break
                             if KlingHealth <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
                                 Win = 1
                                 Coin = Coin + random.randint(20,30)
@@ -402,21 +403,21 @@ while Yes == 1:
                     print(*op3, sep = '\n')
                     klingship = int(input('Option: '))
                     if klingship == 1:
-                        os.system('cls' if os.name == 'nt' else 'clear')
+                        clear()
                         print('You are attacking the Romulan Ship!')
                         time.sleep(1)
                         RomHealth = random.randint(1000,2000)
                         b = RomHealth
                         Win = 0
                         while Win == 0:
-                            os.system('cls' if os.name == 'nt' else 'clear')
+                            clear()
                             print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
                             print(f'{Fore.BLUE}Romulan Health:{Fore.WHITE}', RomHealth)
                             print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
                             print('(1) Attack or (2) Defend')
                             atordef = int(input('Option: '))
                             if Health <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
                                 break
                             if atordef == 1:
@@ -508,11 +509,11 @@ while Yes == 1:
                                      time.sleep(1)
                                      continue 
                             if Health <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
                                 break
                             if RomHealth <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
                                 Win = 1
                                 Coin = Coin + random.randint(20,60)
@@ -528,7 +529,7 @@ while Yes == 1:
                     continue
             continue
         if ChoiceSector == 3: #Delta Sec (Vulcan, mining, planet mission)
-            os.system('cls' if os.name == 'nt' else 'clear')
+            clear()
             op1 = ['Good', 'Good']
             selected_item = random.choice(op1) 
             op3 = ['Material Cluster', 'Vulcan Ship'] #, 'Mission Planet'
@@ -542,7 +543,7 @@ while Yes == 1:
                       mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
                       if (mine == "y"):
                             for i in range(DepositMat):
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print('Mining...')
                                 print('Materials Remaining:', a)
                                 print('Total Materials:', Materials)
@@ -558,21 +559,21 @@ while Yes == 1:
                     print(*op3, sep = '\n')
                     Vulcship = int(input('Option: '))
                     if Vulcship == 1:
-                        os.system('cls' if os.name == 'nt' else 'clear')
+                        clear()
                         print('You are attacking the Vulcan Ship!')
                         time.sleep(1)
                         VulcanHealth = random.randint(1000,2000)
                         b = VulcanHealth
                         Win = 0
                         while Win == 0:
-                            os.system('cls' if os.name == 'nt' else 'clear')
+                            clear()
                             print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
                             print(f'{Fore.BLUE}Vulcan Health:{Fore.WHITE}', VulcanHealth)
                             print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
                             print('(1) Attack or (2) Defend')
                             atordef = int(input('Option: '))
                             if Health <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.RED}Game over!{Fore.WHITE}')
                                 break
                             if atordef == 1:
@@ -664,7 +665,7 @@ while Yes == 1:
                                      time.sleep(1)
                                      continue 
                             if VulcanHealth <= 0:
-                                os.system('cls' if os.name == 'nt' else 'clear')
+                                clear()
                                 print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
                                 Win = 1
                                 Coin = Coin + random.randint(20,60)
@@ -680,13 +681,13 @@ while Yes == 1:
                 continue
         continue
     if Option == 2:
-        os.system('cls' if os.name == 'nt' else 'clear')
+        clear()
         print("Drydock")
         DryOp = ['1: Repair Ship', '2: Upgrade Ship', '3: Check Inventory', '4: Exit']
         print(*DryOp, sep = '\n')
         DryInt = int(input('Option: '))
         if DryInt == 1:
-            os.system('cls' if os.name == 'nt' else 'clear')
+            clear()
             print('Repair Ship')
             print('Ship Health:', Health, '/', MaxHealth)
             if Health > MaxHealth:
@@ -697,18 +698,18 @@ while Yes == 1:
                 continue
             continue
         if DryInt == 2:
-            os.system('cls' if os.name == 'nt' else 'clear')
+            clear()
             print('Upgrade Ship')
             print('What would you like to upgrade?')
             UpOp = ['1: Phaser Upgrade', '2: Max Health Upgrade', '3: Mining Laser Upgrade']
             print(*UpOp, sep = '\n')
             UpOpInt = int(input('Which Upgrade do you Choose?'))
             if UpOpInt == 1:
-                os.system('cls' if os.name == 'nt' else 'clear')
+                clear()
                 print('Phaser Upgrade')
                 print('Cost: 10')
                 print('Current Level:', PhaserUpgrade)
-                if Coin < 10:
+                if Coin > 10:
                     buyconfirm = input('Are you sure you want to buy this? (Y/N)')
                     if buyconfirm == 'y':
                         PhaserUpgrade = PhaserUpgrade + 1
@@ -721,11 +722,11 @@ while Yes == 1:
                     time.sleep(2)
                     continue
             if UpOpInt == 2:
-                os.system('cls' if os.name == 'nt' else 'clear')
+                clear()
                 print('Max Health Upgrade')
                 print('Cost: 15')
                 print('Current Max Health:', MaxHealth)
-                if Coin < 15:
+                if Coin > 15:
                     buyconfirm = input('Are you sure you want to buy this? (Y/N)')
                     if buyconfirm == 'y':
                         MaxHealth = MaxHealth + 500
@@ -739,11 +740,11 @@ while Yes == 1:
                     continue
                 continue
             if UpOpInt == 3:
-                os.system('cls' if os.name == 'nt' else 'clear')
+                clear()
                 print('Mining Laser Upgrade')
                 print('Cost: 10')
                 print('Current Laser:', LaserUpgrade)
-                if Coin < 10:
+                if Coin > 10:
                     buyconfirm = input('Are you sure you want to buy this? (Y/N)')
                     if buyconfirm == 'y':
                         LaserUpgrade = LaserUpgrade + 1

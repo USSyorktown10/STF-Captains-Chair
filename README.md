@@ -5,7 +5,7 @@ Please open an issue if you find anything wrong with the game (There is a lot wr
 
 - ### Game Stats
     - Current Version: `BETA`
-    - Sub Version: `v1.0 - dev3`
+    - Sub Version: `v1.0 - dev4`
     - Bug Ammount: High
     - Non-Optimized Code: High
     - Avalible Features: Approx. 5/11 Features added
