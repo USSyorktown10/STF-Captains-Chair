@@ -4,6 +4,10 @@ import os
 from colorama import Fore
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
+def battle(opponent_health, opponent_name, oppenent_damage, income): # This function is not ready yet. This will be avalible soon. The current version you are reading is the version that got rid of the bug where when you buy something, it actually takes away the ammount of money you spent.
+    print('You are attacking the ', opponent_name, ' ! This ship has ', opponent_health, ' health, and if you win, you get ', income, '.')
+    while Health > 0:
+        continue
 clear()
 missionlist = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
 Coin = 0
@@ -713,6 +717,7 @@ while True:
                     buyconfirm = input('Are you sure you want to buy this? (Y/N)')
                     if buyconfirm == 'y':
                         PhaserUpgrade = PhaserUpgrade + 1
+                        Coin = Coin-10
                         print('Upgrade Bought! Current Phaser Level:', PhaserUpgrade)
                         time.sleep(2)
                         continue
@@ -730,6 +735,7 @@ while True:
                     buyconfirm = input('Are you sure you want to buy this? (Y/N)')
                     if buyconfirm == 'y':
                         MaxHealth = MaxHealth + 500
+                        Coin = Coin-15
                         print('Upgrade Bought! Current Health Level:', MaxHealth)
                         time.sleep(2)
                         continue
@@ -748,7 +754,8 @@ while True:
                     buyconfirm = input('Are you sure you want to buy this? (Y/N)')
                     if buyconfirm == 'y':
                         LaserUpgrade = LaserUpgrade + 1
-                        print('Upgrade Bought! Current Health Level:', MaxHealth)
+                        Coint = Coin-10
+                        print('Upgrade Bought! Current Laser Level:', LaserUpgrade)
                         time.sleep(2)
                         continue
                     continue
