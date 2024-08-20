@@ -8,7 +8,6 @@ Please open an issue if you find anything wrong with the game (There is a lot wr
     - Sub Version: `v1.0 - dev4.1`
     - Bug Ammount: High
     - Non-Optimized Code: High
-    - Avalible Features: Approx. 5/11 Features added
 - ### How to Play
   - Choose between explore and drydock. I would start with drydock, because you dont have many `credits` yet. (Credits are the game currcency)
   - Start with the `Alpha Sector`, where the hostiles are easier, and there is more to mine.
