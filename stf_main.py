@@ -5,9 +5,65 @@ from colorama import Fore
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
 def battle(opponent_health, opponent_name, oppenent_damage, income): # This function is not ready yet. This will be avalible soon. The current version you are reading is the version that got rid of the bug where when you buy something, it actually takes away the ammount of money you spent.
-    print('You are attacking the ', opponent_name, ' ! This ship has ', opponent_health, ' health, and if you win, you get ', income, '.')
+    print(f'{Fore.RED}You are attacking the {Fore.WHITE}', opponent_name, f'{Fore.RED} ! This ship has {Fore.WHITE}', opponent_health, f'{Fore.RED} health, and if you win, you get {Fore.WHITE}', income, f'{Fore.RED}.{Fore.WHITE}')
     while Health > 0:
-        continue
+        if opponent_health <= 0:
+            break
+        print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
+        print(f'{Fore.BLUE}Federation Health:{Fore.WHITE}', FedHealth)
+        print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
+        time.sleep(0.5)
+        print('You are attacking.')
+        damO = int(input("Pick a number between 1 and 10: "))
+        damInt = random.randint(1,10)
+        Close1 = damInt + 1
+        Close2 = damInt + 2
+        Close3 = damInt - 1
+        Close4 = damInt - 2
+        if damO == damInt:
+            damdelt = (random.randint(100,200) * PhaserUpgrade)
+            print('You Hit! Damage Dealt:', damdelt) 
+            time.sleep(1)
+            opponent_health = opponent_health - damdelt
+            continue
+        elif damO == Close1:
+            damdelt = (random.randint(50,100) * PhaserUpgrade)
+            print('You Hit! Damage Dealt:', damdelt) 
+            time.sleep(1)
+            opponent_health = opponent_health - damdelt
+            continue
+        elif damO == Close3:
+            damdelt = (random.randint(50,100) * PhaserUpgrade)
+            print('You Hit! Damage Dealt:', damdelt)
+            time.sleep(1)
+            opponent_health = opponent_health - damdelt
+            continue
+        elif damO == Close2:
+            damdelt = (random.randint(25,50) * PhaserUpgrade)
+            print('You Hit! Damage Dealt:', damdelt)
+            time.sleep(1)
+            opponent_health = opponent_health - damdelt
+            continue
+        elif damO == Close4:
+            damdelt = (random.randint(25,50) * PhaserUpgrade)
+            print('You Hit! Damage Dealt:', damdelt)
+            time.sleep(1)
+            opponent_health = opponent_health - damdelt
+            continue
+        else:
+            print('You Missed!', opponent_name, 'Ships Turn...') 
+            damrecieve = random.randint(50,200) * oppenent_damage
+            Health = Health - damrecieve
+            time.sleep(0.5)
+            print('The ', opponent_name, ' Ship did ', damrecieve, ' Damage!')
+            continue
+    if Health <= 0:
+        print(f'{Fore.RED}You Lose!{Fore.WHITE}')
+        exit()
+    if opponent_health <= 0:
+        print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
+        print('Materials Gained: ', income)
+        Materials = Materials + income
 clear()
 missionlist = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
 Coin = 0

@@ -4,8 +4,8 @@ This shows the current version, and a guide on how to play the game.
 Please open an issue if you find anything wrong with the game (There is a lot wrong with it)
 
 - ### Game Stats
-    - Current Version: `BETA`
-    - Sub Version: `v1.0 - dev4.2`
+    - Current Version: `dev`
+    - Sub Version: `dev4.3`
     - Bug Ammount: High
     - Non-Optimized Code: High
 - ### How to Play
