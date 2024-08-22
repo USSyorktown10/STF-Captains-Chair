@@ -2,6 +2,32 @@ import time
 import random
 import os
 from colorama import Fore
+upgrades = {"Mining Laser": 0, "Health": 0, "Phaser": 0}  # this is a dictionary
+costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20}  # the costs
+deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2}  # the amount to multiply by for each level, to make the higher levels cost more
+
+Coin = 100  # pretend we start with money
+
+def ask(question):
+        response = input(question)
+        return response.lower() in ["y", "yes", "sure", "you know the joe"]  # lol
+
+def upgrade(type):
+        current_upgrade_level = upgrades[type]
+        current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level)  # ** = raise to the power of, this multiplies the base cost by the delta the number of upgrade times
+        if Coin >= current_upgrade_cost:  # Can we afford it?
+                print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coins. ({coins} -> {coins - current_upgrade_cost}){Fore.WHITE} ")
+                if ask(f"{Fore.BOLD+Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  # extra space so it looks nicer
+                        Coin -= current_upgrade_cost  # take the cost away
+                        upgrades[type] += 1   # actually upgrade
+                        return True  # we did it!
+        else:
+                print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coins (current: {Coin}, required: {current_upgrade_cost}).{Fore.WHITE}")
+                return False
+
+def view_upgrades():
+        print(f"{Fore.GREEN}Your upgrades:{Fore.WHITE}\n{'\n'.join([u + ': level '+str(upgrades[u]) for u in upgrades.keys()])}")  # I was tired, OK?
+
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
 def battle(opponent_health, opponent_name, oppenent_damage, income): # This function is not ready yet. This will be avalible soon. The current version you are reading is the version that got rid of the bug where when you buy something, it actually takes away the ammount of money you spent.
@@ -66,7 +92,6 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
         Materials = Materials + income
 clear()
 missionlist = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
-Coin = 0
 Health = 1000
 Stamina = 100
 Materials = 5
@@ -744,85 +769,6 @@ while True:
         clear()
         print("Drydock")
         DryOp = ['1: Repair Ship', '2: Upgrade Ship', '3: Check Inventory', '4: Exit']
-        print(*DryOp, sep = '\n')
-        DryInt = int(input('Option: '))
-        if DryInt == 1:
-            clear()
-            print('Repair Ship')
-            print('Ship Health:', Health, '/', MaxHealth)
-            if Health > MaxHealth:
-                Repair = input('Repair? (Y/N)')
-            else:
-                print('Your Health is full.')
-                time.sleep(2)
-                continue
-            continue
-        if DryInt == 2:
-            clear()
-            print('Upgrade Ship')
-            print('What would you like to upgrade?')
-            UpOp = ['1: Phaser Upgrade', '2: Max Health Upgrade', '3: Mining Laser Upgrade']
-            print(*UpOp, sep = '\n')
-            UpOpInt = int(input('Which Upgrade do you Choose?'))
-            if UpOpInt == 1:
-                clear()
-                print('Phaser Upgrade')
-                print('Cost: 10')
-                print('Current Level:', PhaserUpgrade)
-                if Coin > 10:
-                    buyconfirm = input('Are you sure you want to buy this? (Y/N)')
-                    if buyconfirm == 'y':
-                        PhaserUpgrade = PhaserUpgrade + 1
-                        Coin = Coin-10
-                        print('Upgrade Bought! Current Phaser Level:', PhaserUpgrade)
-                        time.sleep(2)
-                        continue
-                    continue
-                else:
-                    print('You do not have enough coins to buy this.')
-                    time.sleep(2)
-                    continue
-            if UpOpInt == 2:
-                clear()
-                print('Max Health Upgrade')
-                print('Cost: 15')
-                print('Current Max Health:', MaxHealth)
-                if Coin > 15:
-                    buyconfirm = input('Are you sure you want to buy this? (Y/N)')
-                    if buyconfirm == 'y':
-                        MaxHealth = MaxHealth + 500
-                        Coin = Coin-15
-                        print('Upgrade Bought! Current Health Level:', MaxHealth)
-                        time.sleep(2)
-                        continue
-                    continue
-                else:
-                    print('You do not have enough coins to buy this.')
-                    time.sleep(2)
-                    continue
-                continue
-            if UpOpInt == 3:
-                clear()
-                print('Mining Laser Upgrade')
-                print('Cost: 10')
-                print('Current Laser:', LaserUpgrade)
-                if Coin > 10:
-                    buyconfirm = input('Are you sure you want to buy this? (Y/N)')
-                    if buyconfirm == 'y':
-                        LaserUpgrade = LaserUpgrade + 1
-                        Coint = Coin-10
-                        print('Upgrade Bought! Current Laser Level:', LaserUpgrade)
-                        time.sleep(2)
-                        continue
-                    continue
-                else:
-                    print('You do not have enough coins to buy this.')
-                    time.sleep(2)
-                    continue
-                continue
-            continue
-        if DryInt == 4:
-            continue
-        continue
+        ask('What would you like to upgrade?')
     if Health < MaxHealth:
         Health = Health + HealthUp
