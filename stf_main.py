@@ -6,23 +6,23 @@ upgrades = {"Mining Laser": 0, "Health": 0, "Phaser": 0}  # this is a dictionary
 costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20}  # the costs
 deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2}  # the amount to multiply by for each level, to make the higher levels cost more
 
-Coin = 100  # pretend we start with money
+coins = 100  # pretend we start with money
 
 def ask(question):
         response = input(question)
-        return response.lower() in ["y", "yes", "sure", "you know the joe"]  # lol
+        return response.lower() in ["y", "yes", "sure"]  # lol
 
 def upgrade(type):
         current_upgrade_level = upgrades[type]
         current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level)  # ** = raise to the power of, this multiplies the base cost by the delta the number of upgrade times
-        if Coin >= current_upgrade_cost:  # Can we afford it?
-                print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coins. ({coins} -> {coins - current_upgrade_cost}){Fore.WHITE} ")
+        if coins >= current_upgrade_cost:  # Can we afford it?
+                print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coinss. ({coins} -> {coins - current_upgrade_cost}){Fore.WHITE} ")
                 if ask(f"{Fore.BOLD+Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  # extra space so it looks nicer
-                        Coin -= current_upgrade_cost  # take the cost away
+                        coins -= current_upgrade_cost  # take the cost away
                         upgrades[type] += 1   # actually upgrade
                         return True  # we did it!
         else:
-                print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coins (current: {Coin}, required: {current_upgrade_cost}).{Fore.WHITE}")
+                print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coinss (current: {coins}, required: {current_upgrade_cost}).{Fore.WHITE}")
                 return False
 
 def view_upgrades():
@@ -32,46 +32,46 @@ def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
 def battle(opponent_health, opponent_name, oppenent_damage, income): # This function is not ready yet. This will be avalible soon. The current version you are reading is the version that got rid of the bug where when you buy something, it actually takes away the ammount of money you spent.
     print(f'{Fore.RED}You are attacking the {Fore.WHITE}', opponent_name, f'{Fore.RED} ! This ship has {Fore.WHITE}', opponent_health, f'{Fore.RED} health, and if you win, you get {Fore.WHITE}', income, f'{Fore.RED}.{Fore.WHITE}')
-    while Health > 0:
+    while health > 0:
         if opponent_health <= 0:
             break
         print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
-        print(f'{Fore.BLUE}Federation Health:{Fore.WHITE}', FedHealth)
-        print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
+        print(f'{Fore.BLUE}{opponent_name} health:{Fore.WHITE}', opponent_health)
+        print(f'{Fore.GREEN}Your health:{Fore.WHITE}', health)
         time.sleep(0.5)
         print('You are attacking.')
-        damO = int(input("Pick a number between 1 and 10: "))
-        damInt = random.randint(1,10)
-        Close1 = damInt + 1
-        Close2 = damInt + 2
-        Close3 = damInt - 1
-        Close4 = damInt - 2
-        if damO == damInt:
-            damdelt = (random.randint(100,200) * PhaserUpgrade)
+        damage_input = int(input("Pick a number between 1 and 10: "))
+        damage_gen = random.randint(1,10)
+        close_1 = damage_gen + 1
+        close_2 = damage_gen + 2
+        close_3 = damage_gen - 1
+        close_4 = damage_gen - 2
+        if damage_input == damage_gen:
+            damdelt = (random.randint(100,200) * phaser_upgrade)
             print('You Hit! Damage Dealt:', damdelt) 
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
-        elif damO == Close1:
-            damdelt = (random.randint(50,100) * PhaserUpgrade)
+        elif damage_input == close_1:
+            damdelt = (random.randint(50,100) * phaser_upgrade)
             print('You Hit! Damage Dealt:', damdelt) 
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
-        elif damO == Close3:
-            damdelt = (random.randint(50,100) * PhaserUpgrade)
+        elif damage_input == close_3:
+            damdelt = (random.randint(50,100) * phaser_upgrade)
             print('You Hit! Damage Dealt:', damdelt)
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
-        elif damO == Close2:
-            damdelt = (random.randint(25,50) * PhaserUpgrade)
+        elif damage_input == close_2:
+            damdelt = (random.randint(25,50) * phaser_upgrade)
             print('You Hit! Damage Dealt:', damdelt)
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
-        elif damO == Close4:
-            damdelt = (random.randint(25,50) * PhaserUpgrade)
+        elif damage_input == close_4:
+            damdelt = (random.randint(25,50) * phaser_upgrade)
             print('You Hit! Damage Dealt:', damdelt)
             time.sleep(1)
             opponent_health = opponent_health - damdelt
@@ -79,30 +79,30 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
         else:
             print('You Missed!', opponent_name, 'Ships Turn...') 
             damrecieve = random.randint(50,200) * oppenent_damage
-            Health = Health - damrecieve
+            health = health - damrecieve
             time.sleep(0.5)
             print('The ', opponent_name, ' Ship did ', damrecieve, ' Damage!')
             continue
-    if Health <= 0:
+    if health <= 0:
         print(f'{Fore.RED}You Lose!{Fore.WHITE}')
         exit()
     if opponent_health <= 0:
         print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
         print('Materials Gained: ', income)
-        Materials = Materials + income
+        materials = materials + income
 clear()
-missionlist = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
-Health = 1000
-Stamina = 100
-Materials = 5
+mission_list = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
+health = 1000
+stamina = 100
+materials = 5
 Win = 0
-LaserUpgrade = 1
-PhaserUpgrade = 1
-MaxHealth = 1000
-HealthUp = 10
+laser_upgrade = 1
+phaser_upgrade = 1
+max_health = 1000
+health_up = 10
 clear()
 while True:
-    if Health <= 0:
+    if health <= 0:
         clear()
         print(f'{Fore.RED}Game over!{Fore.WHITE}')
         exit()
@@ -110,15 +110,15 @@ while True:
     print('What would you like to do?')
     OpList = ['1: Explore', '2: Drydock']
     print(*OpList, sep = '\n')
-    Option = int(input('Option: '))
+    option = int(input('Option: '))
     time.sleep(0.1)
-    if (Option == 1):
+    if (option == 1):
         clear()
         print('Explore')
         Sectors = ['1: Alpha Sector', '2: Beta Sector', '3: Delta Sector'] #Alpha sector (mining, fed ships, planets and missions, sol) Beta Sector (Kilngon, Romulan, Mining, planet, mission) Delta Sec (Vulcan, mining, planet mission)
         print(*Sectors, sep = '\n')
-        ChoiceSector = int(input('Option: '))
-        if (ChoiceSector == 1):
+        choice_sector = int(input('Option: '))
+        if (choice_sector == 1):
             clear()
             op1 = ['Good', 'Good']
             selected_item = random.choice(op1) 
@@ -127,37 +127,37 @@ while True:
                 selecteditem = random.choice(op2) #
                 if (selecteditem == 'Material Cluster'):
                       print('You have approached a Material Cluster!')
-                      DepositMat = random.randint(10,1000)
-                      a = DepositMat / LaserUpgrade
+                      deposit_materials = random.randint(10,1000)
+                      deposit_var = deposit_materials / laser_upgrade
                       time.sleep(1)
-                      print('This mine has', DepositMat, 'rescources.')
+                      print('This mine has', deposit_materials, 'rescources.')
                       mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
                       if (mine == "y"):
-                            for i in range(DepositMat):
+                            for i in range(deposit_materials):
                                 clear()
                                 print('Mining...')
-                                print('Materials Remaining:', a)
-                                print('Total Materials:', Materials)
-                                a = a - LaserUpgrade
-                                Materials = Materials + (0.5 * LaserUpgrade)
+                                print('Materials Remaining:', deposit_var)
+                                print('Total Materials:', materials)
+                                deposit_var = deposit_var - laser_upgrade
+                                materials = materials + (0.5 * laser_upgrade)
                                 time.sleep(0.5)
                             continue
                 if (selecteditem == 'Trading Post'):
                       print('You have approached a Trading Post!')
                       time.sleep(1)
-                      tradepost = input('Would you like to trade? Y/N: ')
-                      if tradepost == 'y':
+                      trade_post = input('Would you like to trade? Y/N: ')
+                      if trade_post == 'y':
                           print('Avalible Items:')
-                          Avalible = ['1: Laser Upgrade: 10 coins', '2: Sell Materials: 1 coin per 50 materials', '3: Exit']
+                          Avalible = ['1: Laser Upgrade: 10 coinss', '2: Sell Materials: 1 coins per 50 materials', '3: Exit']
                           print(*Avalible, sep = '\n')
                           trade = int(input('Option: '))
                           if trade == 1:
                               clear()
-                              if Coin > 10:
-                                  Coin = Coin - 10
-                                  LaserUpgrade = LaserUpgrade + 1
+                              if coins > 10:
+                                  coins = coins - 10
+                                  laser_upgrade = laser_upgrade + 1
                                   print('Laser Upgrade Bought!')
-                                  print('Laser Level:', LaserUpgrade)
+                                  print('Laser Level:', laser_upgrade)
                                   time.sleep(1)
                                   continue
                               else:
@@ -166,16 +166,16 @@ while True:
                                   continue
                           if trade == 2:
                               clear()
-                              if Materials >= 50:
-                                  while Materials >= 50:
-                                      Materials = Materials - 50
-                                      Coin = Coin + 1
-                                      print('Materials:', Materials)
-                                      print('Coins:', Coin)
+                              if materials >= 50:
+                                  while materials >= 50:
+                                      materials = materials - 50
+                                      coins = coins + 1
+                                      print('Materials:', materials)
+                                      print('coinss:', coins)
                                       time.sleep(0.5)
                                   continue
                               else:
-                                print('You dont have enough materials to get coins.')
+                                print('You dont have enough materials to get coinss.')
                                 time.sleep(1)
                                 continue
                           if trade == 3:
@@ -185,8 +185,8 @@ while True:
                 if (selecteditem == 'Mission Planet'): # Mission arent avalible yet and will be ready v. 0.5
                     print('You have approached a planet!')
                     time.sleep(1)
-                    missplanet = input('Are you willing to accept a mission? Y/N: ')
-                    if missplanet == 'y':
+                    miss_planet = input('Are you willing to accept a mission? Y/N: ')
+                    if miss_planet == 'y':
                         clear()
                         print('Missions Avalible:')
                 if (selecteditem == "Federation Ship"):
@@ -195,127 +195,10 @@ while True:
                     print('What do you want to do?')
                     op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
                     print(*op3, sep = '\n')
-                    fedship = int(input('Option: '))
-                    if fedship == 1:
-                        clear()
-                        print('You are attacking the Federation Ship!')
-                        time.sleep(1)
-                        FedHealth = random.randint(500,1000)
-                        b = FedHealth
-                        Win = 0
-                        while Win == 0:
-                            clear()
-                            print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
-                            print(f'{Fore.BLUE}Federation Health:{Fore.WHITE}', FedHealth)
-                            print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
-                            print('(1) Attack or (2) Defend')
-                            atordef = int(input('Option: '))
-                            if Health <= 0:
-                                clear()
-                                print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                exit()
-                            if atordef == 1:
-                                print('You are Attacking.')
-                                damO = int(input("Pick a number between 1 and 10: "))
-                                damInt = random.randint(1,10)
-                                Close1 = damInt + 1
-                                Close2 = damInt + 2
-                                Close3 = damInt - 1
-                                Close4 = damInt - 2
-                                if damO == damInt:
-                                    damdelt = (random.randint(100,200) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    FedHealth = FedHealth - damdelt
-                                    continue
-                                elif damO == Close1:
-                                    damdelt = (random.randint(50,100) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    FedHealth = FedHealth - damdelt
-                                    continue
-                                elif damO == Close3:
-                                    damdelt = (random.randint(50,100) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    FedHealth = FedHealth - damdelt
-                                    continue   
-                                elif damO == Close2:
-                                    damdelt = (random.randint(10,50) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    FedHealth = FedHealth - damdelt
-                                    continue
-                                elif damO == Close4:
-                                    damdelt = (random.randint(10,50) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    FedHealth = FedHealth - damdelt
-                                    continue 
-                                else:
-                                     print('You Missed! Federation Ship Turn...') 
-                                     damrecieve = random.randint(50,200) 
-                                     Health = Health - damrecieve
-                                     time.sleep(1)
-                                     continue
-                            if atordef == 2:
-                                print('You are defending.')
-                                defO = int(input('Pick a number between 1 and 10: '))
-                                defInt = random.randint(1,10)
-                                Far1 = defInt + 1
-                                Far2 = defInt + 2
-                                Far3 = defInt - 1
-                                Far4 = defInt - 2
-                                if defO == defInt:
-                                    defdelt = (random.randint(100,200))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue
-                                elif defO == Far1:
-                                    defdelt = (random.randint(50,100))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue
-                                elif defO == Far3:
-                                    defdelt = (random.randint(50,100))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue   
-                                elif defO == Far2:
-                                    defdelt = (random.randint(10,50))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue  
-                                elif defO == Far4:
-                                    defdelt = (random.randint(10,50))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue 
-                                else:
-                                     damrecieve = random.randint(100,300)
-                                     print('You have been Hit!')  
-                                     Health = Health - damrecieve
-                                     time.sleep(1)
-                                     continue 
-                            if Health <= 0:
-                                clear()
-                                print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                break
-                            if FedHealth <= 0:
-                                clear()
-                                print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
-                                Win = 1
-                                Coin = Coin + random.randint(10,50)
-                                Materials = Materials + random.randint(50,100)
-                                Health = Health + random.randint(10,80)
-                                time.sleep(1)
-                                continue
-                        if fedship == -2: #This option will be avalible in v. 0.2 NOTE: Should be 2
+                    federation_ship = int(input('Option: '))
+                    if federation_ship == 1:
+                        battle() #Figuring this out, will be possible soon
+                        if federation_ship == -2: #This option will be avalible in v. 0.2 NOTE: Should be 2
                             clear()
                             print(f"{Fore.GREEN}Hailing Frequency Open{Fore.WHITE}")
                             hailing = random.randint(1,5)
@@ -330,290 +213,55 @@ while True:
                     clear()
                     print('')
             continue
-        if ChoiceSector == 2: #Beta Sector (Kilngon, Romulan, Mining, planet, mission)
+        if choice_sector == 2: #Beta Sector (Kilngon, Romulan, Mining, planet, mission)
             clear()
             op1 = ['Good', 'Good']
             selected_item = random.choice(op1) 
             if selected_item == 'Good':
                 op3 = ['Material Cluster', 'Klingon Ship', 'Romulan Ship'] #, 'Mission Planet'
-                selecteditem2 = random.choice(op3) #
-                if (selecteditem2 == 'Material Cluster'):
+                selected_item_2 = random.choice(op3) #
+                if (selected_item_2 == 'Material Cluster'):
                       print('You have approached a Material Cluster!')
-                      DepositMat = random.randint(10,1000)
-                      a = DepositMat / LaserUpgrade
+                      deposit_materials = random.randint(10,1000)
+                      deposit_var = deposit_materials / laser_upgrade
                       time.sleep(1)
-                      print('This mine has', DepositMat, 'rescources.')
+                      print('This mine has', deposit_materials, 'rescources.')
                       mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
                       if (mine == "y"):
-                            for i in range(DepositMat):
+                            for i in range(deposit_materials):
                                 clear()
                                 print('Mining...')
-                                print('Materials Remaining:', a)
-                                print('Total Materials:', Materials)
-                                a = a - LaserUpgrade
-                                Materials = Materials + (0.5 * LaserUpgrade)
+                                print('Materials Remaining:', deposit_var)
+                                print('Total Materials:', materials)
+                                deposit_var = deposit_var - laser_upgrade
+                                materials = materials + (0.5 * laser_upgrade)
                                 time.sleep(0.5)
                             continue
-                if (selecteditem2 == 'Klingon Ship'):
+                if (selected_item_2 == 'Klingon Ship'):
                     print('You have approached a Klingon ship!')
                     time.sleep(1)
                     print('What do you want to do?')
                     op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
                     print(*op3, sep = '\n')
-                    klingship = int(input('Option: '))
-                    if klingship == 1:
-                        clear()
-                        print('You are attacking the Federation Ship!')
-                        time.sleep(1)
-                        KlingHealth = random.randint(1000,2000)
-                        b = KlingHealth
-                        Win = 0
-                        while Win == 0:
-                            clear()
-                            print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
-                            print(f'{Fore.BLUE}Klingon Health:{Fore.WHITE}', KlingHealth)
-                            print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
-                            print('(1) Attack or (2) Defend')
-                            atordef = int(input('Option: '))
-                            if Health <= 0:
-                                clear()
-                                print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                exit()
-                            if atordef == 1:
-                                print('You are Attacking.')
-                                damO = int(input("Pick a number between 1 and 10: "))
-                                damInt = random.randint(1,10)
-                                Close1 = damInt + 1
-                                Close2 = damInt + 2
-                                Close3 = damInt - 1
-                                Close4 = damInt - 2
-                                if damO == damInt:
-                                    damdelt = (random.randint(100,200) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
-                                    continue
-                                elif damO == Close1:
-                                    damdelt = (random.randint(50,100) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
-                                    continue
-                                elif damO == Close3:
-                                    damdelt = (random.randint(50,100) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
-                                    continue   
-                                elif damO == Close2:
-                                    damdelt = (random.randint(10,50) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
-                                    continue
-                                elif damO == Close4:
-                                    damdelt = (random.randint(10,50) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    KlingHealth = KlingHealth - damdelt
-                                    continue 
-                                else:
-                                     print('You Missed! Klingon Ship Turn...') 
-                                     damrecieve = random.randint(50,200) 
-                                     Health = Health - damrecieve
-                                     time.sleep(1)
-                                     continue
-                            if atordef == 2:
-                                print('You are defending.')
-                                defO = int(input('Pick a number between 1 and 10: '))
-                                defInt = random.randint(1,10)
-                                Far1 = defInt + 1
-                                Far2 = defInt + 2
-                                Far3 = defInt - 1
-                                Far4 = defInt - 2
-                                if defO == defInt:
-                                    defdelt = (random.randint(100,200))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue
-                                elif defO == Far1:
-                                    defdelt = (random.randint(50,100))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue
-                                elif defO == Far3:
-                                    defdelt = (random.randint(50,100))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue   
-                                elif defO == Far2:
-                                    defdelt = (random.randint(10,50))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue  
-                                elif defO == Far4:
-                                    defdelt = (random.randint(10,50))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue 
-                                else:
-                                     damrecieve = random.randint(100,300)
-                                     print('You have been Hit!')  
-                                     Health = Health - damrecieve
-                                     time.sleep(1)
-                                     continue 
-                            if Health <= 0:
-                                clear()
-                                print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                break
-                            if KlingHealth <= 0:
-                                clear()
-                                print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
-                                Win = 1
-                                Coin = Coin + random.randint(20,30)
-                                Materials = Materials + random.randint(100,200)
-                                Health = Health + random.randint(50,100)
-                                time.sleep(1)
-                                continue
-                if (selecteditem2 == 'Romulan Ship'):
+                    kling_ship = int(input('Option: '))
+                    if kling_ship == 1:
+                        battle()
+                if (selected_item_2 == 'Romulan Ship'):
                     print('You have approached a Romulan ship!')
                     time.sleep(1)
                     print('What do you want to do?')
                     op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
                     print(*op3, sep = '\n')
-                    klingship = int(input('Option: '))
-                    if klingship == 1:
-                        clear()
-                        print('You are attacking the Romulan Ship!')
-                        time.sleep(1)
-                        RomHealth = random.randint(1000,2000)
-                        b = RomHealth
-                        Win = 0
-                        while Win == 0:
-                            clear()
-                            print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
-                            print(f'{Fore.BLUE}Romulan Health:{Fore.WHITE}', RomHealth)
-                            print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
-                            print('(1) Attack or (2) Defend')
-                            atordef = int(input('Option: '))
-                            if Health <= 0:
-                                clear()
-                                print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                exit()
-                            if atordef == 1:
-                                print('You are Attacking.')
-                                damO = int(input("Pick a number between 1 and 10: "))
-                                damInt = random.randint(1,10)
-                                Close1 = damInt + 1
-                                Close2 = damInt + 2
-                                Close3 = damInt - 1
-                                Close4 = damInt - 2
-                                if damO == damInt:
-                                    damdelt = (random.randint(100,200) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    RomHealth = RomHealth - damdelt
-                                    continue
-                                elif damO == Close1:
-                                    damdelt = (random.randint(50,100) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    RomHealth = RomHealth - damdelt
-                                    continue
-                                elif damO == Close3:
-                                    damdelt = (random.randint(50,100) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    RomHealth = RomHealth - damdelt
-                                    continue   
-                                elif damO == Close2:
-                                    damdelt = (random.randint(10,50) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    RomHealth = RomHealth - damdelt
-                                    continue
-                                elif damO == Close4:
-                                    damdelt = (random.randint(10,50) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    RomHealth = RomHealth - damdelt
-                                    continue 
-                                else:
-                                     print('You Missed! Romulan Ship Turn...') 
-                                     damrecieve = random.randint(50,200) 
-                                     Health = Health - damrecieve
-                                     time.sleep(1)
-                                     continue
-                            if atordef == 2:
-                                print('You are defending.')
-                                defO = int(input('Pick a number between 1 and 10: '))
-                                defInt = random.randint(1,10)
-                                Far1 = defInt + 1
-                                Far2 = defInt + 2
-                                Far3 = defInt - 1
-                                Far4 = defInt - 2
-                                if defO == defInt:
-                                    defdelt = (random.randint(100,200))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue
-                                elif defO == Far1:
-                                    defdelt = (random.randint(50,100))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue
-                                elif defO == Far3:
-                                    defdelt = (random.randint(50,100))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue   
-                                elif defO == Far2:
-                                    defdelt = (random.randint(10,50))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue  
-                                elif defO == Far4:
-                                    defdelt = (random.randint(10,50))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue 
-                                else:
-                                     damrecieve = random.randint(100,300)
-                                     print('You have been Hit!')  
-                                     Health = Health - damrecieve
-                                     time.sleep(1)
-                                     continue 
-                            if Health <= 0:
-                                clear()
-                                print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                break
-                            if RomHealth <= 0:
-                                clear()
-                                print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
-                                Win = 1
-                                Coin = Coin + random.randint(20,60)
-                                Materials = Materials + random.randint(100,200)
-                                Health = Health + random.randint(50,100)
-                                time.sleep(1)
-                                continue
-                            continue
+                    rom_ship = int(input('Option: '))
+                    if rom_ship == 1:
+                        battle()
                         continue
                     continue
                 else:
                     print('Bad')
                     continue
             continue
-        if ChoiceSector == 3: #Delta Sec (Vulcan, mining, planet mission)
+        if choice_sector == 3: #Delta Sec (Vulcan, mining, planet mission)
             clear()
             op1 = ['Good', 'Good']
             selected_item = random.choice(op1) 
@@ -621,154 +269,40 @@ while True:
             selecteditem3 = random.choice(op3) #
             if (selecteditem3 == 'Material Cluster'):
                       print('You have approached a Material Cluster!')
-                      DepositMat = random.randint(10,1000)
-                      a = DepositMat / LaserUpgrade
+                      deposit_materials = random.randint(10,1000)
+                      deposit_var = deposit_materials / laser_upgrade
                       time.sleep(1)
-                      print('This mine has', DepositMat, 'rescources.')
+                      print('This mine has', deposit_materials, 'rescources.')
                       mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
                       if (mine == "y"):
-                            for i in range(DepositMat):
+                            for i in range(deposit_materials):
                                 clear()
                                 print('Mining...')
-                                print('Materials Remaining:', a)
+                                print('Materials Remaining:', deposit_var)
                                 print('Total Materials:', Materials)
-                                a = a - LaserUpgrade
-                                Materials = Materials + (0.5 * LaserUpgrade)
+                                deposit_var = deposit_var - laser_upgrade
+                                Materials = Materials + (0.5 * laser_upgrade)
                                 time.sleep(0.5)
                             continue
             if (selecteditem3 == 'Vulcan Ship'):
-                    print('You have approached a Klingon ship!')
+                    print('You have approached a Vulcan ship!')
                     time.sleep(1)
                     print('What do you want to do?')
                     op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
                     print(*op3, sep = '\n')
-                    Vulcship = int(input('Option: '))
-                    if Vulcship == 1:
-                        clear()
-                        print('You are attacking the Vulcan Ship!')
-                        time.sleep(1)
-                        VulcanHealth = random.randint(1000,2000)
-                        b = VulcanHealth
-                        Win = 0
-                        while Win == 0:
-                            clear()
-                            print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
-                            print(f'{Fore.BLUE}Vulcan Health:{Fore.WHITE}', VulcanHealth)
-                            print(f'{Fore.GREEN}Your Health:{Fore.WHITE}', Health)
-                            print('(1) Attack or (2) Defend')
-                            atordef = int(input('Option: '))
-                            if Health <= 0:
-                                clear()
-                                print(f'{Fore.RED}Game over!{Fore.WHITE}')
-                                exit()
-                            if atordef == 1:
-                                print('You are Attacking.')
-                                damO = int(input("Pick a number between 1 and 10: "))
-                                damInt = random.randint(1,10)
-                                Close1 = damInt + 1
-                                Close2 = damInt + 2
-                                Close3 = damInt - 1
-                                Close4 = damInt - 2
-                                if damO == damInt:
-                                    damdelt = (random.randint(100,200) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    VulcanHealth = VulcanHealth - damdelt
-                                    continue
-                                elif damO == Close1:
-                                    damdelt = (random.randint(50,100) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    VulcanHealth = VulcanHealth - damdelt
-                                    continue
-                                elif damO == Close3:
-                                    damdelt = (random.randint(50,100) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    VulcanHealth = VulcanHealth - damdelt
-                                    continue   
-                                elif damO == Close2:
-                                    damdelt = (random.randint(10,50) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    VulcanHealth = VulcanHealth - damdelt
-                                    continue
-                                elif damO == Close4:
-                                    damdelt = (random.randint(10,50) * PhaserUpgrade)
-                                    print('You Hit! Damage Dealt:', damdelt) 
-                                    time.sleep(1)
-                                    VulcanHealth = VulcanHealth - damdelt
-                                    continue 
-                                else:
-                                     print('You Missed! Klingon Ship Turn...') 
-                                     damrecieve = random.randint(50,200) 
-                                     Health = Health - damrecieve
-                                     time.sleep(1)
-                                     continue
-                            if atordef == 2:
-                                print('You are defending.')
-                                defO = int(input('Pick a number between 1 and 10: '))
-                                defInt = random.randint(1,10)
-                                Far1 = defInt + 1
-                                Far2 = defInt + 2
-                                Far3 = defInt - 1
-                                Far4 = defInt - 2
-                                if defO == defInt:
-                                    defdelt = (random.randint(100,200))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue
-                                elif defO == Far1:
-                                    defdelt = (random.randint(50,100))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue
-                                elif defO == Far3:
-                                    defdelt = (random.randint(50,100))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue   
-                                elif defO == Far2:
-                                    defdelt = (random.randint(10,50))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue  
-                                elif defO == Far4:
-                                    defdelt = (random.randint(10,50))
-                                    print('You Dodged! Health Regained:', defdelt) 
-                                    time.sleep(1)
-                                    Health = Health + defdelt
-                                    continue 
-                                else:
-                                     damrecieve = random.randint(100,300)
-                                     print('You have been Hit!')  
-                                     Health = Health - damrecieve
-                                     time.sleep(1)
-                                     continue 
-                            if VulcanHealth <= 0:
-                                clear()
-                                print(f'{Fore.GREEN}Battle Won!{Fore.WHITE}')
-                                Win = 1
-                                Coin = Coin + random.randint(20,60)
-                                Materials = Materials + random.randint(100,200)
-                                Health = Health + random.randint(50,100)
-                                time.sleep(1)
-                                continue
-                            continue
+                    vulcan_ship = int(input('Option: '))
+                    if vulcan_ship == 1:
+                        battle()
                         continue
                     continue
             else:
                 print('Bad')
                 continue
         continue
-    if Option == 2:
+    if option == 2:
         clear()
         print("Drydock")
         DryOp = ['1: Repair Ship', '2: Upgrade Ship', '3: Check Inventory', '4: Exit']
         ask('What would you like to upgrade?')
-    if Health < MaxHealth:
-        Health = Health + HealthUp
+    if health < max_health:
+        health = health + health_up
