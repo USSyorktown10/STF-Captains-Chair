@@ -308,8 +308,9 @@ while True:
     if option == 2:
         clear()
         print("Drydock")
-        DryOp = ['1: Repair Ship', '2: Upgrade Ship', '3: Check Inventory', '4: Exit']
-        ask('What would you like to upgrade: ')
-        upgrade('Phaser')
+        drydock_option = ['1: Repair Ship', '2: Upgrade Ship', '3: Check Inventory', '4: Exit']
+        print(*drydock_option, sep = '\n')
+        ask('What would you like to do: ')
+        upgrade('Health')
     if health < max_health:
         health = health + health_up
