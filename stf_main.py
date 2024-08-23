@@ -16,13 +16,13 @@ def upgrade(type):
         current_upgrade_level = upgrades[type]
         current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level)  # ** = raise to the power of, this multiplies the base cost by the delta the number of upgrade times
         if coins >= current_upgrade_cost:  # Can we afford it?
-                print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coinss. ({coins} -> {coins - current_upgrade_cost}){Fore.WHITE} ")
+                print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coins. ({coins} -> {coins - current_upgrade_cost}){Fore.WHITE} ")
                 if ask(f"{Fore.BOLD+Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  # extra space so it looks nicer
                         coins -= current_upgrade_cost  # take the cost away
                         upgrades[type] += 1   # actually upgrade
                         return True  # we did it!
         else:
-                print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coinss (current: {coins}, required: {current_upgrade_cost}).{Fore.WHITE}")
+                print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coins (current: {coins}, required: {current_upgrade_cost}).{Fore.WHITE}")
                 return False
 
 def view_upgrades():
@@ -148,7 +148,7 @@ while True:
                       trade_post = input('Would you like to trade? Y/N: ')
                       if trade_post == 'y':
                           print('Avalible Items:')
-                          Avalible = ['1: Laser Upgrade: 10 coinss', '2: Sell Materials: 1 coins per 50 materials', '3: Exit']
+                          Avalible = ['1: Laser Upgrade: 10 coins', '2: Sell Materials: 1 coins per 50 materials', '3: Exit']
                           print(*Avalible, sep = '\n')
                           trade = int(input('Option: '))
                           if trade == 1:
@@ -171,11 +171,11 @@ while True:
                                       materials = materials - 50
                                       coins = coins + 1
                                       print('Materials:', materials)
-                                      print('coinss:', coins)
+                                      print('coins:', coins)
                                       time.sleep(0.5)
                                   continue
                               else:
-                                print('You dont have enough materials to get coinss.')
+                                print('You dont have enough materials to get coins.')
                                 time.sleep(1)
                                 continue
                           if trade == 3:
