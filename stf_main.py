@@ -6,18 +6,19 @@ upgrades = {"Mining Laser": 0, "Health": 0, "Phaser": 0}  # this is a dictionary
 costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20}  # the costs
 deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2}  # the amount to multiply by for each level, to make the higher levels cost more
 
-coins = 100  # pretend we start with money
+coins = 100
 
 def ask(question):
         response = input(question)
-        return response.lower() in ["y", "yes", "sure"]  # lol
+        return response.lower() in ["y", "yes"]  # lol
 
 def upgrade(type):
+        global coins
         current_upgrade_level = upgrades[type]
         current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level)  # ** = raise to the power of, this multiplies the base cost by the delta the number of upgrade times
         if coins >= current_upgrade_cost:  # Can we afford it?
                 print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coins. ({coins} -> {coins - current_upgrade_cost}){Fore.WHITE} ")
-                if ask(f"{Fore.BOLD+Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  # extra space so it looks nicer
+                if ask(f"{Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  # extra space so it looks nicer
                         coins -= current_upgrade_cost  # take the cost away
                         upgrades[type] += 1   # actually upgrade
                         return True  # we did it!
@@ -30,6 +31,7 @@ def view_upgrades():
 
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
+        
 def battle(opponent_health, opponent_name, oppenent_damage, income): # This function is not ready yet. This will be avalible soon. The current version you are reading is the version that got rid of the bug where when you buy something, it actually takes away the ammount of money you spent.
     print(f'{Fore.RED}You are attacking the {Fore.WHITE}', opponent_name, f'{Fore.RED} ! This ship has {Fore.WHITE}', opponent_health, f'{Fore.RED} health, and if you win, you get {Fore.WHITE}', income, f'{Fore.RED}.{Fore.WHITE}')
     while health > 0:
@@ -95,11 +97,33 @@ def homescreen_setup():
      print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
      print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
      print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
+     
+materials = 5
+
+def mining_deposit():
+    global materials
+    print('You have approached a Material Cluster!')
+    deposit_materials = random.randint(10,1000)
+    deposit_var = deposit_materials / laser_upgrade
+    time.sleep(1)
+    print(f'{Fore.BLUE}This mine has', deposit_materials, f'rescources.{Fore.WHITE}')
+    mine = input(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}')
+    if (mine == "y"):
+        for i in range(deposit_materials):
+            clear()
+            print('Mining...')
+            print('Materials Remaining:', deposit_var)
+            print('Total Materials:', materials)
+            deposit_var = deposit_var - laser_upgrade
+            materials = materials + (0.5 * laser_upgrade)
+            print(f'{Fore.GREEN}Estimated Time remaining:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
+            time.sleep(0.5)
+            continue
+
 clear()
 mission_list = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
 health = 1000
 stamina = 100
-materials = 5
 Win = 0
 laser_upgrade = 1
 phaser_upgrade = 1
@@ -132,22 +156,7 @@ while True:
                 op2 = ['Material Cluster', 'Trading Post', 'Federation Ship'] #, 'Mission Planet'
                 encounter = random.choice(op2) #
                 if (encounter == 'Material Cluster'):
-                      print('You have approached a Material Cluster!')
-                      deposit_materials = random.randint(10,1000)
-                      deposit_var = deposit_materials / laser_upgrade
-                      time.sleep(1)
-                      print('This mine has', deposit_materials, 'rescources.')
-                      mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
-                      if (mine == "y"):
-                            for i in range(deposit_materials):
-                                clear()
-                                print('Mining...')
-                                print('Materials Remaining:', deposit_var)
-                                print('Total Materials:', materials)
-                                deposit_var = deposit_var - laser_upgrade
-                                materials = materials + (0.5 * laser_upgrade)
-                                time.sleep(0.5)
-                            continue
+                    mining_deposit()
                 if (encounter == 'Trading Post'):
                       print('You have approached a Trading Post!')
                       time.sleep(1)
@@ -308,9 +317,17 @@ while True:
     if option == 2:
         clear()
         print("Drydock")
-        drydock_option = ['1: Repair Ship', '2: Upgrade Ship', '3: Check Inventory', '4: Exit']
+        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: Exit']
         print(*drydock_option, sep = '\n')
-        ask('What would you like to do: ')
-        upgrade('Health')
+        drydock_option_2 = int(input('What would you like to upgrade: '))
+        if drydock_option_2 == 1:
+            upgrade(type='Mining Laser')
+        elif drydock_option_2 == 2:
+            upgrade(type='Phaser')
+        elif drydock_option_2 == 3:
+            upgrade(type='Health')
+        elif drydock_option_2 == 4:
+            continue
+        continue
     if health < max_health:
         health = health + health_up
