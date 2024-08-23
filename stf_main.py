@@ -26,7 +26,7 @@ def upgrade(type):
                 return False
 
 def view_upgrades():
-        print(f"{Fore.GREEN}Your upgrades:{Fore.WHITE}\n{'\n'.join([u + ': level '+str(upgrades[u]) for u in upgrades.keys()])}")  # I was tired, OK?
+        print(f"{Fore.GREEN}Your upgrades:{Fore.WHITE}\n{chr(10).join([u + ': level '+str(upgrades[u]) for u in upgrades.keys()])}")  # I was tired, OK?
 
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -90,6 +90,11 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
         print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
         print('Materials Gained: ', income)
         materials = materials + income
+
+def homescreen_setup():
+     print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
+     print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
+     print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
 clear()
 mission_list = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
 health = 1000
@@ -107,6 +112,7 @@ while True:
         print(f'{Fore.RED}Game over!{Fore.WHITE}')
         exit()
     clear()
+    homescreen_setup()
     print('What would you like to do?')
     OpList = ['1: Explore', '2: Drydock']
     print(*OpList, sep = '\n')
@@ -303,6 +309,7 @@ while True:
         clear()
         print("Drydock")
         DryOp = ['1: Repair Ship', '2: Upgrade Ship', '3: Check Inventory', '4: Exit']
-        ask('What would you like to upgrade?')
+        ask('What would you like to upgrade: ')
+        upgrade('Phaser')
     if health < max_health:
         health = health + health_up
