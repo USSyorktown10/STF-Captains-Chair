@@ -124,8 +124,8 @@ while True:
             selected_item = random.choice(op1) 
             if (selected_item == 'Good'):
                 op2 = ['Material Cluster', 'Trading Post', 'Federation Ship'] #, 'Mission Planet'
-                selecteditem = random.choice(op2) #
-                if (selecteditem == 'Material Cluster'):
+                encounter = random.choice(op2) #
+                if (encounter == 'Material Cluster'):
                       print('You have approached a Material Cluster!')
                       deposit_materials = random.randint(10,1000)
                       deposit_var = deposit_materials / laser_upgrade
@@ -142,7 +142,7 @@ while True:
                                 materials = materials + (0.5 * laser_upgrade)
                                 time.sleep(0.5)
                             continue
-                if (selecteditem == 'Trading Post'):
+                if (encounter == 'Trading Post'):
                       print('You have approached a Trading Post!')
                       time.sleep(1)
                       trade_post = input('Would you like to trade? Y/N: ')
@@ -182,14 +182,14 @@ while True:
                                 continue
                           continue
                       continue
-                if (selecteditem == 'Mission Planet'): # Mission arent avalible yet and will be ready v. 0.5
+                if (encounter == 'Mission Planet'): # Mission arent avalible yet and will be ready v. 0.5
                     print('You have approached a planet!')
                     time.sleep(1)
                     miss_planet = input('Are you willing to accept a mission? Y/N: ')
                     if miss_planet == 'y':
                         clear()
                         print('Missions Avalible:')
-                if (selecteditem == "Federation Ship"):
+                if (encounter == "Federation Ship"):
                     print('You have approached a Federation ship!')
                     time.sleep(1)
                     print('What do you want to do?')
@@ -266,8 +266,8 @@ while True:
             op1 = ['Good', 'Good']
             selected_item = random.choice(op1) 
             op3 = ['Material Cluster', 'Vulcan Ship'] #, 'Mission Planet'
-            selecteditem3 = random.choice(op3) #
-            if (selecteditem3 == 'Material Cluster'):
+            encounter_3 = random.choice(op3) #
+            if (encounter_3 == 'Material Cluster'):
                       print('You have approached a Material Cluster!')
                       deposit_materials = random.randint(10,1000)
                       deposit_var = deposit_materials / laser_upgrade
@@ -284,7 +284,7 @@ while True:
                                 Materials = Materials + (0.5 * laser_upgrade)
                                 time.sleep(0.5)
                             continue
-            if (selecteditem3 == 'Vulcan Ship'):
+            if (encounter_3 == 'Vulcan Ship'):
                     print('You have approached a Vulcan ship!')
                     time.sleep(1)
                     print('What do you want to do?')

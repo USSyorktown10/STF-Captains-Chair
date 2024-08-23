@@ -5,7 +5,7 @@ Please open an issue if you find anything wrong with the game (There is a lot wr
 
 - ### Game Stats
     - Current Version: `dev`
-    - Sub Version: `dev5.1`
+    - Sub Version: `dev5.2`
     - Bug Ammount: High
     - Non-Optimized Code: High
 - ### How to Play
