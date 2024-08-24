@@ -2,7 +2,7 @@ import time
 import random
 import os
 from colorama import Fore
-upgrades = {"Mining Laser": 0, "Health": 0, "Phaser": 0}  # this is a dictionary
+upgrades = {"Mining Laser": 1, "Health": 1, "Phaser": 1}  # this is a dictionary
 costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20}  # the costs
 deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2}  # the amount to multiply by for each level, to make the higher levels cost more
 
@@ -104,9 +104,10 @@ def mining_deposit():
     global materials
     print('You have approached a Material Cluster!')
     deposit_materials = random.randint(10,1000)
-    deposit_var = deposit_materials / laser_upgrade
+    deposit_var = deposit_materials / upgrades['Mining Laser']
     time.sleep(1)
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'rescources.{Fore.WHITE}')
+    print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
     mine = input(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}')
     if (mine == "y"):
         for i in range(deposit_materials):
@@ -114,8 +115,8 @@ def mining_deposit():
             print('Mining...')
             print('Materials Remaining:', deposit_var)
             print('Total Materials:', materials)
-            deposit_var = deposit_var - laser_upgrade
-            materials = materials + (0.5 * laser_upgrade)
+            deposit_var = deposit_var - upgrades['Mining Laser']
+            materials = materials + (0.5 * upgrades['Mining Laser'])
             print(f'{Fore.GREEN}Estimated Time remaining:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
             continue
@@ -125,7 +126,6 @@ mission_list = ['Mission: '] # Missions arent avalible yet and will be ready in 
 health = 1000
 stamina = 100
 Win = 0
-laser_upgrade = 1
 phaser_upgrade = 1
 max_health = 1000
 health_up = 10
@@ -236,22 +236,7 @@ while True:
                 op3 = ['Material Cluster', 'Klingon Ship', 'Romulan Ship'] #, 'Mission Planet'
                 selected_item_2 = random.choice(op3) #
                 if (selected_item_2 == 'Material Cluster'):
-                      print('You have approached a Material Cluster!')
-                      deposit_materials = random.randint(10,1000)
-                      deposit_var = deposit_materials / laser_upgrade
-                      time.sleep(1)
-                      print('This mine has', deposit_materials, 'rescources.')
-                      mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
-                      if (mine == "y"):
-                            for i in range(deposit_materials):
-                                clear()
-                                print('Mining...')
-                                print('Materials Remaining:', deposit_var)
-                                print('Total Materials:', materials)
-                                deposit_var = deposit_var - laser_upgrade
-                                materials = materials + (0.5 * laser_upgrade)
-                                time.sleep(0.5)
-                            continue
+                     mining_deposit()
                 if (selected_item_2 == 'Klingon Ship'):
                     print('You have approached a Klingon ship!')
                     time.sleep(1)
@@ -283,22 +268,7 @@ while True:
             op3 = ['Material Cluster', 'Vulcan Ship'] #, 'Mission Planet'
             encounter_3 = random.choice(op3) #
             if (encounter_3 == 'Material Cluster'):
-                      print('You have approached a Material Cluster!')
-                      deposit_materials = random.randint(10,1000)
-                      deposit_var = deposit_materials / laser_upgrade
-                      time.sleep(1)
-                      print('This mine has', deposit_materials, 'rescources.')
-                      mine = input('Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: ')
-                      if (mine == "y"):
-                            for i in range(deposit_materials):
-                                clear()
-                                print('Mining...')
-                                print('Materials Remaining:', deposit_var)
-                                print('Total Materials:', Materials)
-                                deposit_var = deposit_var - laser_upgrade
-                                Materials = Materials + (0.5 * laser_upgrade)
-                                time.sleep(0.5)
-                            continue
+                      mining_deposit()
             if (encounter_3 == 'Vulcan Ship'):
                     print('You have approached a Vulcan ship!')
                     time.sleep(1)
