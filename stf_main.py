@@ -7,6 +7,13 @@ costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20}  # the costs
 deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2}  # the amount to multiply by for each level, to make the higher levels cost more
 
 coins = 100
+health = 1000
+materials = 5
+
+def income_display():
+    print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
+    print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
+    print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
 
 def ask(question):
         response = input(question)
@@ -98,7 +105,6 @@ def homescreen_setup():
      print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
      print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
      
-materials = 5
 
 def mining_deposit():
     global materials
@@ -121,9 +127,35 @@ def mining_deposit():
             time.sleep(0.5)
             continue
 
+def trading_post():
+    global materials
+    income_display()
+    print('You have approached a Trading Post!')
+    time.sleep(1)
+    trade_post = input('Would you like to trade? Y/N: ')
+    if trade_post == 'y':
+        print('Avalible Items:')
+        Avalible = ['1: Sell Materials: 1 coins per 50 materials', '2: Exit']
+        print(*Avalible, sep = '\n')
+        trade = int(input('Option: '))
+        if trade == 1:
+            clear()
+            if materials >= 50:
+                while materials >= 50:
+                    materials = materials - 50
+                    coins = coins + 1
+                    print('Materials:', materials)
+                    print('coins:', coins)
+                    time.sleep(0.5)
+                    continue
+            else:
+                print(f'{Fore.RED}You dont have enough materials to get coins.{Fore.WHITE}')
+                time.sleep(1.5)
+            if trade == 2:
+                time.sleep(0.01)
+    
 clear()
 mission_list = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
-health = 1000
 stamina = 100
 Win = 0
 phaser_upgrade = 1
@@ -144,6 +176,7 @@ while True:
     time.sleep(0.1)
     if (option == 1):
         clear()
+        income_display()
         print('Explore')
         Sectors = ['1: Alpha Sector', '2: Beta Sector', '3: Delta Sector'] #Alpha sector (mining, fed ships, planets and missions, sol) Beta Sector (Kilngon, Romulan, Mining, planet, mission) Delta Sec (Vulcan, mining, planet mission)
         print(*Sectors, sep = '\n')
@@ -158,45 +191,7 @@ while True:
                 if (encounter == 'Material Cluster'):
                     mining_deposit()
                 if (encounter == 'Trading Post'):
-                      print('You have approached a Trading Post!')
-                      time.sleep(1)
-                      trade_post = input('Would you like to trade? Y/N: ')
-                      if trade_post == 'y':
-                          print('Avalible Items:')
-                          Avalible = ['1: Laser Upgrade: 10 coins', '2: Sell Materials: 1 coins per 50 materials', '3: Exit']
-                          print(*Avalible, sep = '\n')
-                          trade = int(input('Option: '))
-                          if trade == 1:
-                              clear()
-                              if coins > 10:
-                                  coins = coins - 10
-                                  laser_upgrade = laser_upgrade + 1
-                                  print('Laser Upgrade Bought!')
-                                  print('Laser Level:', laser_upgrade)
-                                  time.sleep(1)
-                                  continue
-                              else:
-                                  print('You dont have enough money to purchase this.')
-                                  time.sleep(1)
-                                  continue
-                          if trade == 2:
-                              clear()
-                              if materials >= 50:
-                                  while materials >= 50:
-                                      materials = materials - 50
-                                      coins = coins + 1
-                                      print('Materials:', materials)
-                                      print('coins:', coins)
-                                      time.sleep(0.5)
-                                  continue
-                              else:
-                                print('You dont have enough materials to get coins.')
-                                time.sleep(1)
-                                continue
-                          if trade == 3:
-                                continue
-                          continue
-                      continue
+                      trading_post()
                 if (encounter == 'Mission Planet'): # Mission arent avalible yet and will be ready v. 0.5
                     print('You have approached a planet!')
                     time.sleep(1)
