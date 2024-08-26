@@ -34,7 +34,11 @@ def upgrade(type):
                 return False
 
 def view_upgrades():
-        print(f"{Fore.GREEN}Your upgrades:{Fore.WHITE}\n{chr(10).join([u + ': level '+str(upgrades[u]) for u in upgrades.keys()])}")  # I was tired, OK?
+    clear()
+    print(f"{Fore.GREEN}Your upgrades:{Fore.WHITE}\n{chr(10).join([u + ': Level '+str(upgrades[u]) for u in upgrades.keys()])}")
+    continue_1 = input(f'{Fore.RED}Continue? {Fore.WHITE}')
+    if continue_1 == ('y', 'yes'):
+        time.sleep(0.001)
 
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -56,31 +60,31 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
         close_3 = damage_gen - 1
         close_4 = damage_gen - 2
         if damage_input == damage_gen:
-            damdelt = (random.randint(100,200) * phaser_upgrade)
+            damdelt = (random.randint(100,200) * upgrades['Phaser'])
             print('You Hit! Damage Dealt:', damdelt) 
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_1:
-            damdelt = (random.randint(50,100) * phaser_upgrade)
+            damdelt = (random.randint(50,100) * upgrades['Phaser'])
             print('You Hit! Damage Dealt:', damdelt) 
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_3:
-            damdelt = (random.randint(50,100) * phaser_upgrade)
+            damdelt = (random.randint(50,100) * upgrades['Phaser'])
             print('You Hit! Damage Dealt:', damdelt)
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_2:
-            damdelt = (random.randint(25,50) * phaser_upgrade)
+            damdelt = (random.randint(25,50) * upgrades['Phaser'])
             print('You Hit! Damage Dealt:', damdelt)
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_4:
-            damdelt = (random.randint(25,50) * phaser_upgrade)
+            damdelt = (random.randint(25,50) * upgrades['Phaser'])
             print('You Hit! Damage Dealt:', damdelt)
             time.sleep(1)
             opponent_health = opponent_health - damdelt
@@ -158,7 +162,7 @@ clear()
 mission_list = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
 stamina = 100
 Win = 0
-phaser_upgrade = 1
+upgrades['Phaser'] = 1
 max_health = 1000
 health_up = 10
 clear()
@@ -207,7 +211,7 @@ while True:
                     print(*op3, sep = '\n')
                     federation_ship = int(input('Option: '))
                     if federation_ship == 1:
-                        battle() #Figuring this out, will be possible soon
+                        battle(opponent_health=random.randint(500,900), opponent_name='Federation Ship', oppenent_damage=random.randint(50,200), income=random.randint(100,250)) #Figuring this out, will be possible soon
                         if federation_ship == -2: #This option will be avalible in v. 0.2 NOTE: Should be 2
                             clear()
                             print(f"{Fore.GREEN}Hailing Frequency Open{Fore.WHITE}")
@@ -282,7 +286,7 @@ while True:
     if option == 2:
         clear()
         print("Drydock")
-        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: Exit']
+        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: View Upgrades', '5: Exit']
         print(*drydock_option, sep = '\n')
         drydock_option_2 = int(input('What would you like to upgrade: '))
         if drydock_option_2 == 1:
@@ -292,6 +296,8 @@ while True:
         elif drydock_option_2 == 3:
             upgrade(type='Health')
         elif drydock_option_2 == 4:
+            view_upgrades()
+        elif drydock_option_2 == 5:
             continue
         continue
     if health < max_health:
