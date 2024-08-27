@@ -44,14 +44,16 @@ def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
         
 def battle(opponent_health, opponent_name, oppenent_damage, income): # This function is not ready yet. This will be avalible soon. The current version you are reading is the version that got rid of the bug where when you buy something, it actually takes away the ammount of money you spent.
+    global health
+    global materials
     print(f'{Fore.RED}You are attacking the {Fore.WHITE}', opponent_name, f'{Fore.RED} ! This ship has {Fore.WHITE}', opponent_health, f'{Fore.RED} health, and if you win, you get {Fore.WHITE}', income, f'{Fore.RED}.{Fore.WHITE}')
     while health > 0:
+        clear()
         if opponent_health <= 0:
             break
         print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
         print(f'{Fore.BLUE}{opponent_name} health:{Fore.WHITE}', opponent_health)
         print(f'{Fore.GREEN}Your health:{Fore.WHITE}', health)
-        time.sleep(0.5)
         print('You are attacking.')
         damage_input = int(input("Pick a number between 1 and 10: "))
         damage_gen = random.randint(1,10)
@@ -90,19 +92,21 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
             opponent_health = opponent_health - damdelt
             continue
         else:
-            print('You Missed!', opponent_name, 'Ships Turn...') 
+            print(f'{Fore.RED}You Missed!{Fore.WHITE}', opponent_name, f'{Fore.RED}Ships Turn...{Fore.WHITE}') 
             damrecieve = random.randint(50,200) * oppenent_damage
             health = health - damrecieve
-            time.sleep(0.5)
-            print('The ', opponent_name, ' Ship did ', damrecieve, ' Damage!')
+            time.sleep(1)
+            print(f'{Fore.RED}The {opponent_name} Ship did {damrecieve} Damage!{Fore.WHITE}')
+            time.sleep(1)
             continue
     if health <= 0:
         print(f'{Fore.RED}You Lose!{Fore.WHITE}')
         exit()
     if opponent_health <= 0:
         print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
-        print('Materials Gained: ', income)
+        print(f'{Fore.BLUE}Materials Gained: {Fore.WHITE}', income)
         materials = materials + income
+        time.sleep(2)
 
 def homescreen_setup():
      print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
@@ -112,6 +116,7 @@ def homescreen_setup():
 
 def mining_deposit():
     global materials
+    income_display()
     print('You have approached a Material Cluster!')
     deposit_materials = random.randint(10,1000)
     deposit_var = deposit_materials / upgrades['Mining Laser']
@@ -211,7 +216,7 @@ while True:
                     print(*op3, sep = '\n')
                     federation_ship = int(input('Option: '))
                     if federation_ship == 1:
-                        battle(opponent_health=random.randint(500,900), opponent_name='Federation Ship', oppenent_damage=random.randint(50,200), income=random.randint(100,250)) #Figuring this out, will be possible soon
+                        battle(opponent_health=random.randint(500,900), opponent_name='Federation Ship', oppenent_damage=1, income=random.randint(100,250))
                         if federation_ship == -2: #This option will be avalible in v. 0.2 NOTE: Should be 2
                             clear()
                             print(f"{Fore.GREEN}Hailing Frequency Open{Fore.WHITE}")
@@ -244,7 +249,7 @@ while True:
                     print(*op3, sep = '\n')
                     kling_ship = int(input('Option: '))
                     if kling_ship == 1:
-                        battle()
+                        battle(opponent_health=random.randint(700,1100), opponent_name='Klingon Ship', oppenent_damage=1.5, income=random.randint(250,300))
                 if (selected_item_2 == 'Romulan Ship'):
                     print('You have approached a Romulan ship!')
                     time.sleep(1)
@@ -253,7 +258,7 @@ while True:
                     print(*op3, sep = '\n')
                     rom_ship = int(input('Option: '))
                     if rom_ship == 1:
-                        battle()
+                        battle(opponent_health=random.randint(1000,1500), opponent_name='Romulan Ship', oppenent_damage=2, income=random.randint(350,500))
                         continue
                     continue
                 else:
@@ -276,7 +281,7 @@ while True:
                     print(*op3, sep = '\n')
                     vulcan_ship = int(input('Option: '))
                     if vulcan_ship == 1:
-                        battle()
+                        battle(opponent_health=random.randint(1000,1600), opponent_name='Vulcan Ship', oppenent_damage=2.5, income=random.randint(450,600))
                         continue
                     continue
             else:
@@ -286,7 +291,7 @@ while True:
     if option == 2:
         clear()
         print("Drydock")
-        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: View Upgrades', '5: Exit']
+        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: View Upgrades', '5: Restore Health', '6: Exit']
         print(*drydock_option, sep = '\n')
         drydock_option_2 = int(input('What would you like to upgrade: '))
         if drydock_option_2 == 1:
@@ -298,6 +303,20 @@ while True:
         elif drydock_option_2 == 4:
             view_upgrades()
         elif drydock_option_2 == 5:
+            current_heal_cost = health / max_health
+            current_heal_cost = current_heal_cost * 10
+            if coins >= current_heal_cost:
+                print(f"{Fore.YELLOW}You are healing your ship from {health} to {max_health}.\n {Fore.RED}This upgrade will cost you {current_heal_cost} coins. ({coins} -> {coins - current_heal_cost}){Fore.WHITE}")
+                if ask(f"{Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):
+                    coins -= current_heal_cost
+                    health = max_health
+                    continue
+                continue
+            else: 
+                print(f"{Fore.YELLOW}You can't heal your ship because you don't have enough coins (current: {coins}, required: {current_heal_cost}).{Fore.WHITE}")
+                continue
+            continue
+        elif drydock_option_2 == 6:
             continue
         continue
     if health < max_health:
