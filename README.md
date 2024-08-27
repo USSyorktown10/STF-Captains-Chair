@@ -8,7 +8,7 @@ Please open an issue if you find anything wrong with the game (There is a lot wr
     - Sub Version: `dev7`
     - Bug Ammount: Moderatly High
     - Non-Optimized Code: Modeeratly High
-    - Planned Release date of v.BETA - September 30, 2024
+    - Planned Release date of `v.BETA` - September 30, 2024
 - ### How to Play
   - Choose between `explore` and `drydock`. I would start with `drydock`, because you dont have many `coins` yet. (coins are the game currcency)
   - Start with the `Alpha Sector`, where the hostiles are easier, and there is more to mine.
