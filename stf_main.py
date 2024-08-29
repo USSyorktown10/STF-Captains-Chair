@@ -46,7 +46,8 @@ def clear():
 def battle(opponent_health, opponent_name, oppenent_damage, income): # This function is not ready yet. This will be avalible soon. The current version you are reading is the version that got rid of the bug where when you buy something, it actually takes away the ammount of money you spent.
     global health
     global materials
-    print(f'{Fore.RED}You are attacking the {Fore.WHITE}', opponent_name, f'{Fore.RED} ! This ship has {Fore.WHITE}', opponent_health, f'{Fore.RED} health, and if you win, you get {Fore.WHITE}', income, f'{Fore.RED}.{Fore.WHITE}')
+    print(f'{Fore.YELLOW}You are attacking the {opponent_name}! This ship has {opponent_health} health, and if you win, you get {income} materials.{Fore.WHITE}')
+    time.sleep(3)
     while health > 0:
         clear()
         if opponent_health <= 0:
@@ -63,25 +64,25 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
         close_4 = damage_gen - 2
         if damage_input == damage_gen:
             damdelt = (random.randint(100,200) * upgrades['Phaser'])
-            print('You Hit! Damage Dealt:', damdelt) 
+            print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}') 
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_1:
             damdelt = (random.randint(50,100) * upgrades['Phaser'])
-            print('You Hit! Damage Dealt:', damdelt) 
+            print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}') 
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_3:
             damdelt = (random.randint(50,100) * upgrades['Phaser'])
-            print('You Hit! Damage Dealt:', damdelt)
+            print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}')
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_2:
             damdelt = (random.randint(25,50) * upgrades['Phaser'])
-            print('You Hit! Damage Dealt:', damdelt)
+            print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}')
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
@@ -92,7 +93,7 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
             opponent_health = opponent_health - damdelt
             continue
         else:
-            print(f'{Fore.RED}You Missed!{Fore.WHITE}', opponent_name, f'{Fore.RED}Ships Turn...{Fore.WHITE}') 
+            print(f'{Fore.RED}You Missed! {opponent_name}s Ship Turn...{Fore.WHITE}') 
             damrecieve = random.randint(50,200) * oppenent_damage
             health = health - damrecieve
             time.sleep(1)
@@ -100,7 +101,10 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
             time.sleep(1)
             continue
     if health <= 0:
+        clear()
         print(f'{Fore.RED}You Lose!{Fore.WHITE}')
+        print(f'{Fore.RED}Coins Lost: {coins}{Fore.WHITE}')
+        print(f'{Fore.RED}Materials Lost: {materials}{Fore.WHITE}')
         exit()
     if opponent_health <= 0:
         print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
@@ -164,7 +168,8 @@ def trading_post():
                 time.sleep(0.01)
     
 clear()
-mission_list = ['Mission: '] # Missions arent avalible yet and will be ready in v. 0.5
+mission_list = {'1: Mine 100 Materials': 0, '2: Defeat 1 Enemy': 0,}
+mission_rewards = {'1: Mine 100 Materials': 25, '2: Defeat 1 Enemy': 25,}
 stamina = 100
 Win = 0
 upgrades['Phaser'] = 1
@@ -195,29 +200,34 @@ while True:
             op1 = ['Good', 'Good']
             selected_item = random.choice(op1) 
             if (selected_item == 'Good'):
-                op2 = ['Material Cluster', 'Trading Post', 'Federation Ship'] #, 'Mission Planet'
+                op2 = ['Material Cluster', 'Trading Post', 'Raider Ship'] #, 'Mission Planet'
                 encounter = random.choice(op2) #
                 if (encounter == 'Material Cluster'):
                     mining_deposit()
                 if (encounter == 'Trading Post'):
                       trading_post()
                 if (encounter == 'Mission Planet'): # Mission arent avalible yet and will be ready v. 0.5
+                    income_display()
                     print('You have approached a planet!')
                     time.sleep(1)
-                    miss_planet = input('Are you willing to accept a mission? Y/N: ')
+                    miss_planet = input('Would you like to veiw the mission list? Y/N: ')
                     if miss_planet == 'y':
                         clear()
                         print('Missions Avalible:')
-                if (encounter == "Federation Ship"):
-                    print('You have approached a Federation ship!')
+                        print(*mission_list, sep = '\n')
+                        print(f'{len(mission_list)+1}: Exit')
+                        int(input('What mission would you like? '))
+                if (encounter == "Raider Ship"):
+                    income_display()
+                    print('You have approached a Raider ship!')
                     time.sleep(1)
                     print('What do you want to do?')
                     op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
                     print(*op3, sep = '\n')
-                    federation_ship = int(input('Option: '))
-                    if federation_ship == 1:
-                        battle(opponent_health=random.randint(500,900), opponent_name='Federation Ship', oppenent_damage=1, income=random.randint(100,250))
-                        if federation_ship == -2: #This option will be avalible in v. 0.2 NOTE: Should be 2
+                    raid_ship = int(input('Option: '))
+                    if raid_ship == 1:
+                        battle(opponent_health=random.randint(500,900), opponent_name='Raider Ship', oppenent_damage=1, income=random.randint(100,250))
+                        if raid_ship == -2: #This option will be avalible in v. 0.2 NOTE: Should be 2
                             clear()
                             print(f"{Fore.GREEN}Hailing Frequency Open{Fore.WHITE}")
                             hailing = random.randint(1,5)
@@ -242,6 +252,7 @@ while True:
                 if (selected_item_2 == 'Material Cluster'):
                      mining_deposit()
                 if (selected_item_2 == 'Klingon Ship'):
+                    income_display()
                     print('You have approached a Klingon ship!')
                     time.sleep(1)
                     print('What do you want to do?')
@@ -251,6 +262,7 @@ while True:
                     if kling_ship == 1:
                         battle(opponent_health=random.randint(700,1100), opponent_name='Klingon Ship', oppenent_damage=1.5, income=random.randint(250,300))
                 if (selected_item_2 == 'Romulan Ship'):
+                    income_display()
                     print('You have approached a Romulan ship!')
                     time.sleep(1)
                     print('What do you want to do?')
@@ -274,6 +286,7 @@ while True:
             if (encounter_3 == 'Material Cluster'):
                       mining_deposit()
             if (encounter_3 == 'Vulcan Ship'):
+                    income_display()
                     print('You have approached a Vulcan ship!')
                     time.sleep(1)
                     print('What do you want to do?')
