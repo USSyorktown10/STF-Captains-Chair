@@ -25,6 +25,7 @@ def income_display():
     print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
     print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
     print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
+    print(f'{Fore.CYAN}Current System:{Fore.WHITE} {systems[current_system]}')
 
 def ask(question):
         response = input(question)
@@ -99,7 +100,7 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
             continue
         elif damage_input == close_4:
             damdelt = (random.randint(25,50) * upgrades['Phaser'])
-            print('You Hit! Damage Dealt:', damdelt)
+            print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}')
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
@@ -127,6 +128,7 @@ def homescreen_setup():
      print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
      print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
      print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
+     print(f'{Fore.CYAN}Current System:{Fore.WHITE} {systems[current_system]}')
      
 
 def mining_deposit():
@@ -152,6 +154,7 @@ def mining_deposit():
             continue
 
 def trading_post():
+    global coins
     global materials
     income_display()
     print('You have approached a Trading Post!')
@@ -232,7 +235,7 @@ stamina = 100
 Win = 0
 upgrades['Phaser'] = 1
 max_health = 1000
-health_up = 10
+health_up = 0
 clear()
 while True:
     if health <= 0:
@@ -242,124 +245,33 @@ while True:
     clear()
     homescreen_setup()
     print('What would you like to do?')
-    OpList = ['1: Explore', '2: Drydock']
+    OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock']
     print(*OpList, sep = '\n')
     option = int(input('Option: '))
     time.sleep(0.1)
     if (option == 1):
         clear()
-        income_display()
-        print('Explore')
-        Sectors = ['1: Alpha Sector', '2: Beta Sector', '3: Delta Sector'] #Alpha sector (mining, fed ships, planets and missions, sol) Beta Sector (Kilngon, Romulan, Mining, planet, mission) Delta Sec (Vulcan, mining, planet mission)
-        print(*Sectors, sep = '\n')
-        choice_sector = int(input('Option: '))
-        if (choice_sector == 1):
-            clear()
-            op1 = ['Good', 'Good']
-            selected_item = random.choice(op1) 
-            if (selected_item == 'Good'):
-                op2 = ['Material Cluster', 'Trading Post', 'Raider Ship'] #, 'Mission Planet'
-                encounter = random.choice(op2) #
-                if (encounter == 'Material Cluster'):
-                    mining_deposit()
-                if (encounter == 'Trading Post'):
-                      trading_post()
-                if (encounter == 'Mission Planet'): # Mission arent avalible yet and will be ready v. 0.5
-                    income_display()
-                    print('You have approached a planet!')
-                    time.sleep(1)
-                    miss_planet = input('Would you like to veiw the mission list? Y/N: ')
-                    if miss_planet == 'y':
-                        clear()
-                        print('Missions Avalible:')
-                        print(*mission_list, sep = '\n')
-                        print(f'{len(mission_list)+1}: Exit')
-                        int(input('What mission would you like? '))
-                if (encounter == "Raider Ship"):
-                    income_display()
-                    print('You have approached a Raider ship!')
-                    time.sleep(1)
-                    print('What do you want to do?')
-                    op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
-                    print(*op3, sep = '\n')
-                    raid_ship = int(input('Option: '))
-                    if raid_ship == 1:
-                        battle(opponent_health=random.randint(500,900), opponent_name='Raider Ship', oppenent_damage=1, income=random.randint(100,250))
-                        if raid_ship == -2: #This option will be avalible in v. 0.2 NOTE: Should be 2
-                            clear()
-                            print(f"{Fore.GREEN}Hailing Frequency Open{Fore.WHITE}")
-                            hailing = random.randint(1,5)
-                            if hailing == 1:
-                                clear()
-                                print('')
-                            time.sleep(0)
-                            continue
-                        continue
-                    continue
-                else: #Still trying to figure out what would be bad
-                    clear()
-                    print('')
-            continue
-        if choice_sector == 2: #Beta Sector (Kilngon, Romulan, Mining, planet, mission)
-            clear()
-            op1 = ['Good', 'Good']
-            selected_item = random.choice(op1) 
-            if selected_item == 'Good':
-                op3 = ['Material Cluster', 'Klingon Ship', 'Romulan Ship'] #, 'Mission Planet'
-                selected_item_2 = random.choice(op3) #
-                if (selected_item_2 == 'Material Cluster'):
-                     mining_deposit()
-                if (selected_item_2 == 'Klingon Ship'):
-                    income_display()
-                    print('You have approached a Klingon ship!')
-                    time.sleep(1)
-                    print('What do you want to do?')
-                    op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
-                    print(*op3, sep = '\n')
-                    kling_ship = int(input('Option: '))
-                    if kling_ship == 1:
-                        battle(opponent_health=random.randint(700,1100), opponent_name='Klingon Ship', oppenent_damage=1.5, income=random.randint(250,300))
-                if (selected_item_2 == 'Romulan Ship'):
-                    income_display()
-                    print('You have approached a Romulan ship!')
-                    time.sleep(1)
-                    print('What do you want to do?')
-                    op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
-                    print(*op3, sep = '\n')
-                    rom_ship = int(input('Option: '))
-                    if rom_ship == 1:
-                        battle(opponent_health=random.randint(1000,1500), opponent_name='Romulan Ship', oppenent_damage=2, income=random.randint(350,500))
-                        continue
-                    continue
-                else:
-                    print('Bad')
-                    continue
-            continue
-        if choice_sector == 3: #Delta Sec (Vulcan, mining, planet mission)
-            clear()
-            op1 = ['Good', 'Good']
-            selected_item = random.choice(op1) 
-            op3 = ['Material Cluster', 'Vulcan Ship'] #, 'Mission Planet'
-            encounter_3 = random.choice(op3) #
-            if (encounter_3 == 'Material Cluster'):
-                      mining_deposit()
-            if (encounter_3 == 'Vulcan Ship'):
-                    income_display()
-                    print('You have approached a Vulcan ship!')
-                    time.sleep(1)
-                    print('What do you want to do?')
-                    op3 = ['1: Attack the Ship', '2: Ignore the Ship'] #, '2: Hail the Ship'
-                    print(*op3, sep = '\n')
-                    vulcan_ship = int(input('Option: '))
-                    if vulcan_ship == 1:
-                        battle(opponent_health=random.randint(1000,1600), opponent_name='Vulcan Ship', oppenent_damage=2.5, income=random.randint(450,600))
-                        continue
-                    continue
-            else:
-                print('Bad')
-                continue
-        continue
-    if option == 2:
+        system_findings = ['Material Mine', 'Orion Pirate', 'Trading Post'] # Mission planet
+        current_system_rand = random.choice(system_findings)
+        if current_system_rand == 'Material Mine':
+            mining_deposit()
+        if current_system_rand == 'Trading Post':
+            trading_post()
+        if current_system_rand == 'Orion Pirate':
+            income_display()
+            print('You have approached an Orion Pirate!')
+            time.sleep(1)
+            print('What do you want to do?')
+            op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+            print(*op_1, sep='\n')
+            ori_ship = int(input('Option: '))
+            if ori_ship == 1:
+                battle(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', oppenent_damage=1, income=random.randint(100,250))
+            if ori_ship == -2:
+                print('Hailing Frequencys are in development.')
+    if (option == 2):
+        navigate()
+    if option == 3:
         clear()
         print("Drydock")
         drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: View Upgrades', '5: Restore Health', '6: Exit']
