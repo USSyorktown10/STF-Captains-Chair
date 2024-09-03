@@ -1,10 +1,16 @@
+import json
 import time
 import random
 import os
 from colorama import Fore
-upgrades = {"Mining Laser": 1, "Health": 1, "Phaser": 1}  # this is a dictionary
-costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20}  # the costs
-deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2}  # the amount to multiply by for each level, to make the higher levels cost more
+
+'''with open('STF_data') as f:
+    data = json.load(f)
+    print(data)'''
+
+upgrades = {"Mining Laser": 1, "Health": 1, "Phaser": 1}  
+costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20}  
+deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2}  
 systems = {
     1: 'Sol', 
     2: 'Vulcan', 
@@ -17,9 +23,37 @@ systems = {
     9: 'Xindi Starbase 9', 
     10: 'Altor IV'
 }
+
+   
 coins = 100
 health = 1000
 materials = 5
+
+'''data = {
+    'coins': coins,
+    'materials': materials,
+    'health': health,
+    'upgrades': upgrades,
+}
+
+file_name = 'STF_data'
+
+with open(file_name, 'w') as f:
+    json.dump(data, f, indent=4)'''
+ 
+
+def ask_sanitize(question_ask, follow_up_question=None):
+    if follow_up_question is None:
+        follow_up_question = question_ask
+        response = input(question_ask)
+        while True:
+            try:
+                response = int(response) 
+                break
+            except ValueError: 
+                response = input(follow_up_question)
+                continue
+        return response
 
 def income_display():
     print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
@@ -29,18 +63,18 @@ def income_display():
 
 def ask(question):
         response = input(question)
-        return response.lower() in ["y", "yes"]  # lol
+        return response.lower() in ["y", "yes"] 
 
 def upgrade(type):
         global coins
         current_upgrade_level = upgrades[type]
-        current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level)  # ** = raise to the power of, this multiplies the base cost by the delta the number of upgrade times
-        if coins >= current_upgrade_cost:  # Can we afford it?
+        current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level) 
+        if coins >= current_upgrade_cost: 
                 print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coins. ({coins} -> {coins - current_upgrade_cost}){Fore.WHITE} ")
-                if ask(f"{Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  # extra space so it looks nicer
-                        coins -= current_upgrade_cost  # take the cost away
-                        upgrades[type] += 1   # actually upgrade
-                        return True  # we did it!
+                if ask(f"{Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  
+                        coins -= current_upgrade_cost
+                        upgrades[type] += 1   
+                        return True  
         else:
                 print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coins (current: {coins}, required: {current_upgrade_cost}).{Fore.WHITE}")
                 return False
@@ -48,7 +82,7 @@ def upgrade(type):
 def view_upgrades():
     clear()
     print(f"{Fore.GREEN}Your upgrades:{Fore.WHITE}\n{chr(10).join([u + ': Level '+str(upgrades[u]) for u in upgrades.keys()])}")
-    continue_1 = input(f'{Fore.RED}Continue? {Fore.WHITE}')
+    continue_1 = ask(f'{Fore.RED}Continue? {Fore.WHITE}')
     if continue_1 == ('y', 'yes'):
         time.sleep(0.001)
 
@@ -68,7 +102,7 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
         print(f'{Fore.BLUE}{opponent_name} health:{Fore.WHITE}', opponent_health)
         print(f'{Fore.GREEN}Your health:{Fore.WHITE}', health)
         print('You are attacking.')
-        damage_input = int(input("Pick a number between 1 and 10: "))
+        damage_input = ask_sanitize(question_ask='Pick a number between 1 and 10: ')
         damage_gen = random.randint(1,10)
         close_1 = damage_gen + 1
         close_2 = damage_gen + 2
@@ -140,8 +174,7 @@ def mining_deposit():
     time.sleep(1)
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'rescources.{Fore.WHITE}')
     print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
-    mine = input(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}')
-    if (mine == "y"):
+    if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
         for i in range(deposit_materials):
             clear()
             print('Mining...')
@@ -159,12 +192,11 @@ def trading_post():
     income_display()
     print('You have approached a Trading Post!')
     time.sleep(1)
-    trade_post = input('Would you like to trade? Y/N: ')
-    if trade_post == 'y':
+    if ask('Would you like to trade? Y/N: '):
         print('Avalible Items:')
         Avalible = ['1: Sell Materials: 1 coins per 50 materials', '2: Exit']
         print(*Avalible, sep = '\n')
-        trade = int(input('Option: '))
+        trade = ask_sanitize(question_ask='Option: ')
         if trade == 1:
             clear()
             if materials >= 50:
@@ -206,15 +238,21 @@ def navigate():
             print(f'{key}: {value}')
         
         system_travel = input(f'{Fore.BLUE}Which system would you like to travel to? {Fore.WHITE}')
-        found = False
+        found = ''
         for key, value in systems.items():
             if system_travel == value:
                 target_system = key
                 warp_time = (abs(current_system - target_system)*10) 
                 print(f'{Fore.RED}Traveling to {value}. Estimated time: {warp_time} seconds.{Fore.WHITE}')
-                time.sleep(warp_time)  
+                time.sleep(1)
+                for i in range(warp_time):
+                    clear()
+                    print(f'{Fore.BLUE}Warping... Time Remaining: {warp_time}{Fore.WHITE}')
+                    time.sleep(1)
+                    warp_time = warp_time - 1
                 current_system = target_system 
                 print(f'Arrived at {systems[current_system]}.')
+                time.sleep(2)
                 found = True
                 break
         if not found:
@@ -247,28 +285,51 @@ while True:
     print('What would you like to do?')
     OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock']
     print(*OpList, sep = '\n')
-    option = int(input('Option: '))
+    option = ask_sanitize(question_ask='What would you like to do: ')
     time.sleep(0.1)
     if (option == 1):
         clear()
-        system_findings = ['Material Mine', 'Orion Pirate', 'Trading Post'] # Mission planet
-        current_system_rand = random.choice(system_findings)
-        if current_system_rand == 'Material Mine':
-            mining_deposit()
-        if current_system_rand == 'Trading Post':
-            trading_post()
-        if current_system_rand == 'Orion Pirate':
-            income_display()
-            print('You have approached an Orion Pirate!')
-            time.sleep(1)
-            print('What do you want to do?')
-            op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
-            print(*op_1, sep='\n')
-            ori_ship = int(input('Option: '))
-            if ori_ship == 1:
-                battle(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', oppenent_damage=1, income=random.randint(100,250))
-            if ori_ship == -2:
-                print('Hailing Frequencys are in development.')
+        if current_system == 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 or 10:
+            system_findings = ['Material Mine', 'Orion Pirate', 'Trading Post'] # Mission planet
+            current_system_rand = random.choice(system_findings)
+            if current_system_rand == 'Material Mine':
+                mining_deposit()
+            if current_system_rand == 'Trading Post':
+                trading_post()
+            if current_system_rand == 'Orion Pirate':
+                income_display()
+                print('You have approached an Orion Pirate!')
+                time.sleep(1)
+                print('What do you want to do?')
+                op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+                print(*op_1, sep='\n')
+                ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+                if ori_ship == 1:
+                    battle(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', oppenent_damage=1, income=random.randint(100,250))
+                if ori_ship == -2:
+                    print('Hailing Frequencys are in development.')
+        if current_system == 9:
+            if ask(f'Would you like to dock with the Xindi Starbase or Explore the system?'):
+                clear()
+            else:
+                system_findings = ['Material Mine', 'Orion Pirate', 'Trading Post'] # Mission planet
+                current_system_rand = random.choice(system_findings)
+                if current_system_rand == 'Material Mine':
+                    mining_deposit()
+                if current_system_rand == 'Trading Post':
+                    trading_post()
+                if current_system_rand == 'Orion Pirate':
+                    income_display()
+                    print('You have approached an Orion Pirate!')
+                    time.sleep(1)
+                    print('What do you want to do?')
+                    op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+                    print(*op_1, sep='\n')
+                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+                if ori_ship == 1:
+                    battle(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', oppenent_damage=1, income=random.randint(100,250))
+                if ori_ship == -2:
+                    print('Hailing Frequencys are in development.')
     if (option == 2):
         navigate()
     if option == 3:
@@ -276,7 +337,7 @@ while True:
         print("Drydock")
         drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: View Upgrades', '5: Restore Health', '6: Exit']
         print(*drydock_option, sep = '\n')
-        drydock_option_2 = int(input('What would you like to upgrade: '))
+        drydock_option_2 = ask_sanitize(question_ask='What would you like to upgrade: ')
         if drydock_option_2 == 1:
             upgrade(type='Mining Laser')
         elif drydock_option_2 == 2:
