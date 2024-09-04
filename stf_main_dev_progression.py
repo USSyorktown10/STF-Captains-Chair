@@ -8,9 +8,10 @@ from colorama import Fore
     data = json.load(f)
     print(data)'''
 
-upgrades = {"Mining Laser": 1, "Health": 1, "Phaser": 1}  
-costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20}  
-deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2}  
+upgrades = {"Mining Laser": 1, "Health": 1, "Phaser": 1, "Warp Range": 2}  
+costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20, "Warp Range": 15}  
+deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2, "Warp Range": 2}  
+system_deltas = {'Material Cluster': 1.5, 'Trading Post': 2, 'Enemy Ships Loot': 1.5, 'Enemy Ships Health': 1.3}
 systems = {
     1: 'Sol', 
     2: 'Vulcan', 
@@ -140,7 +141,7 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
             continue
         else:
             print(f'{Fore.RED}You Missed! {opponent_name}s Ship Turn...{Fore.WHITE}') 
-            damrecieve = random.randint(50,200) * oppenent_damage
+            damrecieve = random.randint(50,150) * oppenent_damage
             health = health - damrecieve
             time.sleep(1)
             print(f'{Fore.RED}The {opponent_name} Ship did {damrecieve} Damage!{Fore.WHITE}')
@@ -169,7 +170,7 @@ def mining_deposit():
     global materials
     income_display()
     print('You have approached a Material Cluster!')
-    deposit_materials = random.randint(10,1000)
+    deposit_materials = ((system_deltas['Material Cluster'] * current_system) * random.randint(10,1000))
     deposit_var = deposit_materials / upgrades['Mining Laser']
     time.sleep(1)
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'rescources.{Fore.WHITE}')
@@ -217,7 +218,6 @@ current_system = 1
 finding_var = 0
                 
 def find_system_number(system_name):
-    """Find the number associated with the given system name."""
     for key, value in systems.items():
         if value == system_name:
             return key
@@ -229,35 +229,39 @@ def navigate():
     global system_travel
     global warp_time
 
-    print(f'You are currently in {systems[current_system]}')
-    
-    if ask(f'Would you like to navigate to another system? '):
+    warp_range = upgrades['Warp Range']
+    reachable_systems = {
+        key: value for key, value in systems.items()
+        if key >= current_system - warp_range and key <= current_system + warp_range
+    }
+
+    print(f'{Fore.BLUE}You are currently in {systems[current_system]}{Fore.WHITE}')
+
+    if ask(f'{Fore.BLUE}Would you like to navigate to another system? {Fore.WHITE}'):
         clear()
         print(f'{Fore.BLUE}Systems in Warp Range:{Fore.WHITE}')
-        for key, value in systems.items():
+        for key, value in reachable_systems.items():
             print(f'{key}: {value}')
-        
-        system_travel = input(f'{Fore.BLUE}Which system would you like to travel to? {Fore.WHITE}')
-        found = ''
-        for key, value in systems.items():
-            if system_travel == value:
-                target_system = key
-                warp_time = (abs(current_system - target_system)*10) 
-                print(f'{Fore.RED}Traveling to {value}. Estimated time: {warp_time} seconds.{Fore.WHITE}')
-                time.sleep(1)
-                for i in range(warp_time):
-                    clear()
-                    print(f'{Fore.BLUE}Warping... Time Remaining: {warp_time}{Fore.WHITE}')
+        while True:
+            try:
+                system_number = int(input(f'{Fore.BLUE}Which system number would you like to travel to? {Fore.WHITE}'))
+                if system_number in reachable_systems:
+                    target_system = system_number
+                    warp_time = (abs(current_system - target_system) * 10) 
+                    print(f'{Fore.RED}Traveling to {reachable_systems[target_system]}. Estimated time: {warp_time} seconds.{Fore.WHITE}')
                     time.sleep(1)
-                    warp_time = warp_time - 1
-                current_system = target_system 
-                print(f'Arrived at {systems[current_system]}.')
-                time.sleep(2)
-                found = True
-                break
-        if not found:
-            print(f'{system_travel} is not in the list of systems.')
-            time.sleep(2)
+                    for i in range(warp_time):
+                        clear()
+                        print(f'{Fore.BLUE}Warping... Time Remaining: {warp_time - i}{Fore.WHITE}')
+                        time.sleep(1)
+                    current_system = target_system 
+                    print(f'Arrived at {systems[current_system]}.')
+                    time.sleep(2)
+                    break
+                else:
+                    print(f'{Fore.RED}Invalid system number. Please choose a number from the list.{Fore.WHITE}')
+            except ValueError:
+                print(f'{Fore.RED}Please enter a valid number.{Fore.WHITE}')
         
         return True
     else:
@@ -305,7 +309,7 @@ while True:
                 print(*op_1, sep='\n')
                 ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                 if ori_ship == 1:
-                    battle(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', oppenent_damage=1, income=random.randint(100,250))
+                    battle(opponent_health=((system_deltas['Enemy Ships Health'] ** current_system) * random.randint(500,900)), opponent_name='Orion Pirate', oppenent_damage=1, income=((system_deltas['Enemy Ships Loot'] ** current_system) * random.randint(100,250)))
                 if ori_ship == -2:
                     print('Hailing Frequencys are in development.')
         if current_system == 9:
