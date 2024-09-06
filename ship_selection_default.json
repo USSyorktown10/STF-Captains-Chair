@@ -1,0 +1,5 @@
+{"ship selection": [
+    {"name": "Stargazer", "firepower": 1, "accuracy": 1, "evasion": 1, "antimatter": 500, "storage": 750},
+    {"name": "USS Grissom", "firepower": 1, "accuracy": 2, "evasion": 2, "antimatter": 550, "storage": 800},
+    {}
+]}

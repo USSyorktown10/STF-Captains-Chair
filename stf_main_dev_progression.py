@@ -3,6 +3,7 @@ import time
 import random
 import os
 from colorama import Fore
+import copy
 
 '''with open('STF_data') as f:
     data = json.load(f)
@@ -41,7 +42,65 @@ file_name = 'STF_data'
 
 with open(file_name, 'w') as f:
     json.dump(data, f, indent=4)'''
- 
+
+
+original_file_path = 'crew_list.json'
+user_file_path = 'user_crew_data.json'
+
+def load_original_data(file_path):
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+def save_user_data(file_path, data):
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+
+def has_played_before(file_path):
+    return os.path.exists(file_path)
+
+def initialize_crew_data():
+    if has_played_before(user_file_path):
+        with open(user_file_path, 'r') as file:
+            return json.load(file)
+    else:
+        original_crew_data = load_original_data(original_file_path)
+        return copy.deepcopy(original_crew_data)
+
+def display_crew(crew_data):
+    print("\nCurrent Crew Members:")
+    for index, member in enumerate(crew_data['crew']):
+        print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Skill Level: {member['skill_level']}, Rarity: {member['rarity']})")
+
+def upgrade_crew_member(crew_data, member_index, cost):
+    global coins
+    if coins >= cost:
+        crew_data['crew'][member_index]['skill_level'] += 5  # Increase skill level
+        coins -= cost  # Deduct coins
+        print(f"{Fore.GREEN}\n{crew_data['crew'][member_index]['name']}'s skill level increased to {crew_data['crew'][member_index]['skill_level']}!{Fore.WHITE}")
+        print(f"{Fore.YELLOW}Remaining Coins: {coins}{Fore.WHITE}")
+        time.sleep(2)
+    else:
+        print(f"{Fore.RED}\nNot enough coins to upgrade.{Fore.WHITE}")
+        time.sleep(2)
+
+# Main function
+def main():
+    global coins
+    user_crew_data = initialize_crew_data()  
+    display_crew(user_crew_data)  
+
+    choice = int(input(f"{Fore.BLUE}\nEnter the number of the crew member to upgrade: {Fore.WHITE}")) - 1  # Convert to 0-based index
+
+    cost = 10
+    print(f"{Fore.YELLOW}Upgrading {user_crew_data['crew'][choice]['name']} will cost {cost} coins.{Fore.WHITE}")
+    if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}"):
+        upgrade_crew_member(user_crew_data, choice, cost)
+        save_user_data(user_file_path, user_crew_data)  # Save updated user crew data to file
+        print("\nCrew data saved to 'user_crew_data.json'.")
+    else:
+        print(f"{Fore.RED}\nUpgrade canceled.{Fore.WHITE}")
+        time.sleep(1)
+
 
 def ask_sanitize(question_ask, follow_up_question=None):
     if follow_up_question is None:
@@ -287,9 +346,9 @@ while True:
     clear()
     homescreen_setup()
     print('What would you like to do?')
-    OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock']
+    OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock', '4: Ship Manifest', '5: Away Teams', '6: Ship Selection']
     print(*OpList, sep = '\n')
-    option = ask_sanitize(question_ask='What would you like to do: ')
+    option = ask_sanitize(question_ask='Option: ')
     time.sleep(0.1)
     if (option == 1):
         clear()
@@ -339,7 +398,7 @@ while True:
     if option == 3:
         clear()
         print("Drydock")
-        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: View Upgrades', '5: Restore Health', '6: Exit']
+        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: Upgrade Warp Range', '5: View Upgrades', '6: Restore Health', '7: Exit']
         print(*drydock_option, sep = '\n')
         drydock_option_2 = ask_sanitize(question_ask='What would you like to upgrade: ')
         if drydock_option_2 == 1:
@@ -348,9 +407,11 @@ while True:
             upgrade(type='Phaser')
         elif drydock_option_2 == 3:
             upgrade(type='Health')
-        elif drydock_option_2 == 4:
-            view_upgrades()
         elif drydock_option_2 == 5:
+            view_upgrades()
+        elif drydock_option_2 == 4:
+            upgrade(type='Warp Range')
+        elif drydock_option_2 == 6:
             current_heal_cost = health / max_health
             current_heal_cost = current_heal_cost * 10
             if coins >= current_heal_cost:
@@ -364,7 +425,31 @@ while True:
                 print(f"{Fore.YELLOW}You can't heal your ship because you don't have enough coins (current: {coins}, required: {current_heal_cost}).{Fore.WHITE}")
                 continue
             continue
-        elif drydock_option_2 == 6:
+        elif drydock_option_2 == 7:
+            continue
+        continue
+    if option == 4:
+        clear()
+        with open('user_crew_data.json', 'r') as file:
+            data = json.load(file)
+        for crew_member in data["crew"]:
+            print("- " + crew_member["name"])
+        manifest_option = ask_sanitize(question_ask='Would you like to view crew stats (1) or upgrade crew (2) or exit (3)? ')
+        if manifest_option == 1:
+            clear()
+            for crew_member in data["crew"]:
+                print(f"- {crew_member['name']}'s Stats:")
+                for key, value in crew_member.items():
+                    print(f"  {key.capitalize()}: {value}")
+                print() 
+            if ask(question='Type Y or N to exit: '):
+                continue
+            continue
+        elif manifest_option == 2:
+            if __name__ == "__main__":
+                main()
+        elif manifest_option == 3:
+            clear()
             continue
         continue
     if health < max_health:

@@ -1,0 +1,12 @@
+{
+    "coins": 100,
+    "health": 1000,
+    "materials": 5,
+    "ship": "Stargazer",
+    "upgrades": {
+        "Mining Laser": 1,
+        "Health": 1,
+        "Phaser": 1,
+        "Warp Range": 2
+    }
+}
