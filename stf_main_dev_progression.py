@@ -5,79 +5,85 @@ import os
 from colorama import Fore
 import copy
 
-'''with open('STF_data') as f:
-    data = json.load(f)
-    print(data)'''
+# File paths
+original_crew_file_path = 'crew_list.json'
+user_crew_file_path = 'user_crew_data.json'
+user_game_file_path = 'user_game_data.json'
 
-upgrades = {"Mining Laser": 1, "Health": 1, "Phaser": 1, "Warp Range": 2}  
-costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20, "Warp Range": 15}  
-deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2, "Warp Range": 2}  
+# Upgrades, Costs, Deltas, Systems, and Other Game Data
+upgrades = {"Mining Laser": 1, "Health": 1, "Phaser": 1, "Warp Range": 1}
+costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20, "Warp Range": 15}
+deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2, "Warp Range": 2}
 system_deltas = {'Material Cluster': 1.5, 'Trading Post': 2, 'Enemy Ships Loot': 1.5, 'Enemy Ships Health': 1.3}
 systems = {
-    1: 'Sol', 
-    2: 'Vulcan', 
-    3: 'Tellar', 
-    4: 'Andor', 
-    5: 'Omicron II', 
-    6: 'Regula', 
-    7: 'Solaria', 
-    8: 'Tarkalea XII', 
-    9: 'Xindi Starbase 9', 
-    10: 'Altor IV'
+    1: 'Sol', 2: 'Vulcan', 3: 'Tellar', 4: 'Andor', 5: 'Omicron II', 
+    6: 'Regula', 7: 'Solaria', 8: 'Tarkalea XII', 9: 'Xindi Starbase 9', 10: 'Altor IV'
 }
 
-   
-coins = 100
-health = 1000
-materials = 5
-
-'''data = {
-    'coins': coins,
-    'materials': materials,
-    'health': health,
+# Game State Initialization
+game_state = {
+    'coins': 100,
+    'health': 1000,
+    'materials': 5,
     'upgrades': upgrades,
+    'current_system': 1,
+    'max_health': 1000
 }
 
-file_name = 'STF_data'
-
-with open(file_name, 'w') as f:
-    json.dump(data, f, indent=4)'''
-
-
-original_file_path = 'crew_list.json'
-user_file_path = 'user_crew_data.json'
-
-def load_original_data(file_path):
+def load_crew_data(file_path):
+    """Load crew data from a file."""
     with open(file_path, 'r') as file:
         return json.load(file)
 
-def save_user_data(file_path, data):
+def save_crew_data(file_path, data):
+    """Save crew data to a file."""
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+
+def load_game_data(file_path):
+    """Load game state data from a file."""
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+def save_game_data(file_path, data):
+    """Save game state data to a file."""
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
 def has_played_before(file_path):
+    """Check if a user-specific game file exists."""
     return os.path.exists(file_path)
 
-def initialize_crew_data():
-    if has_played_before(user_file_path):
-        with open(user_file_path, 'r') as file:
+def initialize_game_data():
+    """Initialize or load game state data."""
+    if has_played_before(user_game_file_path):
+        with open(user_game_file_path, 'r') as file:
             return json.load(file)
     else:
-        original_crew_data = load_original_data(original_file_path)
-        return copy.deepcopy(original_crew_data)
+        return game_state
 
+def initialize_crew_data():
+    """Initialize or load crew data."""
+    if has_played_before(user_crew_file_path):
+        with open(user_crew_file_path, 'r') as file:
+            return json.load(file)
+    else:
+        original_crew_data = load_crew_data(original_crew_file_path)
+        save_crew_data(user_crew_file_path, original_crew_data)
+        return original_crew_data
+
+# Display Crew Information
 def display_crew(crew_data):
     print("\nCurrent Crew Members:")
     for index, member in enumerate(crew_data['crew']):
         print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Skill Level: {member['skill_level']}, Rarity: {member['rarity']})")
 
-def upgrade_crew_member(crew_data, member_index, cost):
-    global coins
-    if coins >= cost:
+def upgrade_crew_member(game_state, crew_data, member_index, cost):
+    if game_state['coins'] >= cost:
         crew_data['crew'][member_index]['skill_level'] += 5  # Increase skill level
-        coins -= cost  # Deduct coins
+        game_state['coins'] -= cost  # Deduct coins
         print(f"{Fore.GREEN}\n{crew_data['crew'][member_index]['name']}'s skill level increased to {crew_data['crew'][member_index]['skill_level']}!{Fore.WHITE}")
-        print(f"{Fore.YELLOW}Remaining Coins: {coins}{Fore.WHITE}")
+        print(f"{Fore.YELLOW}Remaining Coins: {game_state['coins']}{Fore.WHITE}")
         time.sleep(2)
     else:
         print(f"{Fore.RED}\nNot enough coins to upgrade.{Fore.WHITE}")
@@ -85,18 +91,21 @@ def upgrade_crew_member(crew_data, member_index, cost):
 
 # Main function
 def main():
-    global coins
-    user_crew_data = initialize_crew_data()  
-    display_crew(user_crew_data)  
+    global game_state
+    game_state = initialize_game_data()
+    crew_data = initialize_crew_data()
+    
+    display_crew(crew_data)
 
     choice = int(input(f"{Fore.BLUE}\nEnter the number of the crew member to upgrade: {Fore.WHITE}")) - 1  # Convert to 0-based index
 
     cost = 10
-    print(f"{Fore.YELLOW}Upgrading {user_crew_data['crew'][choice]['name']} will cost {cost} coins.{Fore.WHITE}")
+    print(f"{Fore.YELLOW}Upgrading {crew_data['crew'][choice]['name']} will cost {cost} coins.{Fore.WHITE}")
     if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}"):
-        upgrade_crew_member(user_crew_data, choice, cost)
-        save_user_data(user_file_path, user_crew_data)  # Save updated user crew data to file
-        print("\nCrew data saved to 'user_crew_data.json'.")
+        upgrade_crew_member(game_state, crew_data, choice, cost)
+        save_game_data(user_game_file_path, game_state)  # Save updated user game data to file
+        save_crew_data(user_crew_file_path, crew_data)  # Save updated user crew data to file
+        print("\nGame data and crew data saved.")
     else:
         print(f"{Fore.RED}\nUpgrade canceled.{Fore.WHITE}")
         time.sleep(1)
@@ -115,11 +124,11 @@ def ask_sanitize(question_ask, follow_up_question=None):
                 continue
         return response
 
-def income_display():
-    print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
-    print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
-    print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
-    print(f'{Fore.CYAN}Current System:{Fore.WHITE} {systems[current_system]}')
+def income_display(game_state, systems):
+    print(f"{Fore.YELLOW}Coins:{Fore.WHITE}", game_state['coins'])
+    print(f"{Fore.GREEN}Materials:{Fore.WHITE}", game_state['materials'])
+    print(f"{Fore.BLUE}Health:{Fore.WHITE} {game_state['health']}/{game_state['max_health']}")
+    print(f"{Fore.CYAN}Current System:{Fore.WHITE} {systems[game_state['current_system']]}")
 
 def ask(question):
         response = input(question)
@@ -227,7 +236,7 @@ def homescreen_setup():
 
 def mining_deposit():
     global materials
-    income_display()
+    income_display(game_state, systems)()
     print('You have approached a Material Cluster!')
     deposit_materials = ((system_deltas['Material Cluster'] * current_system) * random.randint(10,1000))
     deposit_var = deposit_materials / upgrades['Mining Laser']
@@ -249,7 +258,7 @@ def mining_deposit():
 def trading_post():
     global coins
     global materials
-    income_display()
+    income_display(game_state, systems)()
     print('You have approached a Trading Post!')
     time.sleep(1)
     if ask('Would you like to trade? Y/N: '):
@@ -360,7 +369,7 @@ while True:
             if current_system_rand == 'Trading Post':
                 trading_post()
             if current_system_rand == 'Orion Pirate':
-                income_display()
+                income_display(game_state, systems)
                 print('You have approached an Orion Pirate!')
                 time.sleep(1)
                 print('What do you want to do?')
@@ -382,7 +391,7 @@ while True:
                 if current_system_rand == 'Trading Post':
                     trading_post()
                 if current_system_rand == 'Orion Pirate':
-                    income_display()
+                    income_display(game_state, systems)()
                     print('You have approached an Orion Pirate!')
                     time.sleep(1)
                     print('What do you want to do?')

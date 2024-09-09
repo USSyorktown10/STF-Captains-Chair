@@ -3,6 +3,7 @@
     "health": 1000,
     "materials": 5,
     "ship": "Stargazer",
+    "max_health": 1000,
     "upgrades": {
         "Mining Laser": 1,
         "Health": 1,
