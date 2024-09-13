@@ -1,0 +1,28 @@
+{
+    "crew": [
+        {
+            "name": "Kirk",
+            "skill_level": 10,
+            "skill": "Command",
+            "rarity": "Common"
+        },
+        {
+            "name": "Spock",
+            "skill_level": 10,
+            "skill": "Science",
+            "rarity": "Common"
+        },
+        {
+            "name": "Scotty",
+            "skill_level": 10,
+            "skill": "Engineering",
+            "rarity": "Common"
+        },
+        {
+            "name": "McCoy",
+            "skill_level": 10,
+            "skill": "Medical",
+            "rarity": "Common"
+        }
+    ]
+}

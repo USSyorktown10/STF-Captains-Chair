@@ -5,6 +5,11 @@ import os
 from colorama import Fore
 import copy
 
+coins = 100
+materials = 5
+health = 1000
+current_system = 1
+
 # File paths
 original_crew_file_path = 'crew_list.json'
 user_crew_file_path = 'user_crew_data.json'
@@ -20,50 +25,33 @@ systems = {
     6: 'Regula', 7: 'Solaria', 8: 'Tarkalea XII', 9: 'Xindi Starbase 9', 10: 'Altor IV'
 }
 
-# Game State Initialization
-game_state = {
-    'coins': 100,
-    'health': 1000,
-    'materials': 5,
-    'upgrades': upgrades,
-    'current_system': 1,
-    'max_health': 1000
-}
-
-def load_crew_data(file_path):
-    """Load crew data from a file."""
+def load_crew_data(file_path): #load crew
     with open(file_path, 'r') as file:
         return json.load(file)
 
-def save_crew_data(file_path, data):
-    """Save crew data to a file."""
+def save_crew_data(file_path, data): #save crew
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def load_game_data(file_path):
-    """Load game state data from a file."""
+def load_game_data(file_path): #load game state
     with open(file_path, 'r') as file:
         return json.load(file)
 
-def save_game_data(file_path, data):
-    """Save game state data to a file."""
+def save_game_data(file_path, data): #save game state
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def has_played_before(file_path):
-    """Check if a user-specific game file exists."""
+def has_played_before(file_path): #check if personal file path exists
     return os.path.exists(file_path)
 
-def initialize_game_data():
-    """Initialize or load game state data."""
+def initialize_game_data(): #initialize load or save data
     if has_played_before(user_game_file_path):
         with open(user_game_file_path, 'r') as file:
             return json.load(file)
     else:
         return game_state
 
-def initialize_crew_data():
-    """Initialize or load crew data."""
+def initialize_crew_data(): #initialize load or save crew
     if has_played_before(user_crew_file_path):
         with open(user_crew_file_path, 'r') as file:
             return json.load(file)
@@ -72,8 +60,7 @@ def initialize_crew_data():
         save_crew_data(user_crew_file_path, original_crew_data)
         return original_crew_data
 
-# Display Crew Information
-def display_crew(crew_data):
+def display_crew(crew_data): #display crew
     print("\nCurrent Crew Members:")
     for index, member in enumerate(crew_data['crew']):
         print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Skill Level: {member['skill_level']}, Rarity: {member['rarity']})")
@@ -124,11 +111,11 @@ def ask_sanitize(question_ask, follow_up_question=None):
                 continue
         return response
 
-def income_display(game_state, systems):
-    print(f"{Fore.YELLOW}Coins:{Fore.WHITE}", game_state['coins'])
-    print(f"{Fore.GREEN}Materials:{Fore.WHITE}", game_state['materials'])
-    print(f"{Fore.BLUE}Health:{Fore.WHITE} {game_state['health']}/{game_state['max_health']}")
-    print(f"{Fore.CYAN}Current System:{Fore.WHITE} {systems[game_state['current_system']]}")
+def income_display():
+     print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
+     print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
+     print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
+     print(f'{Fore.CYAN}Current System:{Fore.WHITE} {systems[current_system]}')
 
 def ask(question):
         response = input(question)
@@ -236,7 +223,7 @@ def homescreen_setup():
 
 def mining_deposit():
     global materials
-    income_display(game_state, systems)()
+    income_display()
     print('You have approached a Material Cluster!')
     deposit_materials = ((system_deltas['Material Cluster'] * current_system) * random.randint(10,1000))
     deposit_var = deposit_materials / upgrades['Mining Laser']
@@ -258,7 +245,7 @@ def mining_deposit():
 def trading_post():
     global coins
     global materials
-    income_display(game_state, systems)()
+    income_display()
     print('You have approached a Trading Post!')
     time.sleep(1)
     if ask('Would you like to trade? Y/N: '):
@@ -369,7 +356,7 @@ while True:
             if current_system_rand == 'Trading Post':
                 trading_post()
             if current_system_rand == 'Orion Pirate':
-                income_display(game_state, systems)
+                income_display()
                 print('You have approached an Orion Pirate!')
                 time.sleep(1)
                 print('What do you want to do?')
@@ -391,7 +378,7 @@ while True:
                 if current_system_rand == 'Trading Post':
                     trading_post()
                 if current_system_rand == 'Orion Pirate':
-                    income_display(game_state, systems)()
+                    income_display()
                     print('You have approached an Orion Pirate!')
                     time.sleep(1)
                     print('What do you want to do?')
