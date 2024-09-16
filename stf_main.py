@@ -69,9 +69,6 @@ def increment_upgrade(upgrade_type):
     # Save the updated upgrades dictionary back to the JSON file
     save_data('upgrades', upgrades)
 
-# Example usage
-increment_upgrade('Mining Laser')
-
 # Upgrades, Costs, Deltas, Systems, and Other Game Data
 costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20, "Warp Range": 15}
 deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2, "Warp Range": 2}
