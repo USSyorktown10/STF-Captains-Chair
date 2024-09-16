@@ -5,18 +5,74 @@ import os
 from colorama import Fore
 import copy
 
-coins = 100
-materials = 5
-health = 1000
-current_system = 1
 
 # File paths
 original_crew_file_path = 'crew_list.json'
 user_crew_file_path = 'user_crew_data.json'
 user_game_file_path = 'user_game_data.json'
 
+# Load data from JSON file
+def load_data(key):
+    try:
+        with open('user_game_data.json', 'r') as file:
+            data = json.load(file)
+        # Traverse nested dictionaries if necessary
+        if key in data:
+            return data[key]
+        elif key in data['upgrades']:
+            return data['upgrades'][key]
+        else:
+            raise KeyError(f"Key '{key}' not found.")
+    except FileNotFoundError:
+        print("Game data file not found. Loading default values.")
+        return None
+    except KeyError as e:
+        print(e)
+
+# Save data to JSON file
+def save_data(key, value):
+    try:
+        with open('user_game_data.json', 'r') as file:
+            data = json.load(file)
+
+        # Update the value in the correct place
+        if key in data:
+            data[key] = value
+        elif key in data['upgrades']:
+            data['upgrades'][key] = value
+        else:
+            raise KeyError(f"Key '{key}' not found.")
+        
+        # Save the updated data back to the JSON file
+        with open('user_game_data.json', 'w') as file:
+            json.dump(data, file, indent=4)
+    except FileNotFoundError:
+        print("Game data file not found.")
+    except KeyError as e:
+        print(e)
+
+def increment_upgrade(upgrade_type):
+    """Increment the value of a specified upgrade type by 1 and save it to the JSON file."""
+    # Load the existing upgrades dictionary
+    upgrades = load_data('upgrades')
+    
+    if upgrades is None:
+        return
+    
+    # Check if the upgrade_type exists in the dictionary
+    if upgrade_type in upgrades:
+        # Increment the value of the specified upgrade type
+        upgrades[upgrade_type] += 1
+    else:
+        return
+    
+    # Save the updated upgrades dictionary back to the JSON file
+    save_data('upgrades', upgrades)
+
+# Example usage
+increment_upgrade('Mining Laser')
+
 # Upgrades, Costs, Deltas, Systems, and Other Game Data
-upgrades = {"Mining Laser": 1, "Health": 1, "Phaser": 1, "Warp Range": 1}
 costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20, "Warp Range": 15}
 deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2, "Warp Range": 2}
 system_deltas = {'Material Cluster': 1.5, 'Trading Post': 2, 'Enemy Ships Loot': 1.5, 'Enemy Ships Health': 1.3}
@@ -66,11 +122,11 @@ def display_crew(crew_data): #display crew
         print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Skill Level: {member['skill_level']}, Rarity: {member['rarity']})")
 
 def upgrade_crew_member(game_state, crew_data, member_index, cost):
-    if game_state['coins'] >= cost:
+    if load_data('coins') >= cost:
         crew_data['crew'][member_index]['skill_level'] += 5  # Increase skill level
-        game_state['coins'] -= cost  # Deduct coins
+        save_data('coins', load_data('coins') - cost)  # Deduct coins
         print(f"{Fore.GREEN}\n{crew_data['crew'][member_index]['name']}'s skill level increased to {crew_data['crew'][member_index]['skill_level']}!{Fore.WHITE}")
-        print(f"{Fore.YELLOW}Remaining Coins: {game_state['coins']}{Fore.WHITE}")
+        print(f"{Fore.YELLOW}Remaining Coins: {load_data('coins')}{Fore.WHITE}")
         time.sleep(2)
     else:
         print(f"{Fore.RED}\nNot enough coins to upgrade.{Fore.WHITE}")
@@ -112,10 +168,10 @@ def ask_sanitize(question_ask, follow_up_question=None):
         return response
 
 def income_display():
-     print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
-     print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
-     print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
-     print(f'{Fore.CYAN}Current System:{Fore.WHITE} {systems[current_system]}')
+     print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', load_data('coins'))
+     print(f'{Fore.GREEN}Materials:{Fore.WHITE}', load_data('materials'))
+     print(f"{Fore.BLUE}Health:{Fore.WHITE} {load_data('health')}/{load_data('max_health')}")
+     print(f"{Fore.CYAN}Current System:{Fore.WHITE} {systems[load_data('current_system')]}")
 
 def ask(question):
         response = input(question)
@@ -123,21 +179,22 @@ def ask(question):
 
 def upgrade(type):
         global coins
-        current_upgrade_level = upgrades[type]
+        current_upgrade_level = load_data('upgrades')[type]
         current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level) 
-        if coins >= current_upgrade_cost: 
-                print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coins. ({coins} -> {coins - current_upgrade_cost}){Fore.WHITE} ")
+        if load_data('coins') >= current_upgrade_cost: 
+                print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coins. ({load_data('coins')} -> {load_data('coins') - current_upgrade_cost}){Fore.WHITE} ")
                 if ask(f"{Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  
-                        coins -= current_upgrade_cost
-                        upgrades[type] += 1   
+                        save_data('coins', load_data('coins') - current_upgrade_cost)
+                        increment_upgrade(type)  
                         return True  
         else:
-                print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coins (current: {coins}, required: {current_upgrade_cost}).{Fore.WHITE}")
+                print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coins (current: {load_data('coins')}, required: {current_upgrade_cost}).{Fore.WHITE}")
                 return False
 
 def view_upgrades():
     clear()
-    print(f"{Fore.GREEN}Your upgrades:{Fore.WHITE}\n{chr(10).join([u + ': Level '+str(upgrades[u]) for u in upgrades.keys()])}")
+    upgrades = load_data('upgrades')
+    print(f"{Fore.GREEN}Your upgrades:{Fore.WHITE}\n{chr(10).join([u + ': Level ' + str(upgrades[u]) for u in upgrades.keys()])}")
     continue_1 = ask(f'{Fore.RED}Continue? {Fore.WHITE}')
     if continue_1 == ('y', 'yes'):
         time.sleep(0.001)
@@ -145,18 +202,18 @@ def view_upgrades():
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
         
-def battle(opponent_health, opponent_name, oppenent_damage, income): # This function is not ready yet. This will be avalible soon. The current version you are reading is the version that got rid of the bug where when you buy something, it actually takes away the ammount of money you spent.
+def battle(opponent_health, opponent_name, oppenent_damage, income): 
     global health
     global materials
     print(f'{Fore.YELLOW}You are attacking the {opponent_name}! This ship has {opponent_health} health, and if you win, you get {income} materials.{Fore.WHITE}')
     time.sleep(3)
-    while health > 0:
+    while load_data('health') > 0:
         clear()
         if opponent_health <= 0:
             break
         print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
         print(f'{Fore.BLUE}{opponent_name} health:{Fore.WHITE}', opponent_health)
-        print(f'{Fore.GREEN}Your health:{Fore.WHITE}', health)
+        print(f'{Fore.GREEN}Your health:{Fore.WHITE}', load_data('health'))
         print('You are attacking.')
         damage_input = ask_sanitize(question_ask='Pick a number between 1 and 10: ')
         damage_gen = random.randint(1,10)
@@ -165,31 +222,31 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
         close_3 = damage_gen - 1
         close_4 = damage_gen - 2
         if damage_input == damage_gen:
-            damdelt = (random.randint(100,200) * upgrades['Phaser'])
+            damdelt = (random.randint(100,200) * load_data('upgrades')['Phaser'])
             print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}') 
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_1:
-            damdelt = (random.randint(50,100) * upgrades['Phaser'])
+            damdelt = (random.randint(50,100) * load_data('upgrades')['Phaser'])
             print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}') 
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_3:
-            damdelt = (random.randint(50,100) * upgrades['Phaser'])
+            damdelt = (random.randint(50,100) * load_data('upgrades')['Phaser'])
             print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}')
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_2:
-            damdelt = (random.randint(25,50) * upgrades['Phaser'])
+            damdelt = (random.randint(25,50) * load_data('upgrades')['Phaser'])
             print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}')
             time.sleep(1)
             opponent_health = opponent_health - damdelt
             continue
         elif damage_input == close_4:
-            damdelt = (random.randint(25,50) * upgrades['Phaser'])
+            damdelt = (random.randint(25,50) * load_data('upgrades')['Phaser'])
             print(f'{Fore.GREEN}You Hit! Damage Dealt: {damdelt}{Fore.WHITE}')
             time.sleep(1)
             opponent_health = opponent_health - damdelt
@@ -197,7 +254,7 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
         else:
             print(f'{Fore.RED}You Missed! {opponent_name}s Ship Turn...{Fore.WHITE}') 
             damrecieve = random.randint(50,150) * oppenent_damage
-            health = health - damrecieve
+            save_data('health', load_data('health') - damrecieve)
             time.sleep(1)
             print(f'{Fore.RED}The {opponent_name} Ship did {damrecieve} Damage!{Fore.WHITE}')
             time.sleep(1)
@@ -205,28 +262,28 @@ def battle(opponent_health, opponent_name, oppenent_damage, income): # This func
     if health <= 0:
         clear()
         print(f'{Fore.RED}You Lose!{Fore.WHITE}')
-        print(f'{Fore.RED}Coins Lost: {coins}{Fore.WHITE}')
-        print(f'{Fore.RED}Materials Lost: {materials}{Fore.WHITE}')
+        print(f"{Fore.RED}Coins Lost: {load_data('coins')}{Fore.WHITE}")
+        print(f"{Fore.RED}Materials Lost: {load_data('materials')}{Fore.WHITE}")
         exit()
     if opponent_health <= 0:
         print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
         print(f'{Fore.BLUE}Materials Gained: {Fore.WHITE}', income)
-        materials = materials + income
+        save_data('materials', load_data('materials') + income)
         time.sleep(2)
 
 def homescreen_setup():
-     print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', coins)
-     print(f'{Fore.GREEN}Materials:{Fore.WHITE}', materials)
-     print(f'{Fore.BLUE}Health:{Fore.WHITE} {health}/{max_health}')
-     print(f'{Fore.CYAN}Current System:{Fore.WHITE} {systems[current_system]}')
+     print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', load_data('coins'))
+     print(f'{Fore.GREEN}Materials:{Fore.WHITE}', load_data('materials'))
+     print(f"{Fore.BLUE}Health:{Fore.WHITE} {load_data('health')}/{load_data('max_health')}")
+     print(f"{Fore.CYAN}Current System:{Fore.WHITE} {systems[load_data('current_system')]}")
      
 
 def mining_deposit():
     global materials
     income_display()
     print('You have approached a Material Cluster!')
-    deposit_materials = ((system_deltas['Material Cluster'] * current_system) * random.randint(10,1000))
-    deposit_var = deposit_materials / upgrades['Mining Laser']
+    deposit_materials = ((system_deltas['Material Cluster'] * load_data('current_system')) * random.randint(10,1000))
+    deposit_var = deposit_materials / load_data('upgrades')['Mining Laser']
     time.sleep(1)
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'rescources.{Fore.WHITE}')
     print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
@@ -235,9 +292,9 @@ def mining_deposit():
             clear()
             print('Mining...')
             print('Materials Remaining:', deposit_var)
-            print('Total Materials:', materials)
-            deposit_var = deposit_var - upgrades['Mining Laser']
-            materials = materials + (0.5 * upgrades['Mining Laser'])
+            print('Total Materials:', load_data('materials'))
+            deposit_var = deposit_var - load_data('upgrades')['Mining Laser']
+            materials = materials + (0.5 * load_data('upgrades')['Mining Laser'])
             print(f'{Fore.GREEN}Estimated Time remaining:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
             continue
@@ -255,21 +312,21 @@ def trading_post():
         trade = ask_sanitize(question_ask='Option: ')
         if trade == 1:
             clear()
-            if materials >= 50:
-                while materials >= 50:
-                    materials = materials - 50
-                    coins = coins + 1
-                    print('Materials:', materials)
-                    print('coins:', coins)
+            if load_data('materials') >= 50:
+                while load_data('materials') >= 50:
+                    save_data('materials', load_data('materials') - 50) 
+                    save_data('coins', load_data('coins') + 1)
+                    print('Materials:', load_data('materials'))
+                    print('Coins:', load_data('coins'))
                     time.sleep(0.5)
                     continue
+                time.sleep(2)
             else:
                 print(f'{Fore.RED}You dont have enough materials to get coins.{Fore.WHITE}')
                 time.sleep(1.5)
             if trade == 2:
                 time.sleep(0.01)
                 
-current_system = 1
 finding_var = 0
                 
 def find_system_number(system_name):
@@ -278,64 +335,64 @@ def find_system_number(system_name):
             return key
     return None
 
+reachable_systems = {
+    key: value for key, value in systems.items()
+    if key >= load_data('current_system') - load_data('upgrades')['Warp Range'] and key <= load_data('current_system') + load_data('upgrades')['Warp Range']
+}
+
 def navigate():
     global current_system
-    global finding_var
-    global system_travel
     global warp_time
+    global max_system
 
-    warp_range = upgrades['Warp Range']
+    warp_range = load_data('upgrades')['Warp Range']
+    max_system = len(systems)  
+
     reachable_systems = {
         key: value for key, value in systems.items()
-        if key >= current_system - warp_range and key <= current_system + warp_range
+        if load_data('current_system') - warp_range <= key <= load_data('current_system') + warp_range
     }
 
-    print(f'{Fore.BLUE}You are currently in {systems[current_system]}{Fore.WHITE}')
+    print(f"{Fore.BLUE}You are currently in {systems[load_data('current_system')]}{Fore.WHITE}")
 
     if ask(f'{Fore.BLUE}Would you like to navigate to another system? {Fore.WHITE}'):
         clear()
         print(f'{Fore.BLUE}Systems in Warp Range:{Fore.WHITE}')
         for key, value in reachable_systems.items():
             print(f'{key}: {value}')
+        
         while True:
             try:
                 system_number = int(input(f'{Fore.BLUE}Which system number would you like to travel to? {Fore.WHITE}'))
                 if system_number in reachable_systems:
                     target_system = system_number
-                    warp_time = (abs(current_system - target_system) * 10) 
+                    warp_time = abs(load_data('current_system') - target_system) * 10
                     print(f'{Fore.RED}Traveling to {reachable_systems[target_system]}. Estimated time: {warp_time} seconds.{Fore.WHITE}')
                     time.sleep(1)
                     for i in range(warp_time):
                         clear()
                         print(f'{Fore.BLUE}Warping... Time Remaining: {warp_time - i}{Fore.WHITE}')
                         time.sleep(1)
-                    current_system = target_system 
-                    print(f'Arrived at {systems[current_system]}.')
+                    save_data('current_system', target_system)
+                    print(f"Arrived at {systems[load_data('current_system')]}.")
                     time.sleep(2)
                     break
                 else:
                     print(f'{Fore.RED}Invalid system number. Please choose a number from the list.{Fore.WHITE}')
             except ValueError:
                 print(f'{Fore.RED}Please enter a valid number.{Fore.WHITE}')
-        
-        return True
     else:
         return False
-current_system = 1 
 finding_var = 0
 warp_time = 0
 
 clear()
 mission_list = {'1: Mine 100 Materials': 0, '2: Defeat 1 Enemy': 0,}
 mission_rewards = {'1: Mine 100 Materials': 25, '2: Defeat 1 Enemy': 25,}
-stamina = 100
-Win = 0
-upgrades['Phaser'] = 1
-max_health = 1000
-health_up = 0
+
 clear()
 while True:
-    if health <= 0:
+    if load_data('health') <= 0:
         clear()
         print(f'{Fore.RED}Game over!{Fore.WHITE}')
         exit()
@@ -348,7 +405,7 @@ while True:
     time.sleep(0.1)
     if (option == 1):
         clear()
-        if current_system == 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 or 10:
+        if load_data('current_system') == 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 or 10:
             system_findings = ['Material Mine', 'Orion Pirate', 'Trading Post'] # Mission planet
             current_system_rand = random.choice(system_findings)
             if current_system_rand == 'Material Mine':
@@ -364,10 +421,10 @@ while True:
                 print(*op_1, sep='\n')
                 ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                 if ori_ship == 1:
-                    battle(opponent_health=((system_deltas['Enemy Ships Health'] ** current_system) * random.randint(500,900)), opponent_name='Orion Pirate', oppenent_damage=1, income=((system_deltas['Enemy Ships Loot'] ** current_system) * random.randint(100,250)))
+                    battle(opponent_health=((system_deltas['Enemy Ships Health'] ** load_data('current_system')) * random.randint(500,900)), opponent_name='Orion Pirate', oppenent_damage=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
                 if ori_ship == -2:
                     print('Hailing Frequencys are in development.')
-        if current_system == 9:
+        if load_data('current_system') == 9:
             if ask(f'Would you like to dock with the Xindi Starbase or Explore the system?'):
                 clear()
             else:
@@ -408,17 +465,17 @@ while True:
         elif drydock_option_2 == 4:
             upgrade(type='Warp Range')
         elif drydock_option_2 == 6:
-            current_heal_cost = health / max_health
+            current_heal_cost = load_data('health') / load_data('max_health')
             current_heal_cost = current_heal_cost * 10
-            if coins >= current_heal_cost:
-                print(f"{Fore.YELLOW}You are healing your ship from {health} to {max_health}.\n {Fore.RED}This upgrade will cost you {current_heal_cost} coins. ({coins} -> {coins - current_heal_cost}){Fore.WHITE}")
+            if load_data('coins') >= current_heal_cost:
+                print(f"{Fore.YELLOW}You are healing your ship from {load_data('health')} to {load_data('max_health')}.\n {Fore.RED}This upgrade will cost you {current_heal_cost} coins. ({load_data('coins')} -> {load_data('coins') - current_heal_cost}){Fore.WHITE}")
                 if ask(f"{Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):
-                    coins -= current_heal_cost
-                    health = max_health
+                    save_data('coins', load_data('coins') - current_heal_cost)
+                    save_data('health', load_data('max_health'))
                     continue
                 continue
             else: 
-                print(f"{Fore.YELLOW}You can't heal your ship because you don't have enough coins (current: {coins}, required: {current_heal_cost}).{Fore.WHITE}")
+                print(f"{Fore.YELLOW}You can't heal your ship because you don't have enough coins (current: {load_data('coins')}, required: {current_heal_cost}).{Fore.WHITE}")
                 continue
             continue
         elif drydock_option_2 == 7:
@@ -448,5 +505,3 @@ while True:
             clear()
             continue
         continue
-    if health < max_health:
-        health = health + health_up
