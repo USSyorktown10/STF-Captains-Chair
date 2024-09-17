@@ -5,11 +5,25 @@ import os
 from colorama import Fore
 import copy
 
-
+shuttle_bays = 1
 # File paths
 original_crew_file_path = 'crew_list.json'
 user_crew_file_path = 'user_crew_data.json'
 user_game_file_path = 'user_game_data.json'
+ship_selection_default = 'ship_selection_default.json'
+
+def ask_sanitize(question_ask, follow_up_question=None):
+    if follow_up_question is None:
+        follow_up_question = question_ask
+        response = input(question_ask)
+        while True:
+            try:
+                response = int(response) 
+                break
+            except ValueError: 
+                response = input(follow_up_question)
+                continue
+        return response
 
 # Load data from JSON file
 def load_data(key):
@@ -25,6 +39,7 @@ def load_data(key):
             raise KeyError(f"Key '{key}' not found.")
     except FileNotFoundError:
         print("Game data file not found. Loading default values.")
+        time.sleep(1)
         return None
     except KeyError as e:
         print(e)
@@ -32,24 +47,26 @@ def load_data(key):
 # Save data to JSON file
 def save_data(key, value):
     try:
-        with open('user_game_data.json', 'r') as file:
-            data = json.load(file)
+        # Use 'r+' for both reading and writing without truncating the file
+        with open('user_game_data.json', 'r+') as file:
+            data = json.load(file)  # Read existing data
 
-        # Update the value in the correct place
-        if key in data:
-            data[key] = value
-        elif key in data['upgrades']:
-            data['upgrades'][key] = value
-        else:
-            raise KeyError(f"Key '{key}' not found.")
-        
-        # Save the updated data back to the JSON file
-        with open('user_game_data.json', 'w') as file:
+            # Update the key or nested key
+            if key in data:
+                data[key] = value
+            elif 'upgrades' in data and key in data['upgrades']:
+                data['upgrades'][key] = value
+            else:
+                print(f"Key '{key}' not found. Adding it at the top level.")
+                data[key] = value  # Add new key if not found
+
+            # Seek back to the beginning to overwrite the file
+            file.seek(0)
             json.dump(data, file, indent=4)
+            file.truncate()  # Ensure file size is adjusted
+
     except FileNotFoundError:
         print("Game data file not found.")
-    except KeyError as e:
-        print(e)
 
 def increment_upgrade(upgrade_type):
     """Increment the value of a specified upgrade type by 1 and save it to the JSON file."""
@@ -68,6 +85,265 @@ def increment_upgrade(upgrade_type):
     
     # Save the updated upgrades dictionary back to the JSON file
     save_data('upgrades', upgrades)
+
+def save_ship_data(ship_name, stat_key, value):
+    try:
+        with open('ship_selection_default.json', 'r+') as file:
+            data = json.load(file)
+
+            # Find the ship and update the stat
+            for ship in data['ship selection']:
+                if ship['name'] == ship_name:
+                    if stat_key in ship:
+                        ship[stat_key] = value
+                    else:
+                        print(f"Stat '{stat_key}' not found for ship '{ship_name}'.")
+                        return
+            
+            # Save updated data back to the JSON file
+            file.seek(0)  # Move the file pointer to the beginning
+            json.dump(data, file, indent=4)
+            file.truncate()  # Remove any leftover data from the previous file size
+
+    except FileNotFoundError:
+        print("Ship data file not found.")
+
+def load_ship_stat(ship_name, stat_key):
+    try:
+        with open('ship_selection_default.json', 'r') as file:
+            data = json.load(file)
+
+            for ship in data['ship selection']:
+                if ship['name'] == ship_name:
+                    return ship.get(stat_key, None)  # Return None if the stat doesn't exist
+
+        print(f"Ship '{ship_name}' not found.")
+        return None
+    except FileNotFoundError:
+        print("Ship data file not found.")
+        return None
+
+def is_ship_owned(ship_name):
+    try:
+        with open('ship_selection_default.json', 'r') as file:
+            data = json.load(file)
+
+            for ship in data['ship selection']:
+                if ship['name'] == ship_name:
+                    return ship.get('owned', False)  # Return False if 'owned' key is missing
+
+        print(f"Ship '{ship_name}' not found.")
+        return False
+    except FileNotFoundError:
+        print("Ship data file not found.")
+        return False
+    
+def set_ship_owned_status(ship_name, owned_status):
+    try:
+        with open('ship_selection_default.json', 'r+') as file:
+            data = json.load(file)
+
+            for ship in data['ship selection']:
+                if ship['name'] == ship_name:
+                    ship['owned'] = owned_status  # Update the 'owned' status
+
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
+
+    except FileNotFoundError:
+        print("Ship data file not found.")
+
+def equip_ship_in_game(ship_name):
+    try:
+        # Load user game data
+        with open('user_game_data.json', 'r+') as user_file:
+            user_data = json.load(user_file)
+            
+            # Load available ships data
+            with open('ship_selection_default.json', 'r') as ship_file:
+                ship_data = json.load(ship_file)
+
+            # Check if the selected ship is owned
+            for ship in ship_data['ship selection']:
+                if ship['name'] == ship_name and ship.get('owned', False):
+                    # Equip the ship by updating the user game data
+                    user_data['ship'] = ship_name
+                    print(f"{ship_name} is now equipped in your game data!")
+                    break
+            else:
+                print(f"You do not own the ship: {ship_name}")
+
+            # Save the updated game data back to the JSON file
+            user_file.seek(0)
+            json.dump(user_data, user_file, indent=4)
+            user_file.truncate()
+
+    except FileNotFoundError as e:
+        print(f"File not found: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
+def upgrade_ship(ship_name, stat, coins):
+    try:
+        with open('ship_selection_default.json', 'r+') as file:
+            data = json.load(file)
+
+            for ship in data['ship selection']:
+                if ship['name'] == ship_name and ship.get('owned', False):
+                    upgrade_cost = 50  # Example upgrade cost
+
+                    if load_data('coins') >= upgrade_cost:
+                        ship[stat] += 1
+                        save_data('coins', load_data('coins') - upgrade_cost)
+                        print(f"{ship_name}'s {stat} has been upgraded to {ship[stat]}!")
+                    else:
+                        print(f"Not enough coins to upgrade {stat}.")
+
+                    break
+
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
+
+    except FileNotFoundError:
+        print("Ship data file not found.")
+    
+    return load_data('coins')
+
+def equip_ship(ship_name):
+    try:
+        with open('ship_selection_default.json', 'r+') as file:
+            data = json.load(file)
+
+            for ship in data['ship selection']:
+                if ship['name'] == ship_name and ship.get('owned', False):
+                    # Set all ships to not equipped
+                    for s in data['ship selection']:
+                        s['equipped'] = False
+
+                    # Equip the selected ship
+                    ship['equipped'] = True
+                    print(f"{ship_name} is now equipped!")
+                    break
+
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
+
+    except FileNotFoundError:
+        print("Ship data file not found.")
+
+def buy_ship(ship_name, coins):
+    global current_coins
+    try:
+        with open('ship_selection_default.json', 'r+') as file:
+            data = json.load(file)
+
+            for ship in data['ship selection']:
+                if ship['name'] == ship_name and not ship['owned']:
+                    current_coins = load_data('coins')
+                    # Assume the price is a fixed amount for now
+                    price = 100  # Adjust as needed
+
+                    if current_coins >= price:
+                        print(load_data('coins'))
+                        time.sleep(1)
+                        clear()
+                        ship['owned'] = True
+                        save_data('coins', current_coins - price)
+                        print(f"You have purchased {ship_name}!")
+                        print(load_data('coins'))
+                        time.sleep(2)
+                    else:
+                        print("Not enough coins to buy this ship.")
+                        time.sleep(2)
+                    break
+
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
+
+    except FileNotFoundError:
+        print("Ship data file not found.")
+    
+    return coins
+
+def view_ship_details(ship_name):
+    try:
+        with open('ship_selection_default.json', 'r') as file:
+            data = json.load(file)
+
+        for ship in data['ship selection']:
+            if ship['name'] == ship_name:
+                print(f"{Fore.BLUE}{ship_name}{Fore.WHITE}")
+                print(f"Firepower: {ship['firepower']}")
+                print(f"Accuracy: {ship['accuracy']}")
+                print(f"Evasion: {ship['evasion']}")
+                print(f"Antimatter: {ship['antimatter']}")
+                print(f"Storage: {ship['storage']}")
+                print(f"Owned: {ship['owned']}")
+                if ask('Type Y or N to exit: '):
+                    return
+
+
+        print(f"Ship '{ship_name}' not found.")
+    except FileNotFoundError:
+        print("Ship data file not found.")
+
+def display_ship_menu():
+    try:
+        with open('ship_selection_default.json', 'r') as file:
+            data = json.load(file)
+        for i, ship in enumerate(data['ship selection'], 1):
+            print(f"{Fore.BLUE}{i}. {ship['name']} (Owned: {ship.get('owned', False)}){Fore.WHITE}")
+
+    except FileNotFoundError:
+        print("Ship data file not found.")
+
+def ship_management_menu(coins):
+    global ship_name
+    while True:
+        clear()
+        income_display()
+        display_ship_menu()
+
+        choice = ask_sanitize(question_ask="\nOptions:\n1. View Ship Details\n2. Buy Ship\n3. Equip Ship\n4. Upgrade Ship\n5. Exit\nSelect an option: ")
+        time.sleep(0.001)
+
+        if choice == 1:
+            clear()
+            display_ship_menu()
+            ship_num = ask_sanitize(question_ask='What ship would you like to view? ')
+            if ship_num == 1:
+                ship_name = 'Stargazer'
+            elif ship_num == 2:
+                ship_name = 'USS Grissom'
+            view_ship_details(ship_name)
+
+        elif choice == 2:
+            clear()
+            ship_name = input("Enter the ship name to buy: ")
+            save_data('coins', buy_ship(ship_name, coins))
+
+        elif choice == 3:
+            clear()
+            ship_name = input("Enter the ship name to equip: ")
+            equip_ship(ship_name)
+
+        elif choice == 4:
+            clear()
+            ship_name = input("Enter the ship name to upgrade: ")
+            stat = input("Enter the stat to upgrade (firepower, accuracy, evasion, antimatter, storage): ")
+            save_data('coins', upgrade_ship(ship_name, stat, coins))
+
+        elif choice == 5:
+            break
+        else:
+            print("Invalid option. Please try again.")
+            time.sleep(2)
+
+        print(f"\nCurrent coins: {coins}\n")
 
 # Upgrades, Costs, Deltas, Systems, and Other Game Data
 costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20, "Warp Range": 15}
@@ -119,9 +395,10 @@ def display_crew(crew_data): #display crew
         print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Skill Level: {member['skill_level']}, Rarity: {member['rarity']})")
 
 def upgrade_crew_member(game_state, crew_data, member_index, cost):
+
     if load_data('coins') >= cost:
         crew_data['crew'][member_index]['skill_level'] += 5  # Increase skill level
-        save_data('coins', load_data('coins') - cost)  # Deduct coins
+        save_data('coins', load_data('coins') - cost)
         print(f"{Fore.GREEN}\n{crew_data['crew'][member_index]['name']}'s skill level increased to {crew_data['crew'][member_index]['skill_level']}!{Fore.WHITE}")
         print(f"{Fore.YELLOW}Remaining Coins: {load_data('coins')}{Fore.WHITE}")
         time.sleep(2)
@@ -150,20 +427,6 @@ def main():
         print(f"{Fore.RED}\nUpgrade canceled.{Fore.WHITE}")
         time.sleep(1)
 
-
-def ask_sanitize(question_ask, follow_up_question=None):
-    if follow_up_question is None:
-        follow_up_question = question_ask
-        response = input(question_ask)
-        while True:
-            try:
-                response = int(response) 
-                break
-            except ValueError: 
-                response = input(follow_up_question)
-                continue
-        return response
-
 def income_display():
      print(f'{Fore.YELLOW}Coins:{Fore.WHITE}', load_data('coins'))
      print(f'{Fore.GREEN}Materials:{Fore.WHITE}', load_data('materials'))
@@ -175,7 +438,6 @@ def ask(question):
         return response.lower() in ["y", "yes"] 
 
 def upgrade(type):
-        global coins
         current_upgrade_level = load_data('upgrades')[type]
         current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level) 
         if load_data('coins') >= current_upgrade_cost: 
@@ -256,7 +518,7 @@ def battle(opponent_health, opponent_name, oppenent_damage, income):
             print(f'{Fore.RED}The {opponent_name} Ship did {damrecieve} Damage!{Fore.WHITE}')
             time.sleep(1)
             continue
-    if health <= 0:
+    if load_data('health') <= 0:
         clear()
         print(f'{Fore.RED}You Lose!{Fore.WHITE}')
         print(f"{Fore.RED}Coins Lost: {load_data('coins')}{Fore.WHITE}")
@@ -380,6 +642,7 @@ def navigate():
                 print(f'{Fore.RED}Please enter a valid number.{Fore.WHITE}')
     else:
         return False
+
 finding_var = 0
 warp_time = 0
 
@@ -396,7 +659,7 @@ while True:
     clear()
     homescreen_setup()
     print('What would you like to do?')
-    OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock', '4: Ship Manifest', '5: Away Teams', '6: Ship Selection']
+    OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock', '4: Ship Manifest', '5: Ship Selection']
     print(*OpList, sep = '\n')
     option = ask_sanitize(question_ask='Option: ')
     time.sleep(0.1)
@@ -502,3 +765,7 @@ while True:
             clear()
             continue
         continue
+    if option == 5:
+        clear()
+        income_display()
+        ship_management_menu(coins=load_data('coins'))
