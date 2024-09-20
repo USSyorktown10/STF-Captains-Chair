@@ -1,12 +1,12 @@
 {
     "coins": 100,
     "health": 1000,
-    "materials": 5,
+    "materials": 0,
     "ship": "Stargazer",
     "max_health": 1000,
     "current_system": 1,
     "upgrades": {
-        "Mining Laser": 2,
+        "Mining Laser": 1,
         "Health": 1,
         "Phaser": 1,
         "Warp Range": 2

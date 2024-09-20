@@ -196,9 +196,11 @@ def upgrade_ship(ship_name, stat, coins):
                     if load_data('coins') >= upgrade_cost:
                         ship[stat] += 1
                         save_data('coins', load_data('coins') - upgrade_cost)
-                        print(f"{ship_name}'s {stat} has been upgraded to {ship[stat]}!")
+                        print(f"{Fore.GREEN}{ship_name}'s {stat} has been upgraded to {ship[stat]}.{Fore.WHITE}")
+                        time.sleep(2)
                     else:
-                        print(f"Not enough coins to upgrade {stat}.")
+                        print(f"{Fore.RED}Not enough coins to upgrade {stat}.{Fore.WHITE}")
+                        time.sleep(2)
 
                     break
 
@@ -224,7 +226,9 @@ def equip_ship(ship_name):
 
                     # Equip the selected ship
                     ship['equipped'] = True
-                    print(f"{ship_name} is now equipped!")
+                    save_data('ship', ship_name)
+                    print(f"{Fore.GREEN}{ship_name} is now equipped.{Fore.GREEN}")
+                    time.sleep(2)
                     break
 
             file.seek(0)
@@ -245,20 +249,19 @@ def buy_ship(ship_name, coins):
                     current_coins = load_data('coins')
                     # Assume the price is a fixed amount for now
                     price = 100  # Adjust as needed
-
-                    if current_coins >= price:
-                        print(load_data('coins'))
-                        time.sleep(1)
-                        clear()
-                        ship['owned'] = True
-                        save_data('coins', current_coins - price)
-                        print(f"You have purchased {ship_name}!")
-                        print(load_data('coins'))
-                        time.sleep(2)
+                    if ask(f"{Fore.RED}Are you sure you want to buy this ship? It costs {price} coins ({load_data('coins')}->{load_data('coins') - price}): {Fore.WHITE}"):
+                        if current_coins >= price:
+                            clear()
+                            ship['owned'] = True
+                            save_data('coins', current_coins - price)
+                            print(f"{Fore.GREEN}You have purchased {ship_name}.{Fore.WHITE}")
+                            time.sleep(2)
+                        else:
+                            print("Not enough coins to buy this ship.")
+                            time.sleep(2)
+                        break
                     else:
-                        print("Not enough coins to buy this ship.")
-                        time.sleep(2)
-                    break
+                        break
 
             file.seek(0)
             json.dump(data, file, indent=4)
@@ -295,6 +298,7 @@ def display_ship_menu():
     try:
         with open('ship_selection_default.json', 'r') as file:
             data = json.load(file)
+        print('')
         for i, ship in enumerate(data['ship selection'], 1):
             print(f"{Fore.BLUE}{i}. {ship['name']} (Owned: {ship.get('owned', False)}){Fore.WHITE}")
 
@@ -309,7 +313,6 @@ def ship_management_menu(coins):
         display_ship_menu()
 
         choice = ask_sanitize(question_ask="\nOptions:\n1. View Ship Details\n2. Buy Ship\n3. Equip Ship\n4. Upgrade Ship\n5. Exit\nSelect an option: ")
-        time.sleep(0.001)
 
         if choice == 1:
             clear()
@@ -323,19 +326,47 @@ def ship_management_menu(coins):
 
         elif choice == 2:
             clear()
-            ship_name = input("Enter the ship name to buy: ")
-            save_data('coins', buy_ship(ship_name, coins))
+            income_display()
+            display_ship_menu()
+            ship_num = ask_sanitize(question_ask='What ship would you like to buy? ')
+            if ship_num == 1:
+                ship_name = 'Stargazer'
+            elif ship_num == 2:
+                ship_name = 'USS Grissom'
+            buy_ship(ship_name, coins)
 
         elif choice == 3:
             clear()
-            ship_name = input("Enter the ship name to equip: ")
+            income_display()
+            display_ship_menu()
+            ship_num = ask_sanitize(question_ask='What ship would you like to equip? ')
+            if ship_num == 1:
+                ship_name = 'Stargazer'
+            elif ship_num == 2:
+                ship_name = 'USS Grissom'
             equip_ship(ship_name)
 
         elif choice == 4:
             clear()
-            ship_name = input("Enter the ship name to upgrade: ")
-            stat = input("Enter the stat to upgrade (firepower, accuracy, evasion, antimatter, storage): ")
-            save_data('coins', upgrade_ship(ship_name, stat, coins))
+            income_display()
+            display_ship_menu()
+            ship_num = ask_sanitize(question_ask='What ship would you like to equip? ')
+            if ship_num == 1:
+                ship_name = 'Stargazer'
+            elif ship_num == 2:
+                ship_name = 'USS Grissom'
+            stat_num = ask_sanitize("Enter the stat to upgrade (1. firepower, 2. accuracy, 3. evasion, 4. antimatter, 5. storage): ")
+            if stat_num == 1:
+                stat = 'firepower'
+            if stat_num == 2:
+                stat = 'accuracy'
+            if stat_num == 3:
+                stat = 'evasion'
+            if stat_num == 4:
+                stat = 'antimatter'
+            if stat_num == 5:
+                stat == 'storage'
+            upgrade_ship(ship_name, stat, coins)
 
         elif choice == 5:
             break
@@ -420,7 +451,6 @@ def main():
     print(f"{Fore.YELLOW}Upgrading {crew_data['crew'][choice]['name']} will cost {cost} coins.{Fore.WHITE}")
     if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}"):
         upgrade_crew_member(game_state, crew_data, choice, cost)
-        save_game_data(user_game_file_path, game_state)  # Save updated user game data to file
         save_crew_data(user_crew_file_path, crew_data)  # Save updated user crew data to file
         print("\nGame data and crew data saved.")
     else:
@@ -432,6 +462,7 @@ def income_display():
      print(f'{Fore.GREEN}Materials:{Fore.WHITE}', load_data('materials'))
      print(f"{Fore.BLUE}Health:{Fore.WHITE} {load_data('health')}/{load_data('max_health')}")
      print(f"{Fore.CYAN}Current System:{Fore.WHITE} {systems[load_data('current_system')]}")
+     print(f"{Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {load_data('ship')}")
 
 def ask(question):
         response = input(question)
@@ -460,6 +491,57 @@ def view_upgrades():
 
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
+        
+def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, evasion):
+    global damdelt
+    print(f'{Fore.YELLOW}You are attacking the {opponent_name}! This ship has {opponent_health} health, and if you win, you get {income} materials.{Fore.WHITE}')
+    print(f"{Fore.YELLOW}YELLOW ALERT{Fore.WHITE}")
+    print(f"{Fore.BLUE}Your ship stats:\nFirepower: {load_ship_stat(ship_name=load_data('ship'), stat_key='firepower')}\nAccuracy: {load_ship_stat(ship_name=load_data('ship'), stat_key='accuracy')}\nEvasion: {load_ship_stat(ship_name=load_data('ship'), stat_key='evasion')}{Fore.WHITE}")
+    print(f"{Fore.YELLOW}Enemy ships stats:\nFirepower: {firepower}\nAccuracy: {accuracy}\nEvasion: {evasion}{Fore.WHITE}")
+    if ask('Do you want to battle this enemy? '):
+        clear()
+        print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
+        while load_data('health') > 0 or opponent_health > 0:
+            clear
+            turn = 'player'
+            if turn == 'player':
+                if random.uniform(0, 1) < (load_ship_stat(ship_name=load_data('ship'), stat_key='accuracy') / evasion + 1):
+                    damage = load_ship_stat(ship_name=load_data('ship'), stat_key='firepower') * random.uniform(50, 200)  # Random damage variation
+                    opponent_health -= damage
+                    print(f"{Fore.GREEN}Enemy Hit! {opponent_name} took {damage:.2f} damage. Enemy health: {opponent_health:.2f}{Fore.WHITE}")
+                    time.sleep(3)
+                    turn = 'enemy'
+                else:
+                    print(f"{Fore.RED}You missed!{Fore.RED}")
+                    time.sleep(2)
+                    turn = 'enemy'
+            if turn == 'enemy':
+                if random.uniform(0, 1) < (accuracy / (load_ship_stat(ship_name=load_data('ship'), stat_key='accuracy') + 1)):
+                    damage = firepower * random.uniform(50, 150)
+                    save_data('health', round(load_data('health') - damage))
+                    print(f"{Fore.RED}You have been hit! You took {damage:.2f} damage. Your health: {load_data('health'):.2f}{Fore.WHITE}")
+                    time.sleep(3)
+                    turn = 'player'
+                else:
+                    print(f"{Fore.GREEN}{opponent_name} missed!{Fore.WHITE}")
+                    time.sleep(2)
+                    turn = 'player'
+            if load_data('health') <= 0:
+                break
+            if opponent_health <= 0:
+                break
+    if load_data('health') <= 0:
+                clear()
+                print(f'{Fore.RED}You Lose!{Fore.WHITE}')
+                print(f"{Fore.RED}Coins Lost: {load_data('coins')}{Fore.WHITE}")
+                print(f"{Fore.RED}Materials Lost: {load_data('materials')}{Fore.WHITE}")
+                exit()
+    if opponent_health <= 0:
+                clear()
+                print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
+                print(f'{Fore.BLUE}Materials Gained: {Fore.WHITE}', income)
+                save_data('materials', load_data('materials') + income)
+                time.sleep(3)
         
 def battle(opponent_health, opponent_name, oppenent_damage, income): 
     global health
@@ -535,6 +617,7 @@ def homescreen_setup():
      print(f'{Fore.GREEN}Materials:{Fore.WHITE}', load_data('materials'))
      print(f"{Fore.BLUE}Health:{Fore.WHITE} {load_data('health')}/{load_data('max_health')}")
      print(f"{Fore.CYAN}Current System:{Fore.WHITE} {systems[load_data('current_system')]}")
+     print(f"{Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {load_data('ship')}")
      
 
 def mining_deposit():
@@ -659,7 +742,7 @@ while True:
     clear()
     homescreen_setup()
     print('What would you like to do?')
-    OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock', '4: Ship Manifest', '5: Ship Selection']
+    OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock', '4: Ship Manifest', '5: Shipyard']
     print(*OpList, sep = '\n')
     option = ask_sanitize(question_ask='Option: ')
     time.sleep(0.1)
@@ -681,7 +764,10 @@ while True:
                 print(*op_1, sep='\n')
                 ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                 if ori_ship == 1:
-                    battle(opponent_health=((system_deltas['Enemy Ships Health'] ** load_data('current_system')) * random.randint(500,900)), opponent_name='Orion Pirate', oppenent_damage=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    if load_data('current_system') == 1:
+                        battle_stat(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', firepower=1, accuracy=1, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    else:
+                        battle_stat(opponent_health=((system_deltas['Enemy Ships Health'] ** load_data('current_system')) * random.randint(500,900)), opponent_name='Orion Pirate', firepower=1, accuracy=1, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
                 if ori_ship == -2:
                     print('Hailing Frequencys are in development.')
         if load_data('current_system') == 9:
@@ -703,7 +789,7 @@ while True:
                     print(*op_1, sep='\n')
                     ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                 if ori_ship == 1:
-                    battle(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', oppenent_damage=1, income=random.randint(100,250))
+                    battle_stat(opponent_health=((system_deltas['Enemy Ships Health'] ** load_data('current_system')) * random.randint(500,900)), opponent_name='Orion Pirate', firepower=1, accuracy=1, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
                 if ori_ship == -2:
                     print('Hailing Frequencys are in development.')
     if (option == 2):
@@ -728,9 +814,9 @@ while True:
             current_heal_cost = load_data('health') / load_data('max_health')
             current_heal_cost = current_heal_cost * 10
             if load_data('coins') >= current_heal_cost:
-                print(f"{Fore.YELLOW}You are healing your ship from {load_data('health')} to {load_data('max_health')}.\n {Fore.RED}This upgrade will cost you {current_heal_cost} coins. ({load_data('coins')} -> {load_data('coins') - current_heal_cost}){Fore.WHITE}")
+                print(f"{Fore.YELLOW}You are healing your ship from {load_data('health')} to {load_data('max_health')}.\n {Fore.RED}This upgrade will cost you {current_heal_cost} coins. ({load_data('coins')} -> {round(load_data('coins') - current_heal_cost)}){Fore.WHITE}")
                 if ask(f"{Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):
-                    save_data('coins', load_data('coins') - current_heal_cost)
+                    save_data('coins', round(load_data('coins') - current_heal_cost))
                     save_data('health', load_data('max_health'))
                     continue
                 continue

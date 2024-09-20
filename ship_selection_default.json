@@ -17,7 +17,7 @@
             "evasion": 2,
             "antimatter": 550,
             "storage": 800,
-            "owned": true,
+            "owned": false,
             "equipped": false
         }
     ]
