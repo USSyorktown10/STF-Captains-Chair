@@ -19,6 +19,26 @@
             "storage": 800,
             "owned": false,
             "equipped": false
+        },
+        {
+            "name": "Federation Shuttlecraft",
+            "firepower": 1,
+            "accuracy": 2,
+            "evasion": 3,
+            "antimatter": 600,
+            "storage": 750,
+            "owned": false,
+            "equipped": false
+        },
+        {
+            "name": "Galaxy Class",
+            "firepower": 5,
+            "accuracy": 6,
+            "evasion": 5,
+            "antimatter": 1250,
+            "storage": 2500,
+            "owned": false,
+            "equipped": false
         }
     ]
 }
