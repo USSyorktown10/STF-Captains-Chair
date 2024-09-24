@@ -334,9 +334,9 @@ def ship_management_menu(coins):
             elif ship_num == 2:
                 ship_name = 'USS Grissom'
             elif ship_num == 3:
-                ship_name == 'Federation Shuttlecraft'
+                ship_name = 'Federation Shuttlecraft'
             elif ship_num == 4:
-                ship_name == 'Galaxy Class'
+                ship_name = 'Galaxy Class'
             view_ship_details(ship_name)
 
         elif choice == 2:
@@ -349,9 +349,9 @@ def ship_management_menu(coins):
             elif ship_num == 2:
                 ship_name = 'USS Grissom'
             elif ship_num == 3:
-                ship_name == 'Federation Shuttlecraft'
+                ship_name = 'Federation Shuttlecraft'
             elif ship_num == 4:
-                ship_name == 'Galaxy Class'
+                ship_name = 'Galaxy Class'
             buy_ship(ship_name, coins)
 
         elif choice == 3:
@@ -364,9 +364,9 @@ def ship_management_menu(coins):
             elif ship_num == 2:
                 ship_name = 'USS Grissom'
             elif ship_num == 3:
-                ship_name == 'Federation Shuttlecraft'
+                ship_name = 'Federation Shuttlecraft'
             elif ship_num == 4:
-                ship_name == 'Galaxy Class'
+                ship_name = 'Galaxy Class'
             equip_ship(ship_name)
 
         elif choice == 4:
@@ -379,9 +379,9 @@ def ship_management_menu(coins):
             elif ship_num == 2:
                 ship_name = 'USS Grissom'
             elif ship_num == 3:
-                ship_name == 'Federation Shuttlecraft'
+                ship_name = 'Federation Shuttlecraft'
             elif ship_num == 4:
-                ship_name == 'Galaxy Class'
+                ship_name = 'Galaxy Class'
             stat_num = ask_sanitize("Enter the stat to upgrade (1. firepower, 2. accuracy, 3. evasion, 4. antimatter, 5. storage): ")
             if stat_num == 1:
                 stat = 'firepower'
@@ -392,7 +392,7 @@ def ship_management_menu(coins):
             if stat_num == 4:
                 stat = 'antimatter'
             if stat_num == 5:
-                stat == 'storage'
+                stat = 'storage'
             upgrade_ship(ship_name, stat, coins)
 
         elif choice == 5:
@@ -619,6 +619,9 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 print(f'{Fore.RED}You Lose!{Fore.WHITE}')
                 print(f"{Fore.RED}Coins Lost: {load_data('coins')}{Fore.WHITE}")
                 print(f"{Fore.RED}Materials Lost: {load_data('materials')}{Fore.WHITE}")
+                save_data('coins', 0)
+                save_data('materials', 0)
+                save_data('ship', 'Stargazer')
                 exit()
     if opponent_health <= 0:
                 clear()
@@ -868,24 +871,22 @@ while True:
                     print('Hailing Frequencys are in development.')
     if (option == 2):
         navigate()
-    if option == 4:
+    if option == 3:
         clear()
         print("Drydock")
-        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Phaser', '3: Upgrade Health', '4: Upgrade Warp Range', '5: View Upgrades', '6: Restore Health', '7: Exit']
+        drydock_option = ['1: Upgrade Mining Laser', '2: Upgrade Health', '3: Upgrade Warp Range', '4: View Upgrades', '5: Restore Health', '6: Exit']
         print(*drydock_option, sep = '\n')
         drydock_option_2 = ask_sanitize(question_ask='What would you like to upgrade: ')
         if drydock_option_2 == 1:
             upgrade(type='Mining Laser')
             update_mission_progress('Upgrade Mining Laser to lvl 2', 1)
         elif drydock_option_2 == 2:
-            upgrade(type='Phaser')
-        elif drydock_option_2 == 3:
             upgrade(type='Health')
-        elif drydock_option_2 == 5:
-            view_upgrades()
         elif drydock_option_2 == 4:
+            view_upgrades()
+        elif drydock_option_2 == 3:
             upgrade(type='Warp Range')
-        elif drydock_option_2 == 6:
+        elif drydock_option_2 == 5:
             current_heal_cost = load_data('health') / load_data('max_health')
             current_heal_cost = current_heal_cost * 10
             if load_data('coins') >= current_heal_cost:
@@ -899,7 +900,7 @@ while True:
                 print(f"{Fore.YELLOW}You can't heal your ship because you don't have enough coins (current: {load_data('coins')}, required: {current_heal_cost}).{Fore.WHITE}")
                 continue
             continue
-        elif drydock_option_2 == 7:
+        elif drydock_option_2 == 6:
             continue
         continue
     if option == 800:
@@ -926,7 +927,7 @@ while True:
             clear()
             continue
         continue
-    if option == 5:
+    if option == 4:
         clear()
         income_display()
         ship_management_menu(coins=load_data('coins'))
