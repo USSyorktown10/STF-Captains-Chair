@@ -530,6 +530,7 @@ def accept_mission(mission_id):
         time.sleep(2)
     else:
         print("Mission either doesn't exist or is already completed.")
+        time.sleep(1)
 
 def update_mission_progress(mission_name, progress_increment):
     missions = load_data('missions')
@@ -538,7 +539,6 @@ def update_mission_progress(mission_name, progress_increment):
     if mission_name in missions and missions[mission_name]['accepted'] and not missions[mission_name]['completed']:
         missions[mission_name]['progress'] += progress_increment
         save_data('missions', missions)
-        print(f"Updated progress for '{mission_name}' to {missions[mission_name]['progress']}")
 
         # Check if mission is complete
         if mission_name == 'Mine 100 Materials' and missions[mission_name]['progress'] >= 100:
@@ -558,7 +558,7 @@ def update_mission_progress(mission_name, progress_increment):
         elif mission_name == 'Complete 2 Sucessful Trades' and missions[mission_name]['progress'] >= 2:
             complete_mission(mission_name)
     else:
-        print(f"Mission '{mission_name}' is either not accepted or already completed.")
+        print()
 
 
 def complete_mission(mission_name):
@@ -573,7 +573,7 @@ def complete_mission(mission_name):
         coins += reward
         save_data('missions', missions)
         save_data('coins', coins)
-        print(f"{Fore.GREEN}Mission '{mission_name}' completed! You earned {reward} coins.{Fore.GREEN}")
+        print(f"{Fore.GREEN}Mission '{mission_name}' completed! You earned {reward} coins.{Fore.WHITE}")
         time.sleep(2)
         
 def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, evasion):
@@ -642,22 +642,35 @@ def mining_deposit():
     global materials
     income_display()
     print('You have approached a Material Cluster!')
-    deposit_materials = ((system_deltas['Material Cluster'] * load_data('current_system')) * random.randint(10,1000))
-    deposit_var = deposit_materials / load_data('upgrades')['Mining Laser']
     time.sleep(1)
-    print(f'{Fore.BLUE}This mine has', deposit_materials, f'rescources.{Fore.WHITE}')
+    deposit_materials = ((system_deltas['Material Cluster'] * load_data('current_system')) * random.randint(10, 1000))
+    mining_efficiency = load_data('upgrades')['Mining Laser'] 
+    deposit_var = deposit_materials / mining_efficiency 
+
+    print(f'{Fore.BLUE}This mine has', deposit_materials, f'resources.{Fore.WHITE}')
     print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
+
     if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
-        for i in range(deposit_materials):
+        start_time = time.time()
+        for i in range(round(deposit_materials)):
             clear()
             print('Mining...')
-            print('Materials Remaining:', deposit_var)
+            print('Materials Remaining:', deposit_materials)
             print('Total Materials:', load_data('materials'))
-            deposit_var = deposit_var - load_data('upgrades')['Mining Laser']
-            save_data('materials', load_data('materials') + (0.5 * load_data('upgrades')['Mining Laser'])) 
-            update_mission_progress('Mine 100 Materials', (0.5 * load_data('upgrades')['Mining Laser']))
-            print(f'{Fore.GREEN}Estimated Time remaining:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
+
+            materials_gathered = 0.5 * mining_efficiency
+            save_data('materials', load_data('materials') + materials_gathered)
+            update_mission_progress('Mine 100 Materials', materials_gathered)
+            deposit_materials -= mining_efficiency
+            
+            elapsed_time = time.time() - start_time
+            deposit_var = deposit_materials
+            estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
+            
+            print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
+            if deposit_materials <= 0:
+                break
             continue
 
 def trading_post():
@@ -748,7 +761,7 @@ finding_var = 0
 warp_time = 0
 
 clear()
-mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4; Deliver 200 Materials to a Trading Post', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Upgrade Mining Laser to lvl 2', '8: Complete 2 Successful Trades']
+mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4: Deliver 200 Materials to a Trading Post', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Upgrade Mining Laser to lvl 2', '8: Complete 2 Successful Trades']
 
 clear()
 while True:
@@ -787,7 +800,7 @@ while True:
                         update_mission_progress('Defeat 3 Enemies', 1)
                         update_mission_progress('Defeat 5 Enemies', 1)
                     else:
-                        battle_stat(opponent_health=((system_deltas['Enemy Ships Health'] ** load_data('current_system')) * random.randint(500,900)), opponent_name='Orion Pirate', firepower=(1 * system_deltas['Enemy Ships Health']), accuracy=(1 * system_deltas['Enemy Ships Health']), evasion=(1 * system_deltas['Enemy Ships Health']), income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                        battle_stat(opponent_health=((system_deltas['Enemy Ships Health'] ** load_data('current_system')) * random.randint(500,900)), opponent_name='Orion Pirate', firepower=(1 * (system_deltas['Enemy Ships Health'] ** load_data('current_system'))), accuracy=(1 * (system_deltas['Enemy Ships Health'] ** load_data('current_system'))), evasion=(1 * (system_deltas['Enemy Ships Health'] ** load_data('current_system'))), income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
                         update_mission_progress('Defeat 1 Enemy', 1)
                         update_mission_progress('Defeat 3 Enemies', 1)
                         update_mission_progress('Defeat 5 Enemies', 1)
