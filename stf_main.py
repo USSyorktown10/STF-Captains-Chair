@@ -3,13 +3,13 @@ import time
 import random
 import os
 from colorama import Fore
-import copy
+import subprocess
+import sys
 
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
 
 shuttle_bays = 1
-# File paths
 original_crew_file_path = 'crew_list.json'
 user_crew_file_path = 'user_crew_data.json'
 user_game_file_path = 'user_game_data.json'
@@ -27,6 +27,24 @@ def ask_sanitize(question_ask, follow_up_question=None):
                 response = input(follow_up_question)
                 continue
         return response
+    
+def ask_sanitize_lobby(question_ask, follow_up_question=None, valid_options=None):
+    if follow_up_question is None:
+        follow_up_question = question_ask
+    
+    while True:
+        response = input(question_ask)
+        try:
+            response = int(response)
+            if valid_options and response not in valid_options:
+                print(f'Choose an option {", ".join(map(str, valid_options))}')
+                continue
+            break
+        except ValueError:
+            print("Please enter a valid number.")
+            continue
+        
+    return response
 
 # Load data from JSON file
 def load_data(key):
@@ -516,8 +534,6 @@ def view_upgrades():
     if continue_1 == ('y', 'yes'):
         time.sleep(0.001)
         
-# Function to accept a mission
-# Function to accept a mission
 def accept_mission(mission_id):
     mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Deliver 200 Materials to a Trading Post', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Upgrade Mining Laser to lvl 2', '8': 'Complete 2 Successful Trades'}   
     missions = load_data('missions')
@@ -599,6 +615,10 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                     print(f"{Fore.RED}You missed!{Fore.RED}")
                     time.sleep(2)
                     turn = 'enemy'
+            if load_data('health') <= 0:
+                break
+            if opponent_health <= 0:
+                break
             if turn == 'enemy':
                 if random.uniform(0, 1) < (accuracy / (load_ship_stat(ship_name=load_data('ship'), stat_key='accuracy') + 1)):
                     damage = firepower * random.uniform(50, 150)
@@ -763,7 +783,19 @@ warp_time = 0
 clear()
 mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4: Deliver 200 Materials to a Trading Post', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Upgrade Mining Laser to lvl 2', '8: Complete 2 Successful Trades']
 
-clear()
+current_dir = os.path.dirname(os.path.realpath(__file__))
+
+requirements_path = os.path.join(current_dir, 'requirements.txt')
+
+print("Checking package requirements...")
+try:
+    subprocess.check_output([sys.executable, "-m", "pip", "install", "-r", requirements_path])
+except subprocess.CalledProcessError:
+    input('Something went wrong with PIP. Press enter to exit program...')
+    sys.exit(1)
+
+print('Necessary packages imported')
+
 while True:
     if load_data('health') <= 0:
         clear()
@@ -774,7 +806,7 @@ while True:
     print('What would you like to do?')
     OpList = ['1: Stay in Current System', '2: Navigate to Another System', '3: Return to Drydock', '4: Shipyard']
     print(*OpList, sep = '\n')
-    option = ask_sanitize(question_ask='Option: ')
+    option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3, 4])
     time.sleep(0.1)
     if (option == 1):
         clear()
