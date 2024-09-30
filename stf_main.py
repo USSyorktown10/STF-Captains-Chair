@@ -642,6 +642,7 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 save_data('coins', 0)
                 save_data('materials', 0)
                 save_data('ship', 'Stargazer')
+                save_data('health', load_data('max_health'))
                 exit()
     if opponent_health <= 0:
                 clear()
@@ -798,9 +799,15 @@ print('Necessary packages imported')
 
 while True:
     if load_data('health') <= 0:
-        clear()
-        print(f'{Fore.RED}Game over!{Fore.WHITE}')
-        exit()
+            clear()
+            print(f'{Fore.RED}You Lose!{Fore.WHITE}')
+            print(f"{Fore.RED}Coins Lost: {load_data('coins')}{Fore.WHITE}")
+            print(f"{Fore.RED}Materials Lost: {load_data('materials')}{Fore.WHITE}")
+            save_data('coins', 0)
+            save_data('materials', 0)
+            save_data('ship', 'Stargazer')
+            save_data('health', load_data('max_health'))
+            exit()
     clear()
     homescreen_setup()
     print('What would you like to do?')
