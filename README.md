@@ -8,7 +8,7 @@ Please open an issue if you find anything wrong with the game (There is a lot wr
 - ### Game Stats
     - Current Version: `dev`
     - Sub Version: `dev12.3`
-    - Bug Ammount: Moderatly High
-    - Non-Optimized Code: Moderate
+    - Bug Ammount: Low
+    - Non-Optimized Code: Low
 - ### How to Play
   - This option is currently unavalible due to the dev-progression version of the game. It is constantly changing, making it hard to constantly re-write a how to play.
