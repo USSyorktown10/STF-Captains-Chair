@@ -1,0 +1,72 @@
+{
+    "ship selection": [
+        {
+            "name": "Stargazer",
+            "firepower": 1,
+            "accuracy": 1,
+            "evasion": 1,
+            "health": 1000,
+            "max_health": 1000,
+            "storage": 750,
+            "max_storage": 750,
+            "parsteel_storage": 0,
+            "tritanium_storage": 0,
+            "dilithium_storage": 0,
+            "mining_efficiency": 1,
+            "warp_range": 2,
+            "owned": true,
+            "equipped": true
+        },
+        {
+            "name": "USS Grissom",
+            "firepower": 1,
+            "accuracy": 2,
+            "evasion": 2,
+            "health": 2000,
+            "max_health": 2000,
+            "storage": 800,
+            "max_storage": 800,
+            "parsteel_storage": 0,
+            "tritanium_storage": 0,
+            "dilithium_storage": 0,
+            "mining_efficiency": 2,
+            "warp_range": 4,
+            "owned": false,
+            "equipped": false
+        },
+        {
+            "name": "Federation Shuttlecraft",
+            "firepower": 1,
+            "accuracy": 2,
+            "evasion": 3,
+            "health": 3500,
+            "max_health": 3500,
+            "storage": 750,
+            "max_storage": 750,
+            "parsteel_storage": 0,
+            "tritanium_storage": 0,
+            "dilithium_storage": 0,
+            "mining_efficiency": 2,
+            "warp_range": 4,
+            "owned": false,
+            "equipped": false
+        },
+        {
+            "name": "Galaxy Class",
+            "firepower": 5,
+            "accuracy": 6,
+            "evasion": 5,
+            "health": 5000,
+            "max_health": 5000,
+            "storage": 2500,
+            "max_storage": 2500,
+            "parsteel_storage": 0,
+            "tritanium_storage": 0,
+            "dilithium_storage": 0,
+            "mining_efficiency": 4,
+            "warp_range": 8,
+            "owned": false,
+            "equipped": false
+        }
+    ]
+}

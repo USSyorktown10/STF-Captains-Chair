@@ -1,0 +1,51 @@
+{
+    "parsteel": 150,
+    "tritanium": 150,
+    "dilithium": 50,
+    "latnium": 0,
+    "recruit_tokens": 20,
+    "ship": "Stargazer",
+    "current_system": 1,
+    "missions": {
+        "Mine 100 Materials": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Defeat 1 Enemy": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Defeat 3 Enemies": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Deliver 200 Materials to a Trading Post": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Defeat 5 Enemies": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Explore 3 New Systems": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Upgrade Mining Laser to lvl 2": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Complete 2 Sucessful Trades": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        }
+    }
+}
