@@ -1,17 +1,27 @@
 ## STF: Captains Chair
 
+<<<<<<< HEAD
 FOR USERS PLAYING: DOWNLOAD THE ALPHA RELASE UNDER RELASES. IF YOU WANT TO DOWNLOAD THE FILES THEMSELVES, GO TO THE FOLDER STF_MAIN. ALL OF THE FILES THAT ARE LISTED ARE UNDER DEVELOPMENT AND UNSTABLE.
 
 PLEASE READ: Progression version has been released. This version will be the new version of this game, and will be the building blocks for the true STF: Captains Chair. It is still not-playable, and is still undergoing updates. To play the runnable version, please run stf_main.py in the main directory.
 
+=======
+>>>>>>> dd661f75022c511ef5a46dfd88e2f6dd52ce180c
 This shows the current version, and a guide on how to play the game.
-Please open an issue if you find anything wrong with the game (There is a lot wrong with it)
+Please open an issue if you find any bugs!
 
 - ### Game Stats
     - Current Version: `ALPHA`
     - Sub Version: `BETA dev 1.0`
     - Bug Ammount: Low
     - Non-Optimized Code: Low
+- ### Startup
+  - Using VScode:
+      - Install the `Python` extension.
+      - Find the play button in the top right corner and click it
+          - If you cant find it, go to the terminal and type `python3 stf_main.py` or `python stf_main.py`
+      - The game will automattically install pips, and will pull data from the JSON files.
+      - Use the keys and press enter to play!
 - ### How to Play
   - All you have to do is start the game, and it will automatticaly install the pips for you.
   - Select 1 to explore your current system to fight hostiles, accept missions, trade materials, and mine materials.
