@@ -1,5 +1,7 @@
 ## STF: Captains Chair
 
+FOR USERS PLAYING: DOWNLOAD THE ALPHA RELASE UNDER RELASES. IF YOU WANT TO DOWNLOAD THE FILES THEMSELVES, GO TO THE FOLDER STF_MAIN. ALL OF THE FILES THAT ARE LISTED ARE UNDER DEVELOPMENT AND UNSTABLE.
+
 PLEASE READ: Progression version has been released. This version will be the new version of this game, and will be the building blocks for the true STF: Captains Chair. It is still not-playable, and is still undergoing updates. To play the runnable version, please run stf_main.py in the main directory.
 
 This shows the current version, and a guide on how to play the game.
@@ -7,7 +9,7 @@ Please open an issue if you find anything wrong with the game (There is a lot wr
 
 - ### Game Stats
     - Current Version: `ALPHA`
-    - Sub Version: `AP v1.0`
+    - Sub Version: `BETA dev 1.0`
     - Bug Ammount: Low
     - Non-Optimized Code: Low
 - ### How to Play
