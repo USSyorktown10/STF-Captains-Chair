@@ -7,6 +7,24 @@
             "parsteel_mine3": 100,
             "parsteel_mine4": 100,
             "parsteel_mine5": 100
+        },
+        {
+            "name": "Vulcan",
+            "parsteel_mine1": 100,
+            "tritanium_mine1": 100,
+            "parsteel_mine2": 100,
+            "tritanium_mine2": 100,
+            "parsteel_mine3": 100,
+            "tritanium_mine3": 100
+        },
+        {
+            "name": "Tellar",
+            "tritanium_mine1": 100,
+            "tritanium_mine2": 100,
+            "dilithium_mine1": 100,
+            "dilithium_mine2": 100,
+            "dilithium_mine3": 100,
+            "dilithium_mine4": 100
         }
     ]
 }

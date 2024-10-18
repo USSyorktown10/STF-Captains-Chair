@@ -5,8 +5,7 @@ import os
 from colorama import Fore
 import subprocess
 import sys
-import asyncio
-import async_timeout
+from datetime import datetime, timedelta
 
 def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -591,7 +590,7 @@ def view_upgrades():
         time.sleep(0.001)
         
 def accept_mission(mission_id):
-    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Deliver 200 Materials to a Trading Post', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Upgrade Mining Laser to lvl 2', '8': 'Complete 2 Successful Trades'}   
+    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Upgrade Mining Laser to lvl 2', '8': 'Complete 2 Successful Trades'}   
     missions = load_data('missions')
 
     mission_name = mission_list.get(mission_id)
@@ -619,7 +618,7 @@ def update_mission_progress(mission_name, progress_increment):
             complete_mission(mission_name)
         elif mission_name == 'Defeat 3 Enemies' and missions[mission_name]['progress'] >= 3:
             complete_mission(mission_name)
-        elif mission_name == 'Deliver 200 Materials to a Trading Post' and missions[mission_name]['progress'] >= 200:
+        elif mission_name == 'Trade 200 Materials With a Ship' and missions[mission_name]['progress'] >= 200:
             complete_mission(mission_name)
         elif mission_name == 'Defeat 5 Enemies' and missions[mission_name]['progress'] >= 5:
             complete_mission(mission_name)
@@ -647,6 +646,54 @@ def complete_mission(mission_name):
         save_data('parsteel', coins)
         print(f"{Fore.GREEN}Mission '{mission_name}' completed! You earned {reward} parsteel.{Fore.WHITE}")
         time.sleep(2)
+        
+def display_missions():
+    # Load mission data from JSON
+    mission_data = load_data('missions')
+
+    if mission_data is None:
+        print("No missions available.")
+        return
+
+    print("Current Missions:")
+
+    for mission_name, mission_info in mission_data.items():
+        # Check mission status
+        if mission_info["accepted"]:
+            status = "Accepted"
+            progress = mission_info["progress"]
+            progress_message = f"Progress: {progress}"  # Or use the actual number if more detailed
+        else:
+            status = "Not Accepted"
+            progress_message = "Progress: N/A"
+
+        if mission_info["completed"]:
+            status = "Completed"
+            progress_message = "Progress: 100%"  # If completed, progress is 100%
+
+        # Print mission information
+        print(f"{Fore.BLUE}{mission_name}: {Fore.GREEN}{status} - {Fore.YELLOW}{progress_message}{Fore.WHITE}")
+
+
+        
+def load_explored(system):
+    if load_data('explored')[system] == 1:
+        return 1
+    elif load_data('explored')[system] == 2:
+        return 2
+    
+def save_explored(system):
+    systems1 = load_data('explored')
+    
+    if systems1 is None:
+        return
+    
+    if system in systems1:
+        systems1[system] = 1
+    else:
+        return
+    
+    save_data('explored', systems1)
         
 def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, evasion):
     global damdelt
@@ -690,7 +737,7 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 break
             if opponent_health <= 0:
                 break
-    if load_ship_stat(ship_name=load_data('ship'), stat_key='health') <= 0:
+    if load_ship_stat(stat_key='health', ship_name=load_data('ship')) <= 0:
             clear()
             print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
             print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage')}{Fore.WHITE}")
@@ -707,6 +754,42 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=1)
                 save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=1)
                 save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=2)
+                save_data('ship', 'Stargazer')
+                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
+                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+            if load_data('ship') == 'USS Grissom':
+                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
+                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
+                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=4)
+                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
+                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
+                save_data('ship', 'Stargazer')
+                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
+                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+            if load_data('ship') == 'Federation Shuttlecraft':
+                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
+                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
+                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=3)
+                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=4)
+                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
+                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
+                save_data('ship', 'Stargazer')
+                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
+                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+            if load_data('ship') == 'Galaxy Class':
+                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
+                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=5)
+                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=6)
+                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=5)
+                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=4)
+                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=8)
+                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
+                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
                 save_data('ship', 'Stargazer')
                 save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
                 save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
@@ -727,7 +810,6 @@ def homescreen_setup():
 def mining_deposit_parsteel(parsteel_mine_num):
     income_display()
     print('You have approached a Parsteel Mine!')
-    time.sleep(1)
     deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=parsteel_mine_num)
     mining_efficiency = load_ship_stat(ship_name=load_data('ship'), stat_key='mining_efficiency') 
     deposit_var = deposit_materials / mining_efficiency 
@@ -763,72 +845,221 @@ def mining_deposit_parsteel(parsteel_mine_num):
                 break
             continue
 
-def mining_deposit_tritanium():
-    global materials
+def mining_deposit_tritanium(tritanium_mine_num):
     income_display()
     print('You have approached a Tritanium Mine!')
-    time.sleep(1)
-    deposit_materials = ((system_deltas['Material Cluster'] * load_data('current_system')) * random.randint(10, 1000))
+    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=tritanium_mine_num)
     mining_efficiency = load_ship_stat(ship_name=load_data('ship'), stat_key='mining_efficiency') 
     deposit_var = deposit_materials / mining_efficiency 
 
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'tritanium.{Fore.WHITE}')
     print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
-
     if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
+        mine_depo_mats = ask_sanitize(f'{Fore.GREEN}How much would you like to mine? (1 - {deposit_materials}){Fore.WHITE}')
         start_time = time.time()
-        for i in range(round(deposit_materials)):
+        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=tritanium_mine_num) <= 0:
             clear()
             print('Mining...')
-            print('Tritanium Remaining:', deposit_materials)
+            print('Tritanium Remaining:', mine_depo_mats)
             print('Total Storage Remaining:', load_ship_stat(ship_name=load_data('ship'), stat_key='storage'))
 
-            materials_gathered = 0.5 * mining_efficiency
+            materials_gathered = 1 * mining_efficiency
             save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + materials_gathered)
-            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') - materials_gathered)
+            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - materials_gathered)
             update_mission_progress('Mine 100 Materials', materials_gathered)
-            deposit_materials -= mining_efficiency
+            mine_depo_mats -= mining_efficiency
             
             elapsed_time = time.time() - start_time
-            deposit_var = deposit_materials
+            deposit_var = mine_depo_mats
             estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
+            update_materials(system_name=systems[load_data('current_system')], mine_name=tritanium_mine_num, amount=mining_efficiency)
             
             print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
-            if deposit_materials <= 0:
+            if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') < 0:
+                clear()
+                print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
+                time.sleep(2)
                 break
             continue
 
-def trading_post():
-    global coins
-    global materials
+def mining_deposit_dilithium(dilithium_mine_num):
     income_display()
-    print('You have approached a Trading Post!')
-    time.sleep(1)
-    if ask('Would you like to trade? Y/N: '):
-        print('Avalible Items:')
-        Avalible = ['1: Sell Materials: 1 coins per 50 materials', '2: Exit']
-        print(*Avalible, sep = '\n')
-        trade = ask_sanitize(question_ask='Option: ')
-        if trade == 1:
+    print('You have approached a Dilithium Mine!')
+    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=dilithium_mine_num)
+    mining_efficiency = load_ship_stat(ship_name=load_data('ship'), stat_key='mining_efficiency') 
+    deposit_var = deposit_materials / mining_efficiency 
+
+    print(f'{Fore.BLUE}This mine has', deposit_materials, f'dilithium.{Fore.WHITE}')
+    print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
+    if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
+        mine_depo_mats = ask_sanitize(f'{Fore.GREEN}How much would you like to mine? (1 - {deposit_materials}){Fore.WHITE}')
+        start_time = time.time()
+        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=dilithium_mine_num) <= 0:
             clear()
-            if load_data('materials') >= 50:
-                while load_data('materials') >= 50:
-                    save_data('materials', load_data('materials') - 50) 
-                    save_data('coins', load_data('coins') + 1)
-                    update_mission_progress('Deliver 200 Materials to a Trading Post', 50)
-                    print('Materials:', load_data('materials'))
-                    print('Coins:', load_data('coins'))
-                    time.sleep(0.5)
-                    clear()
-                    continue
-                update_mission_progress('Complete 2 Sucessful Trades', 1)
+            print('Mining...')
+            print('Dilithium Remaining:', mine_depo_mats)
+            print('Total Storage Remaining:', load_ship_stat(ship_name=load_data('ship'), stat_key='storage'))
+
+            materials_gathered = 1 * mining_efficiency
+            save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + materials_gathered)
+            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - materials_gathered)
+            update_mission_progress('Mine 100 Materials', materials_gathered)
+            mine_depo_mats -= mining_efficiency
+            
+            elapsed_time = time.time() - start_time
+            deposit_var = mine_depo_mats
+            estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
+            update_materials(system_name=systems[load_data('current_system')], mine_name=dilithium_mine_num, amount=mining_efficiency)
+            
+            print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
+            time.sleep(0.5)
+            if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') < 0:
+                clear()
+                print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
                 time.sleep(2)
+                break
+            continue
+        
+def accept_missions():
+    mission_selection = ask_sanitize('Select mission to accept: ')
+    if mission_selection == 1:
+                if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
+                        accept_mission('1')
+                else:
+                    return
+    if mission_selection == 2:
+                if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
+                        accept_mission('2')
+                else:
+                        return
+    if mission_selection == 3:
+                if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
+                        accept_mission('3')
+                else:
+                        return
+    if mission_selection == 4:
+                if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
+                        accept_mission('4')
+                else:
+                        return
+    if mission_selection == 5:
+                if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
+                        accept_mission('5')
+                else:
+                        return
+    if mission_selection == 6:
+                if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
+                        accept_mission('6')
+                else:
+                        return
+    if mission_selection == 7:
+                if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
+                        accept_mission('7')
+                else:
+                        return
+    if mission_selection == 8:
+                if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
+                        accept_mission('8')
+                else:
+                        return
+    if mission_selection == len(mission_list_print) + 1:
+                return
+    return
+
+def scan_system():
+    exploration_time = random.randint(10, 60)
+    if ask(f"{Fore.RED}System {systems[load_data('current_system')]} has not been explored. Would you like to scan this system? This will take you {exploration_time} seconds. (Y/N): {Fore.WHITE}"):
+        while exploration_time > 0:
+            clear()
+            income_display()
+            print(f"{Fore.GREEN}Scanning {systems[load_data('current_system')]}...{Fore.WHITE}")
+            print(f"{Fore.YELLOW}Time Remaining: {exploration_time}{Fore.WHITE}")
+            exploration_time -= 0.5
+            time.sleep(0.5)
+        print(f"{Fore.GREEN}Scan complete! You may now navigate the system.{Fore.WHITE}")
+        save_explored(systems[load_data('current_system')])
+        time.sleep(2)
+
+
+def trading(dil_trade_am, tri_trade_am, par_trade_am):
+        income_display()
+        print('Avalible Items:')
+        avalible = [f"Trade {dil_trade_am} Dilithium for {tri_trade_am} Tritanium", f"Trade {par_trade_am} Parsteel for {tri_trade_am} Tritanium", f"Trade {tri_trade_am} Tritanium for {par_trade_am} Parsteel", f"Trade {par_trade_am} Parsteel for {dil_trade_am} Dilithium"]
+        for i, option in enumerate(avalible, 1):  # Start enumeration at 1
+            print(f"{i}. {option}")
+        print(f"{len(avalible) + 1}. Exit")
+        trade_input = ask_sanitize(f"Option: ")
+        if trade_input == 1 and (load_ship_stat(load_data('ship'), 'dilithium_storage') > dil_trade_am or load_data('dilithium') > dil_trade_am):
+            if ask(f"{Fore.YELLOW}You are going to trade {dil_trade_am} dilithium for {tri_trade_am} tritanium. Are you sure you want to do this? (Y/N): {Fore.WHITE}"):
+                if load_ship_stat(load_data('ship'), 'dilithium_storage') > dil_trade_am:
+                    save_ship_data(load_data('ship'), 'dilithium_storage',load_ship_stat(load_data('ship'), 'dilithium_storage') - dil_trade_am)
+                    print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
+                    time.sleep(2)
+                    return
+                else:
+                    save_data('dilithium', load_data('dilithium') - dil_trade_am)
+                    print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
+                    time.sleep(2)
+                    return
             else:
-                print(f'{Fore.RED}You dont have enough materials to get coins.{Fore.WHITE}')
-                time.sleep(1.5)
-            if trade == 2:
-                time.sleep(0.01)
+                print('Trade Canceled.')
+                time.sleep(1)
+                return
+        elif trade_input == 2 and (load_ship_stat(load_data('ship'), 'parsteel_storage') > par_trade_am or load_data('parsteel') > par_trade_am):
+            if ask(f"{Fore.YELLOW}You are going to trade {par_trade_am} parsteel for {tri_trade_am} tritanium. Are you sure you want to do this? (Y/N): {Fore.WHITE}"):
+                if load_ship_stat(load_data('ship'), 'parsteel_storage') > par_trade_am:
+                    save_ship_data(load_data('ship'), 'parsteel_storage',load_ship_stat(load_data('ship'), 'parsteel_storage') - par_trade_am)
+                    print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
+                    time.sleep(2)
+                    return
+                else:
+                    save_data('parsteel', load_data('parsteel') - par_trade_am)
+                    print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
+                    time.sleep(2)
+                    return
+            else:
+                print('Trade Canceled.')
+                time.sleep(1)
+                return
+        elif trade_input == 3 and (load_ship_stat(load_data('ship'), 'tritanium_storage') > tri_trade_am or load_data('tritanium') > tri_trade_am):
+            if ask(f"{Fore.YELLOW}You are going to trade {tri_trade_am} tritanium for {par_trade_am} parsteel. Are you sure you want to do this? (Y/N): {Fore.WHITE}"):
+                if load_ship_stat(load_data('ship'), 'tritanium_storage') > tri_trade_am:
+                    save_ship_data(load_data('ship'), 'tritanium_storage',load_ship_stat(load_data('ship'), 'tritanium_storage') - tri_trade_am)
+                    print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
+                    time.sleep(2)
+                    return
+                else:
+                    save_data('tritanium', load_data('tritanium') - tri_trade_am)
+                    print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
+                    time.sleep(2)
+                    return
+            else:
+                print('Trade Canceled.')
+                time.sleep(1)
+                return
+        elif trade_input == 4 and (load_ship_stat(load_data('ship'), 'parsteel_storage') > dil_trade_am or load_data('parsteel') > dil_trade_am):
+            if ask(f"{Fore.YELLOW}You are going to trade {par_trade_am} parsteel for {dil_trade_am} dilithium. Are you sure you want to do this? (Y/N): {Fore.WHITE}"):
+                if load_ship_stat(load_data('ship'), 'parsteel_storage') > par_trade_am:
+                    save_ship_data(load_data('ship'), 'parsteel_storage',load_ship_stat(load_data('ship'), 'parsteel_storage') - par_trade_am)
+                    print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
+                    time.sleep(2)
+                    return
+                else:
+                    save_data('parsteel', load_data('parsteel') - par_trade_am)
+                    print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
+                    time.sleep(2)
+                    return
+            else:
+                print('Trade Canceled.')
+                time.sleep(1)
+                return
+        elif trade_input == 5:
+            print('Exiting Trade.')
+            time.sleep(1)
+            return
+        else:
+            print('Please input a valid number.')
                 
 finding_var = 0
                 
@@ -883,11 +1114,421 @@ def navigate():
     else:
         return False
 
+
+# Global player reputation
+player_reputation = load_data('reputation')  # Starts neutral, range from 0 (hostile) to 100 (friendly)
+
+def ship_reply(choice, ship_type, progress):
+    global player_reputation
+
+    # Define possible dialogue based on progression and player choices
+    if choice == 1:  # "Greet the ship"
+        if ship_type == "friendly":
+            clear()
+            income_display()
+            progress['greeted'] = True
+            return "Hello, traveler! How can we assist you today?"
+        elif ship_type == "neutral":
+            if progress['greeted']:
+                clear()
+                income_display()
+                return "We’ve already exchanged greetings. What do you want?"
+            else:
+                progress['greeted'] = True
+                clear()
+                income_display()
+                return "Greetings. Do not cause trouble."
+        else:
+            if progress['greeted']:
+                clear()
+                income_display()
+                return "Still trying to talk? We are not interested!"
+            else:
+                clear()
+                income_display()
+                progress['greeted'] = True
+                return "Your pleasantries are useless here!"
+    
+    elif choice == 2:  # "Ask to trade"
+        if ship_type == "friendly":
+            clear()
+            income_display()
+            trading(dil_trade_am=random.randint(10, 100), tri_trade_am=random.randint(10, 100), par_trade_am=random.randint(10, 100))
+            return "Glad to trade with you!"
+        elif ship_type == "neutral":
+            if progress['greeted']:
+                clear()
+                income_display()
+                trading(dil_trade_am=random.randint(10, 100), tri_trade_am=random.randint(10, 100), par_trade_am=random.randint(10, 100))
+                return "We're neutral, but we might trade."
+            else:
+                clear()
+                income_display()
+                return "We are not traders. Move along."
+        else:
+            clear()
+            income_display()
+            return "We do not deal with your kind."
+
+    elif choice == 3:  # "Request help"
+        if ship_type == "friendly":
+            clear()
+            income_display()
+            return "We can offer assistance. What do you need?"
+        elif ship_type == "neutral":
+            if progress['greeted']:
+                clear()
+                income_display()
+                return "We are neutral. You should seek help elsewhere."
+            else:
+                clear()
+                income_display()
+                return "You didn’t greet us, and now you need help?"
+        else:
+            clear()
+            income_display()
+            return "Help? From us? Prepare to be attacked!"
+    
+    elif choice == 4:  # "Leave the ship"
+        if ship_type == "friendly":
+            clear()
+            income_display()
+            return "Safe travels, friend."
+        else:
+            clear()
+            income_display()
+            return "Good choice. Stay away."
+
+    return "That choice does not seem to apply here."
+
+
+def hailing_frequency():
+    global player_reputation
+
+    ship_types = ["friendly", "neutral", "hostile"]
+    current_ship = random.choice(ship_types)  # Randomize the type of ship encountered
+    hailing = True
+    clear()
+    income_display()
+
+    print(f"{Fore.GREEN}Hailing frequency opened. You've encountered a {current_ship} ship.{Fore.WHITE}")
+    
+    # Reputation affects initial ship behavior
+    if current_ship == "hostile" and player_reputation > 70:
+        current_ship = "neutral"
+        print("This hostile ship recognizes your reputation and is neutral for now.")
+        time.sleep(2)
+
+    # Track conversation progress
+    progress = {
+        'greeted': False,
+        'traded': False,
+        'help_requested': False,
+    }
+    
+    while hailing:
+        player_reputation = load_data('reputation')
+
+        # Present dialogue options to the player
+        print("\nWhat would you like to say?")
+        print("1. Greet the ship")
+        print("2. Ask to trade")
+        print("3. Request help")
+        print("4. Leave the ship")
+        print("5. Exit the conversation")
+
+        # Get player's choice as an integer
+        try:
+            choice = int(input("\nSelect an option by entering the number: "))
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+            continue
+
+        if choice == 5:
+            print("Hailing frequency closed.")
+            time.sleep(2)
+            hailing = False
+            break
+
+        if choice in [1, 2, 3, 4]:
+            npc_reply = ship_reply(choice, current_ship, progress)
+            print(f"{Fore.YELLOW}Ship: {npc_reply}{Fore.WHITE}")
+
+            # Build up events based on choices
+            if choice == 1 and progress['greeted'] and current_ship == "friendly":
+                print("The ship is beginning to trust you.")
+                player_reputation += 5
+                save_data('reputation', player_reputation)
+
+            elif choice == 2 and current_ship == "neutral" and progress['greeted']:
+                print(f"The neutral ship is considering trading with you.")
+                player_reputation += 5
+                save_data('reputation', player_reputation)
+
+            elif choice == 3 and current_ship == "friendly" and not progress['help_requested']:
+                print("The friendly ship offers help.")
+                progress['help_requested'] = True
+                player_reputation += 10
+                save_data('reputation', player_reputation)
+
+            elif choice == 4 and current_ship == "hostile":
+                player_reputation += 10
+                save_data('reputation', player_reputation)
+                print(f"{Fore.GREEN}Your peaceful withdrawal improved your reputation.{Fore.WHITE}")
+                print(f"Current Reputation: {player_reputation}")
+            else:
+                print(f"Current Reputation: {player_reputation}")
+        else:
+            print("Invalid option. Please select a number between 1 and 5.")
+
+def load_building_data(key, building_name=None):
+    try:
+        with open('buildings.json', 'r') as file:
+            data = json.load(file)
+
+        if building_name:  # If building_name is specified, return that specific building's data
+            if building_name in data['buildings']:
+                return data['buildings'][building_name]
+            else:
+                print(f"Building '{building_name}' not found in buildings data.")
+                return None
+        else:  # If no building_name is specified, return the whole 'buildings' section
+            return data.get(key, None)
+        
+    except FileNotFoundError:
+        print("Buildings data file not found.")
+        return None
+    except KeyError as e:
+        print(f"Key '{key}' not found in buildings data.")
+        return None
+
+def save_building_data(key, value, building_name=None):
+    try:
+        with open('buildings.json', 'r+') as file:
+            data = json.load(file)
+
+            if building_name:  # Update a specific building's data
+                if building_name in data['buildings']:
+                    data['buildings'][building_name][key] = value
+                else:
+                    print(f"Building '{building_name}' not found in buildings data.")
+                    return
+            else:  # Update general data (if necessary)
+                data[key] = value
+
+            # Rewind file pointer and write updated data
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
+            print(f"Data for {building_name if building_name else 'buildings'} saved successfully.")
+
+    except FileNotFoundError:
+        print("Buildings data file not found.")
+
+
+def start_construction(building_name, completion_time, upgrade_part=None):
+    user_data = load_data('construction_queue')
+
+    # Check if the construction queue is empty
+    if user_data['building'] is None:
+        current_time = datetime.now()
+        start_time = current_time.isoformat()  # Record start time
+        end_time = (current_time + timedelta(seconds=completion_time)).isoformat()  # Record end time
+
+        # Update the construction queue in user data
+        construction_data = {
+            'building': building_name,
+            'start_time': start_time,
+            'end_time': end_time
+        }
+        save_data('construction_queue', construction_data)
+
+        # If an upgrade part is provided, record it
+        if upgrade_part:
+            # Check if the upgrade exists in the building's upgrades
+            building_data = load_building_data('buildings', building_name)
+            if upgrade_part in building_data['upgrades']:
+                print(f"{Fore.GREEN}Starting upgrade of {upgrade_part} for {building_name}. Estimated completion: {end_time}{Fore.WHITE}")
+                time.sleep(2)
+            else:
+                print(f"Upgrade '{upgrade_part}' does not exist for {building_name}.")
+        else:
+            print(f"Starting construction of {building_name}. Estimated completion: {end_time}")
+    else:
+        print(f"{Fore.RED}Construction queue is already occupied.{Fore.WHITE}")
+
+def check_construction_completion():
+    # Load the current construction queue data
+    construction_data = load_data('construction_queue')
+    
+    if construction_data['building'] is not None and construction_data['end_time'] is not None:
+        # Convert the end_time string to a datetime object
+        end_time = datetime.fromisoformat(construction_data['end_time'])
+        current_time = datetime.now()
+
+        # Check if the current time is greater than or equal to the end time
+        if current_time >= end_time:
+            building_name = construction_data['building']
+            upgrade_part = construction_data.get('upgrade_part', None)  # Get the upgrade part if it exists
+            
+            print(f"{Fore.GREEN}Construction of {building_name} is complete!{Fore.WHITE}")
+
+            if upgrade_part:
+                apply_upgrade(building_name, upgrade_part)  # Apply the specific upgrade
+
+            # Reset the construction queue to null after completion
+            save_data('construction_queue', {
+                'building': None,
+                'start_time': None,
+                'end_time': None,
+                'upgrade_part': None  # Reset the upgrade part
+            })
+            
+            time.sleep(2)  # Optional: wait for a moment before continuing the game loop
+
+        else:
+            # Calculate remaining time
+            remaining_time = (end_time - current_time).total_seconds()
+            print(f"{Fore.YELLOW}Construction in progress. Time remaining: {round(remaining_time)} seconds.{Fore.WHITE}")
+    else:
+        print(f"{Fore.RED}No construction is in progress.{Fore.WHITE}")
+
+
+# Function to apply the upgrade
+def apply_upgrade(building_name, upgrade_part):
+    # Load the current buildings data from buildings.json
+    buildings_data = load_building_data('buildings')  # Loading the buildings data from buildings.json
+    
+    if building_name in buildings_data['buildings']:
+        building = buildings_data['buildings'][building_name]
+        
+        # Check if the upgrade part exists in the building
+        if upgrade_part in building['upgrades']:
+            current_level = building['upgrades'][upgrade_part]
+            new_level = current_level + 1  # Increase the upgrade level by 1
+            
+            # Update the building's upgrade level
+            building['upgrades'][upgrade_part] = new_level
+            print(f"Upgrade '{upgrade_part}' for {building_name} is now at level {new_level}.")
+            
+            # Save the updated building data back to buildings.json
+            save_building_data('upgrades', building['upgrades'], building_name)  # Save only the updates
+        else:
+            print(f"Upgrade '{upgrade_part}' not found for {building_name}.")
+    else:
+        print(f"Building '{building_name}' not found.")
+
+def calculate_production_rate(building_name, upgrade_part):
+    # Load the building data
+    building_data = load_building_data('buildings', building_name)
+    
+    if building_name in building_data['buildings']:
+        building = building_data['buildings'][building_name]
+        
+        # Check if the upgrade part exists in the building
+        if upgrade_part in building['upgrades']:
+            upgrade_level = building['upgrades'][upgrade_part]
+            
+            # Define the base production rate (could vary per building)
+            base_rate = 10  # Base rate of production per minute (can be customized per building)
+            
+            # Multiply the base rate by the upgrade level to get the new production rate
+            new_rate = base_rate * upgrade_level
+            
+            print(f"With '{upgrade_part}' upgrade at level {upgrade_level}, the production rate is {new_rate} per minute.")
+            return new_rate
+        else:
+            print(f"Upgrade '{upgrade_part}' not found for {building_name}.")
+            return None
+    else:
+        print(f"Building '{building_name}' not found.")
+        return None
+
+def calculate_production(upgrade_level):
+    base_rate = 10  # The base production rate per minute for level 1
+    production_rate = base_rate * upgrade_level
+    return production_rate
+
+def background_production():
+    global last_production_time
+    last_production_time = load_data('last_production_time')
+
+    # Get the current time
+    current_time = datetime.now()
+
+    # Check if last_production_time is empty (""), and if so, set it to the current time
+    if load_data('last_production_time') == "":
+        last_production_time = current_time.isoformat()
+        save_data('last_production_time', last_production_time)
+        print("Last production time was empty. Setting to current time.")
+
+    # Calculate the time difference since the last production update
+    last_production_time_obj = datetime.fromisoformat(last_production_time)
+    time_diff = current_time - last_production_time_obj
+
+    # Check if 1 minute (or your desired interval) has passed
+    if time_diff >= timedelta(minutes=1):
+        # Load saved storage values (check if there's any saved material)
+        parsteel_storage = load_data('parsteel_storage') or 0
+        tritanium_storage = load_data('tritanium_storage') or 0
+        dilithium_storage = load_data('dilithium_storage') or 0
+
+        # Load the upgrade levels from the buildings data
+        generators_upgrades = load_building_data('buildings')['generators']['upgrades']
+
+        # Calculate the production for each material based on its upgrade level
+        parsteel_prod = calculate_production(generators_upgrades['Parsteel Generator'])
+        tritanium_prod = calculate_production(generators_upgrades['Tritanium Generator'])
+        dilithium_prod = calculate_production(generators_upgrades['Dilithium Generator'])
+
+        # Increment the storage by the respective production rate
+        parsteel_storage += parsteel_prod
+        tritanium_storage += tritanium_prod
+        dilithium_storage += dilithium_prod
+
+        # Save the updated storage values
+        save_data('parsteel_storage', parsteel_storage)
+        save_data('tritanium_storage', tritanium_storage)
+        save_data('dilithium_storage', dilithium_storage)
+
+        # Save the current time as the last production time
+        last_production_time = current_time.isoformat()
+        save_data('last_production_time', last_production_time)
+
+
+def claim_resources():
+    # Load stored materials and actual materials from user data
+    parsteel_storage = load_data('parsteel_storage') or 0
+    tritanium_storage = load_data('tritanium_storage') or 0
+    dilithium_storage = load_data('dilithium_storage') or 0
+
+    parsteel = load_data('parsteel') or 0
+    tritanium = load_data('tritanium') or 0
+    dilithium = load_data('dilithium') or 0
+
+    # Add stored materials to the actual resources
+    parsteel += parsteel_storage
+    tritanium += tritanium_storage
+    dilithium += dilithium_storage
+
+    # Save the updated resources back to user data
+    save_data('parsteel', parsteel)
+    save_data('tritanium', tritanium)
+    save_data('dilithium', dilithium)
+
+    # Reset the storage to 0
+    save_data('parsteel_storage', 0)
+    save_data('tritanium_storage', 0)
+    save_data('dilithium_storage', 0)
+
+    print(f"{Fore.GREEN}All rescources have been claimed. Parsteel claimed: {parsteel_storage} | Tritanium claimed: {tritanium_storage} | Dilithium claimed: {dilithium_storage}{Fore.WHITE}")
+
+
 finding_var = 0
 warp_time = 0
 
 clear()
-mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4: Deliver 200 Materials to a Trading Post', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Upgrade Mining Laser to lvl 2', '8: Complete 2 Successful Trades']
+mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4: Trade 200 Materials With a Ship', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Upgrade Mining Laser to lvl 2', '8: Complete 2 Successful Trades']
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -923,122 +1564,196 @@ while True:
                 save_data('ship', 'Stargazer')
                 save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
                 save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+            if load_data('ship') == 'USS Grissom':
+                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
+                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
+                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=4)
+                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
+                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
+                save_data('ship', 'Stargazer')
+                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
+                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+            if load_data('ship') == 'Federation Shuttlecraft':
+                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
+                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
+                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=3)
+                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=2)
+                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=4)
+                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
+                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
+                save_data('ship', 'Stargazer')
+                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
+                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+            if load_data('ship') == 'Galaxy Class':
+                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
+                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=5)
+                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=6)
+                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=5)
+                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=4)
+                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=8)
+                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
+                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
+                save_data('ship', 'Stargazer')
+                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
+                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
             time.sleep(5)
             continue
     clear()
     homescreen_setup()
+    check_construction_completion()
+    background_production()
     print('What would you like to do?')
-    OpList = [f"1: Explore {systems[load_data('current_system')]}", "2: Navigate to Another System", "3: Return to Drydock"]
+    OpList = [f"1: Explore {systems[load_data('current_system')]}", "2: Navigate to Another System", "3: Return to Drydock", "4: Display Missions"]
     print(*OpList, sep = '\n')
-    option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3])
+    option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3, 4])
     time.sleep(0.1)
     if (option == 1):
         clear()
         if load_data('current_system') == 1:
-            system_findings = ['Parsteel Mine', 'Mission Planet', 'Orion Pirate', 'Trading Post']
-            current_system_rand = random.choice(system_findings)
-            if current_system_rand == 'Parsteel Mine':
-                if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                    rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3', 'parsteel_mine4', 'parsteel_mine5']
-                    mining_deposit_parsteel(parsteel_mine_num=random.choice(rand_min))
-                else:
+            if load_explored(systems[load_data('current_system')]) == 1:
+                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Orion Pirate']
+                income_display()
+                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
+                print(*system_findings, sep='\n')
+                current_system_rand = ask_sanitize('Option: ')
+                if current_system_rand == 1:
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3', 'parsteel_mine4', 'parsteel_mine5']
+                        mining_deposit_parsteel(parsteel_mine_num=random.choice(rand_min))
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 3:
                     clear()
                     income_display()
-                    print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-            if current_system_rand == 'Trading Post':
-                trading_post()
-            if current_system_rand == 'Orion Pirate':
-                income_display()
-                print('You have approached an Orion Pirate!')
-                time.sleep(1)
-                print('What do you want to do?')
-                op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
-                print(*op_1, sep='\n')
-                ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                if ori_ship == 1:
-                    if load_data('current_system') == 1:
+                    print('You have approached an Orion Pirate!')
+                    print('What do you want to do?')
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship'] #hail the ship
+                    print(*op_1, sep='\n')
+                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+                    if ori_ship == 1:
                         battle_stat(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', firepower=1, accuracy=1, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
                         update_mission_progress('Defeat 1 Enemy', 1)
                         update_mission_progress('Defeat 3 Enemies', 1)
                         update_mission_progress('Defeat 5 Enemies', 1)
-                if ori_ship == -2:
-                    print('Hailing Frequencys are in development.')
-            if current_system_rand == 'Mission Planet':
-                clear()
+                    if ori_ship == 2:
+                        hailing_frequency()
+                if current_system_rand == 2:
+                    clear()
+                    income_display()
+                    print('You have approached a Mission Planet!')
+                    print(*mission_list_print, sep = '\n')
+                    print(f"{len(mission_list_print) + 1}: Exit")
+                    accept_missions()
+            elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
-                print('You have approached a Mission Planet!')
-                time.sleep(1)
-                print(*mission_list_print, sep = '\n')
-                print(f"{len(mission_list_print) + 1}: Exit")
-                mission_selection = ask_sanitize('Select mission to accept: ')
-                if mission_selection == 1:
-                    if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
-                        accept_mission('1')
+                scan_system()
+        if load_data('current_system') == 2: # vulcan dev
+            if load_explored(systems[load_data('current_system')]) == 1:
+                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Orion Pirate', '4. Tritanium Mine']
+                income_display()
+                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
+                print(*system_findings, sep='\n')
+                current_system_rand = ask_sanitize('Option: ')
+                if current_system_rand == 1:
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3']
+                        mining_deposit_parsteel(parsteel_mine_num=random.choice(rand_min))
                     else:
-                        continue
-                if mission_selection == 2:
-                    if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
-                        accept_mission('2')
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 4:
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['tritanium_mine1', 'tritanium_mine2', 'tritanium_mine3']
+                        mining_deposit_tritanium(tritanium_mine_num=random.choice(rand_min))
                     else:
-                        continue
-                if mission_selection == 3:
-                    if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
-                        accept_mission('3')
-                    else:
-                        continue
-                if mission_selection == 4:
-                    if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
-                        accept_mission('4')
-                    else:
-                        continue
-                if mission_selection == 5:
-                    if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
-                        accept_mission('5')
-                    else:
-                        continue
-                if mission_selection == 6:
-                    if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
-                        accept_mission('6')
-                    else:
-                        continue
-                if mission_selection == 7:
-                    if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
-                        accept_mission('7')
-                    else:
-                        continue
-                if mission_selection == 8:
-                    if ask(f'{Fore.YELLOW}Are you sure you want to accept this mission?{Fore.WHITE}'):
-                        accept_mission('8')
-                    else:
-                        continue
-                if mission_selection == len(mission_list_print) + 1:
-                    continue
-                continue
-        if load_data('current_system') == 9:
-            if ask(f'Would you like to dock with the Xindi Starbase or Explore the system?'):
-                clear()
-            else:
-                system_findings = ['Material Mine', 'Orion Pirate', 'Trading Post'] # Mission planet
-                current_system_rand = random.choice(system_findings)
-                if current_system_rand == 'Material Mine':
-                    mining_deposit_parsteel()
-                if current_system_rand == 'Trading Post':
-                    trading_post()
-                if current_system_rand == 'Orion Pirate':
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 3:
+                    clear()
                     income_display()
                     print('You have approached an Orion Pirate!')
-                    time.sleep(1)
                     print('What do you want to do?')
                     op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
                     print(*op_1, sep='\n')
                     ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                if ori_ship == 1:
-                    battle_stat(opponent_health=((system_deltas['Enemy Ships Health'] ** load_data('current_system')) * random.randint(500,900)), opponent_name='Orion Pirate', firepower=(1 * system_deltas['Enemy Ships Health']), accuracy=(1 * system_deltas['Enemy Ships Health']), evasion=(1 * system_deltas['Enemy Ships Health']), income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    update_mission_progress('Defeat 1 Enemy', 1)
-                    update_mission_progress('Defeat 3 Enemies', 1)
-                    update_mission_progress('Defeat 5 Enemies', 1)
-                if ori_ship == -2:
-                    print('Hailing Frequencys are in development.')
+                    if ori_ship == 1:
+                        battle_stat(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', firepower=1, accuracy=1, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                        update_mission_progress('Defeat 1 Enemy', 1)
+                        update_mission_progress('Defeat 3 Enemies', 1)
+                        update_mission_progress('Defeat 5 Enemies', 1)
+                    if ori_ship == -2:
+                        print('Hailing Frequencys are in development.')
+                if current_system_rand == 2:
+                    clear()
+                    income_display()
+                    print('You have approached a Mission Planet!')
+                    print(*mission_list_print, sep = '\n')
+                    print(f"{len(mission_list_print) + 1}: Exit")
+                    accept_missions()
+            elif load_explored(systems[load_data('current_system')]) == 2:
+                income_display()
+                scan_system()
+        if load_data('current_system') == 3: # tellar dev
+            if load_explored(systems[load_data('current_system')]) == 1:
+                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Orion Pirate', '4. Tritanium Mine']
+                income_display()
+                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
+                print(*system_findings, sep='\n')
+                current_system_rand = ask_sanitize('Option: ')
+                if current_system_rand == 1:
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4']
+                        mining_deposit_dilithium(dilithium_mine_num=random.choice(rand_min))
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 4:
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['tritanium_mine1', 'tritanium_mine2']
+                        mining_deposit_tritanium(tritanium_mine_num=random.choice(rand_min))
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 3:
+                    clear()
+                    income_display()
+                    print('You have approached an Orion Pirate!')
+                    print('What do you want to do?')
+                    op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+                    print(*op_1, sep='\n')
+                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+                    if ori_ship == 1:
+                        battle_stat(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', firepower=2, accuracy=2, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                        update_mission_progress('Defeat 1 Enemy', 1)
+                        update_mission_progress('Defeat 3 Enemies', 1)
+                        update_mission_progress('Defeat 5 Enemies', 1)
+                    if ori_ship == -2:
+                        print('Hailing Frequencys are in development.')
+                if current_system_rand == 2:
+                    clear()
+                    income_display()
+                    print('You have approached a Mission Planet!')
+                    print(*mission_list_print, sep = '\n')
+                    print(f"{len(mission_list_print) + 1}: Exit")
+                    accept_missions()
+            elif load_explored(systems[load_data('current_system')]) == 2:
+                income_display()
+                scan_system()
     if (option == 2):
         navigate()
     if option == 3:
@@ -1055,7 +1770,7 @@ while True:
             save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage'))
             income_display()
             save_data('current_system', 1)
-            drydock_option = ['1: Enter Station', '2: Enter Shipyard', '3: Open Research', '4: Exit']
+            drydock_option = ['1: Enter Station', '2: Enter Shipyard', '3: Open Research', '4: Repair Ship', '5: Exit']
             print(f"{Fore.RED}The Station is currently not functional.{Fore.WHITE}")
             print(*drydock_option, sep='\n')
             drydock_selection = ask_sanitize('Option: ')
@@ -1068,13 +1783,39 @@ while True:
                 if station_selection == 1:
                     clear()
                     income_display()
-                    #generator code goes here
+                    print('Generator Menu')
+                    print('1. Claim all generator material\n2. Upgrade Generators')
+                    generator_option = ask_sanitize("Option: ")
+                    if generator_option == 1:
+                        claim_resources()
+                        time.sleep(2)
+                    if generator_option == 2:
+                        start_construction('generators', 10, 'Mining Speed')
             if drydock_selection == 2: #Shipyard
                 clear()
                 income_display()
-                ship_management_menu(coins=load_data('coins'))
+                ship_management_menu(coins=load_data('parsteel'))
             #rest of station code
+            if drydock_selection == 4:
+                clear()
+                income_display()
+                if ask(f"{Fore.RED}Are you sure you want to repair your ship? This will cost you {round((load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5)} parsteel. (Y/N): "):
+                    save_data('parsteel', load_data('parsteel') - round((load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5))
+                    save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
+                    print(f"{Fore.GREEN}Repair Completed. You now have {load_ship_stat(load_data('ship'), 'health')} health.{Fore.WHITE}")
+                    time.sleep(2)
+                    continue
+                else:
+                    print(f"{Fore.YELLOW}Repair Canceled.{Fore.WHITE}")
+                    time.sleep(2)
+                    continue     
         else:
+            continue
+    if option == 4:
+        clear()
+        income_display()
+        display_missions()
+        if ask("Type Y to exit: "):
             continue
     if option == 800:
         clear()

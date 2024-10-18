@@ -1,11 +1,16 @@
 {
-    "parsteel": 150,
-    "tritanium": 150,
-    "dilithium": 50,
+    "parsteel": 160,
+    "tritanium": 160,
+    "dilithium": 60,
     "latnium": 0,
     "recruit_tokens": 20,
     "ship": "Stargazer",
     "current_system": 1,
+    "reputation": 65,
+    "last_production_time": "",
+    "parsteel_storage": 10,
+    "tritanium_storage": 10,
+    "dilithium_storage": 10,
     "missions": {
         "Mine 100 Materials": {
             "progress": 0,
@@ -22,7 +27,7 @@
             "completed": false,
             "accepted": false
         },
-        "Deliver 200 Materials to a Trading Post": {
+        "Trade 200 Materials With a Ship": {
             "progress": 0,
             "completed": false,
             "accepted": false
@@ -47,5 +52,21 @@
             "completed": false,
             "accepted": false
         }
+    },
+    "explored": {
+        "Sol": 1,
+        "Vulcan": 2,
+        "Tellar": 2
+    },
+    "construction_queue": {
+        "building": null,
+        "start_time": null,
+        "end_time": null,
+        "upgrade_part": null
+    },
+    "research_queue": {
+        "research": null,
+        "start_time": null,
+        "end_time": null
     }
 }
