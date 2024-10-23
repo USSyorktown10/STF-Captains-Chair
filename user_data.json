@@ -1,16 +1,16 @@
 {
-    "parsteel": 160,
+    "parsteel": 150,
     "tritanium": 160,
     "dilithium": 60,
-    "latnium": 0,
+    "latinum": 0,
     "recruit_tokens": 20,
     "ship": "Stargazer",
     "current_system": 1,
-    "reputation": 65,
+    "reputation": 50,
     "last_production_time": "",
-    "parsteel_storage": 10,
-    "tritanium_storage": 10,
-    "dilithium_storage": 10,
+    "parsteel_storage": 0,
+    "tritanium_storage": 0,
+    "dilithium_storage": 0,
     "missions": {
         "Mine 100 Materials": {
             "progress": 0,
@@ -42,7 +42,7 @@
             "completed": false,
             "accepted": false
         },
-        "Upgrade Mining Laser to lvl 2": {
+        "Buy a new Ship": {
             "progress": 0,
             "completed": false,
             "accepted": false
@@ -56,7 +56,8 @@
     "explored": {
         "Sol": 1,
         "Vulcan": 2,
-        "Tellar": 2
+        "Tellar": 2,
+        "Andor": 2
     },
     "construction_queue": {
         "building": null,

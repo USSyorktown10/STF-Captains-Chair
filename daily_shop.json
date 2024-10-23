@@ -1,0 +1,35 @@
+{
+    "last_updated": "2024-10-23",
+    "items": [
+        {
+            "item_name": "500 Parsteel",
+            "price": 20,
+            "resource_key": "parsteel",
+            "amount": 500
+        },
+        {
+            "item_name": "300 Tritanium",
+            "price": 20,
+            "resource_key": "tritanium",
+            "amount": 300
+        },
+        {
+            "item_name": "200 Dilithium",
+            "price": 10,
+            "resource_key": "dilithium",
+            "amount": 200
+        },
+        {
+            "item_name": "5 Recruit Token",
+            "price": 1,
+            "resource_key": "recruit_tokens",
+            "amount": 5
+        },
+        {
+            "item_name": "1 Construction Speed Up",
+            "price": 20,
+            "resource_key": "speed_up",
+            "amount": 1
+        }
+    ]
+}

@@ -1,18 +1,18 @@
 {
-  "buildings": {
-      "starbase": {
-          "upgrades": {
-              "Ops": 1,
-              "R&D": 1,
-              "Academy": 1
-          }
-      },
-      "generators": {
-          "upgrades": {
-              "Parsteel Generator": 1,
-              "Tritanium Generator": 1,
-              "Dilithium Generator": 1
-          }
-      }
-  }
+    "buildings": {
+        "starbase": {
+            "upgrades": {
+                "Ops": 1,
+                "R&D": 1,
+                "Academy": 1
+            }
+        },
+        "generators": {
+            "upgrades": {
+                "Parsteel Generator": 1,
+                "Tritanium Generator": 1,
+                "Dilithium Generator": 1
+            }
+        }
+    }
 }
