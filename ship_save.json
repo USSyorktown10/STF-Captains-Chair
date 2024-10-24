@@ -15,7 +15,13 @@
             "mining_efficiency": 1,
             "warp_range": 2,
             "owned": true,
-            "equipped": true
+            "equipped": true,
+            "crew": {
+                "captain": null,
+                "bridge1": null,
+                "bridge2": null,
+                "bridge3": null
+            }
         },
         {
             "name": "USS Grissom",

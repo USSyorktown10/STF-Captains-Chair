@@ -274,15 +274,23 @@ def upgrade_ship(ship_name, stat, coins):
                 if ship['name'] == ship_name and ship.get('owned', False):
                     if ship_name == 'Galaxy Class':
                         upgrade_cost = 150
-                    else:
+                        json_save_data = 'galaxy_class_blueprints'
+                    if ship_name == 'Federation Shuttlecraft':
+                        upgrade_cost = 100
+                        json_save_data = 'federation_shuttlecraft_blueprints'
+                    if ship_name == 'USS Grissom':
+                        upgrade_cost = 75
+                        json_save_data = 'uss_grissom_blueprints'
+                    if ship_name == 'Stargazer':
                         upgrade_cost = 50
-                    if load_data('parsteel') >= upgrade_cost:
+                        json_save_data = 'stargazer_blueprints'
+                    if load_data(json_save_data) >= upgrade_cost:
                         ship[stat] += 1
-                        save_data('parsteel', load_data('parsteel') - upgrade_cost)
+                        save_data(json_save_data, load_data(json_save_data) - upgrade_cost)
                         print(f"{Fore.GREEN}{ship_name}'s {stat} has been upgraded to {ship[stat]}.{Fore.WHITE}")
                         time.sleep(2)
                     else:
-                        print(f"{Fore.RED}Not enough parsteel to upgrade {stat}.{Fore.WHITE}")
+                        print(f"{Fore.RED}Not enough blueprints to upgrade {stat}.{Fore.WHITE}")
                         time.sleep(2)
 
                     break
@@ -329,24 +337,28 @@ def buy_ship(ship_name, coins):
 
             for ship in data['ship selection']:
                 if ship['name'] == ship_name and not ship['owned']:
-                    current_coins = load_data('tritanium')
                     if ship_name == 'Galaxy Class':
-                        price = 2000
+                        price = 1000
+                        json_save_data = 'galaxy_class_blueprints'
                     elif ship_name == 'Federation Shuttlecraft':
                         price = 400
+                        json_save_data = 'federation_shuttlecraft_blueprints'
                     elif ship_name == 'USS Grissom':
                         price = 350
+                        json_save_data = 'uss_grissom_blueprints'
                     else:
                         price = 200
-                    if ask(f"{Fore.RED}Are you sure you want to buy this ship? It costs {price} tritanium ({load_data('tritanium')}->{load_data('tritanium') - price}): {Fore.WHITE}"):
+                        json_save_data = 'stargazer_blueprints'
+                    current_coins = load_data(json_save_data)
+                    if ask(f"{Fore.RED}Are you sure you want to buy this ship? It costs {price} {ship_name} blueprints ({load_data(json_save_data)}->{load_data(json_save_data) - price}): {Fore.WHITE}"):
                         if current_coins >= price:
                             clear()
                             ship['owned'] = True
-                            save_data('tritanium', current_coins - price)
+                            save_data(json_save_data, current_coins - price)
                             print(f"{Fore.GREEN}You have purchased {ship_name}.{Fore.WHITE}")
                             time.sleep(2)
                         else:
-                            print("Not enough tritanium to buy this ship.")
+                            print("Not enough blueprints to buy this ship.")
                             time.sleep(2)
                         break
                     else:
@@ -399,9 +411,10 @@ def ship_management_menu(coins):
     while True:
         clear()
         income_display()
+        print(f"Stargazer BP: {load_data('stargazer_blueprints')} || USS Grissom BP: {load_data('uss_grissom_blueprints')} || Fed. Shuttle. BP: {load_data('federation_shuttlecraft_blueprints')} || Galaxy C. BP: {load_data('galaxy_class_blueprints')}")
         display_ship_menu()
 
-        choice = ask_sanitize(question_ask="\nOptions:\n1. View Ship Details\n2. Build Ship\n3. Equip Ship\n4. Upgrade Ship\n5. Exit\nSelect an option: ")
+        choice = ask_sanitize(question_ask=f"\nOptions:\n1. View Ship Details\n2. Build Ship\n3. Equip Ship\n4. Upgrade Ship\n5. Change Crew on {load_data('ship')}\n6. Exit\nSelect an option: ")
 
         if choice == 1:
             clear()
@@ -486,7 +499,9 @@ def ship_management_menu(coins):
                 print(f"{Fore.RED}Upgrade Canceled.{Fore.WHITE}")
                 time.sleep(1)
 
-        elif choice == 5:
+        elif choice == 5: #Crew for ships
+            print('crew')
+        elif choice == 6:
             break
         else:
             print("Invalid option. Please try again.")
@@ -1811,9 +1826,9 @@ while True:
     check_construction_completion()
     background_production()
     print('What would you like to do?')
-    OpList = [f"1: Explore {systems[load_data('current_system')]}", "2: Navigate to Another System", "3: Return to Drydock", "4: Display Missions", "5: Open Shop"]
+    OpList = [f"1: Explore {systems[load_data('current_system')]}", "2: Navigate to Another System", "3: Return to Drydock", "4: Display Missions"]
     print(*OpList, sep = '\n')
-    option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3, 4, 5])
+    option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3, 4])
     time.sleep(0.1)
     if (option == 1):
         clear()
@@ -2121,12 +2136,24 @@ while True:
                         continue
                     if academy_option == 2:
                         shop_loop()
-                    
+                    if academy_option == 3:
+                        if ask(f"{Fore.YELLOW}Are you sure you want to upgrade? This will take {(load_specific_upgrade('starbase', 'Academy') ** academy_delta) * 10} seconds and cost {round(((load_specific_upgrade('starbase', 'Academy') * academy_delta) ** academy_delta) * 10)} parsteel and {round(((load_specific_upgrade('starbase', 'Academy') * academy_delta) ** academy_delta) * 5)} tritanium. (Y/N): ") and load_data('parsteel') >= round(((load_specific_upgrade('starbase', 'Academy') * academy_delta) ** academy_delta) * 10) and load_data('tritanium') >= round(((load_specific_upgrade('starbase', 'Academy') * academy_delta) ** academy_delta) * 5):
+                            save_data('parsteel', load_data('parsteel') - round(((load_specific_upgrade('starbase', 'Academy') * academy_delta) ** academy_delta) * 10))
+                            save_data('tritanium', load_data('tritanium') - round(((load_specific_upgrade('starbase', 'Academy') * academy_delta) ** academy_delta) * 5))
+                            start_construction('starbase', (load_specific_upgrade('starbase', 'Academy') ** academy_delta) * 10, 'Academy')
+                        else:
+                            print(f"{Fore.RED}You have either canceled the upgrade, or do not have enough parsteel or tritanium.{Fore.WHITE}")
+                            time.sleep(2)
+                    if academy_option == 4:
+                        continue
             if drydock_selection == 2: #Shipyard
                 clear()
                 income_display()
                 ship_management_menu(coins=load_data('parsteel'))
-            #rest of station code
+            if drydock_option == 3: #research
+                clear()
+                income_display()
+                print('no data')
             if drydock_selection == 4:
                 clear()
                 income_display()
@@ -2148,8 +2175,6 @@ while True:
         display_missions()
         if ask("Type Y to exit: "):
             continue
-    if option == 5:
-        shop_loop()
     if option == 800:
         clear()
         with open('user_crew_data.json', 'r') as file:

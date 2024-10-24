@@ -7,10 +7,14 @@
     "ship": "Stargazer",
     "current_system": 1,
     "reputation": 50,
-    "last_production_time": "",
-    "parsteel_storage": 0,
-    "tritanium_storage": 0,
-    "dilithium_storage": 0,
+    "last_production_time": "2024-10-24T10:14:04.695908",
+    "parsteel_storage": 10,
+    "tritanium_storage": 10,
+    "dilithium_storage": 10,
+    "stargazer_blueprints": 0,
+    "uss_grissom_blueprints": 0,
+    "federation_shuttlecraft_blueprints": 0,
+    "galaxy_class_blueprints": 0,
     "missions": {
         "Mine 100 Materials": {
             "progress": 0,
