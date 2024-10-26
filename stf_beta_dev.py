@@ -517,33 +517,45 @@ systems = {
     6: 'Regula', 7: 'Solaria', 8: 'Tarkalea XII', 9: 'Xindi Starbase 9', 10: 'Altor IV'
 }
 
-def load_crew_data(file_path): #load crew
+import json
+import os
+import time
+from colorama import Fore
+
+# Load crew data
+def load_crew_data(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
 
-def save_crew_data(file_path, data): #save crew
+# Save crew data
+def save_crew_data(file_path, data):
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def load_game_data(file_path): #load game state
+# Load game state data
+def load_game_data(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
 
-def save_game_data(file_path, data): #save game state
+# Save game state data
+def save_game_data(file_path, data):
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def has_played_before(file_path): #check if personal file path exists
+# Check if player has played before
+def has_played_before(file_path):
     return os.path.exists(file_path)
 
-def initialize_game_data(): #initialize load or save data
+# Initialize game data
+def initialize_game_data():
     if has_played_before(user_game_file_path):
         with open(user_game_file_path, 'r') as file:
             return json.load(file)
     else:
         return game_state
 
-def initialize_crew_data(): #initialize load or save crew
+# Initialize crew data
+def initialize_crew_data():
     if has_played_before(user_crew_file_path):
         with open(user_crew_file_path, 'r') as file:
             return json.load(file)
@@ -552,13 +564,22 @@ def initialize_crew_data(): #initialize load or save crew
         save_crew_data(user_crew_file_path, original_crew_data)
         return original_crew_data
 
-def display_crew(crew_data): #display crew
+# Display owned crew
+def display_crew(crew_data):
     print("\nCurrent Crew Members:")
     for index, member in enumerate(crew_data['crew']):
         print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Skill Level: {member['skill_level']}, Rarity: {member['rarity']})")
 
-def upgrade_crew_member(game_state, crew_data, member_index, cost):
+# Display available crew for purchase
+def display_available_crew(crew_data, available_crew):
+    print("\nAvailable Crew for Purchase:")
+    owned_crew_names = [member['name'] for member in crew_data['crew']]
+    for index, member in enumerate(available_crew):
+        if member['name'] not in owned_crew_names:
+            print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Rarity: {member['rarity']}, Price: {member['price']} Recruit Tokens)")
 
+# Upgrade crew member
+def upgrade_crew_member(game_state, crew_data, member_index, cost):
     if load_data('recruit_tokens') >= cost:
         crew_data['crew'][member_index]['skill_level'] += 5  # Increase skill level
         save_data('recruit_tokens', load_data('recruit_tokens') - cost)
@@ -569,25 +590,73 @@ def upgrade_crew_member(game_state, crew_data, member_index, cost):
         print(f"{Fore.RED}\nNot enough recruit tokens to upgrade.{Fore.WHITE}")
         time.sleep(2)
 
+# Purchase a new crew member
+def purchase_crew_member(game_state, crew_data, available_crew, member_index):
+    if load_data('recruit_tokens') >= available_crew[member_index]['price']:
+        # Deduct tokens and add the new crew member
+        save_data('recruit_tokens', load_data('recruit_tokens') - available_crew[member_index]['price'])
+        crew_data['crew'].append(available_crew[member_index])  # Add to owned crew
+        save_crew_data(user_crew_file_path, crew_data)  # Save updated crew
+        print(f"{Fore.GREEN}\n{available_crew[member_index]['name']} has been recruited!{Fore.WHITE}")
+        print(f"{Fore.YELLOW}Remaining Recruit Tokens: {load_data('recruit_tokens')}{Fore.WHITE}")
+        time.sleep(2)
+    else:
+        print(f"{Fore.RED}\nNot enough recruit tokens to purchase this crew member.{Fore.WHITE}")
+        time.sleep(2)
+
 # Main function
 def main():
     global game_state
     game_state = initialize_game_data()
     crew_data = initialize_crew_data()
-    
-    display_crew(crew_data)
 
-    choice = int(input(f"{Fore.BLUE}\nEnter the number of the crew member to upgrade: {Fore.WHITE}")) - 1  # Convert to 0-based index
+    available_crew = [
+        {"name": "Uhura", "skill_level": 10, "skill": "Communication", "rarity": "Rare", "price": 100},
+        {"name": "Sulu", "skill_level": 10, "skill": "Pilot", "rarity": "Common", "price": 50},
+        {"name": "Chekov", "skill_level": 10, "skill": "Navigation", "rarity": "Uncommon", "price": 70}
+    ]
 
-    cost = 10
-    print(f"{Fore.YELLOW}Upgrading {crew_data['crew'][choice]['name']} will cost {cost} recruit tokens.{Fore.WHITE}")
-    if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}"):
-        upgrade_crew_member(game_state, crew_data, choice, cost)
-        save_crew_data(user_crew_file_path, crew_data)  # Save updated user crew data to file
-        print("\nGame data and crew data saved.")
-    else:
-        print(f"{Fore.RED}\nUpgrade canceled.{Fore.WHITE}")
-        time.sleep(1)
+    while True:
+        clear()
+        income_display()
+        display_crew(crew_data)
+
+        choice = ask_sanitize(f"{Fore.BLUE}\nEnter 1 to upgrade crew or 2 to purchase new crew 3 to exit: {Fore.WHITE}")
+        if choice == 1:
+            choice = 'upgrade'
+        elif choice == 2:
+            choice = 'buy'
+        elif choice == 3:
+            choice = 'exit'
+        if choice == 'upgrade':
+            # Upgrade crew
+            crew_choice = int(input(f"{Fore.BLUE}Enter the number of the crew member to upgrade: {Fore.WHITE}")) - 1  # Convert to 0-based index
+            cost = 10
+            print(f"{Fore.YELLOW}Upgrading {crew_data['crew'][crew_choice]['name']} will cost {cost} recruit tokens. ({load_data('recruit_tokens')}->{load_data('recruit_tokens') - cost}){Fore.WHITE}")
+            if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}") and load_data('recruit_tokens') >= cost:
+                upgrade_crew_member(game_state, crew_data, crew_choice, cost)
+                save_crew_data(user_crew_file_path, crew_data)  # Save updated user crew data to file
+            else:
+                print(f"{Fore.RED}\nRather the Upgrade canceled or you do not have enough recruit tokens.{Fore.WHITE}")
+                time.sleep(1)
+
+        elif choice == 'buy':
+            # Purchase new crew
+            display_available_crew(crew_data, available_crew)
+            crew_choice = int(input(f"{Fore.BLUE}Enter the number of the crew member to buy: {Fore.WHITE}")) - 1  # Convert to 0-based index
+            if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}"):
+                purchase_crew_member(game_state, crew_data, available_crew, crew_choice)
+            else:
+                print(f"{Fore.RED}\nPurchase canceled.{Fore.WHITE}")
+                time.sleep(1)
+
+        elif choice == 'exit':
+            print(f"{Fore.GREEN}\nExiting...{Fore.WHITE}")
+            return
+        else:
+            print(f"{Fore.RED}Invalid choice{Fore.WHITE}")
+            time.sleep(1)
+
 
 def income_display():
      print(f"{Fore.YELLOW}Parsteel:{Fore.WHITE} {load_data('parsteel')} || {Fore.GREEN}Tritanium:{Fore.WHITE} {load_data('tritanium')} || {Fore.CYAN}Dilithium:{Fore.WHITE} {load_data('dilithium')} || {Fore.YELLOW}Latinum:{Fore.WHITE} {load_data('latinum')} || {Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {load_data('ship')} || {Fore.LIGHTBLUE_EX}Current System:{Fore.WHITE} {systems[load_data('current_system')]} || {Fore.BLUE}Health:{Fore.WHITE} {load_ship_stat(ship_name=load_data('ship'), stat_key='health')}/{load_ship_stat(ship_name=load_data('ship'), stat_key='max_health')} || {Fore.GREEN}Storage Avalible:{Fore.WHITE} {load_ship_stat(ship_name=load_data('ship'), stat_key='storage')}/{load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage')}")
@@ -661,9 +730,9 @@ def update_mission_progress(mission_name, progress_increment):
 
 
 def complete_mission(mission_name):
-    mission_rewards = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 100, 'Defeat 3 Enemies': 150, 'Deliver 200 Materials to a Trading Post': 125, 'Defeat 5 Enemies': 250, 'Explore 3 New Systems': 125, 'Buy a new Ship': 225, 'Complete 2 Sucessful Trades': 300}
+    mission_rewards = {'Mine 100 Materials': 10, 'Defeat 1 Enemy': 10, 'Defeat 3 Enemies': 20, 'Deliver 200 Materials to a Trading Post': 25, 'Defeat 5 Enemies': 40, 'Explore 3 New Systems': 40, 'Buy a new Ship': 50, 'Complete 2 Sucessful Trades': 70}
     missions = load_data('missions')
-    coins = load_data('parsteel')
+    coins = load_data('latinum')
 
     if not missions[mission_name]['completed']:
         missions[mission_name]['completed'] = True
@@ -671,8 +740,8 @@ def complete_mission(mission_name):
         reward = mission_rewards[mission_name]
         coins += reward
         save_data('missions', missions)
-        save_data('parsteel', coins)
-        print(f"{Fore.GREEN}Mission '{mission_name}' completed! You earned {reward} parsteel.{Fore.WHITE}")
+        save_data('latinum', coins)
+        print(f"{Fore.GREEN}Mission '{mission_name}' completed! You earned {reward} latinum.{Fore.WHITE}")
         time.sleep(2)
         
 def display_missions():
@@ -828,8 +897,11 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
                 print(f'{Fore.BLUE}Parsteel Gained: {Fore.WHITE}', income)
                 print(f'{Fore.BLUE}Dilithium Gained: {Fore.WHITE}', (income/2))
+                lat_reward = random.randint(1, 5)
+                print(f'{Fore.BLUE}Latinum Gained: {Fore.WHITE}', lat_reward)
                 save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + income)
                 save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + (income/2))
+                save_data('latinum', lat_reward)
                 time.sleep(3)
 
 def mining_deposit_parsteel(parsteel_mine_num):
@@ -936,6 +1008,44 @@ def mining_deposit_dilithium(dilithium_mine_num):
             deposit_var = mine_depo_mats
             estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
             update_materials(system_name=systems[load_data('current_system')], mine_name=dilithium_mine_num, amount=mining_efficiency)
+            
+            print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
+            time.sleep(0.5)
+            if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') < 0:
+                clear()
+                print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
+                time.sleep(2)
+                break
+            continue
+        
+def mining_deposit_latinum(latinum_mine_num):
+    income_display()
+    print('You have approached a Latnium Mine!')
+    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=latinum_mine_num)
+    mining_efficiency = load_ship_stat(ship_name=load_data('ship'), stat_key='mining_efficiency') 
+    deposit_var = deposit_materials / mining_efficiency 
+
+    print(f'{Fore.BLUE}This mine has', deposit_materials, f'latinum.{Fore.WHITE}')
+    print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
+    if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
+        mine_depo_mats = ask_sanitize(f'{Fore.GREEN}How much would you like to mine? (1 - {deposit_materials}){Fore.WHITE}')
+        start_time = time.time()
+        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=latinum_mine_num) <= 0:
+            clear()
+            print('Mining...')
+            print('Latinum Remaining:', mine_depo_mats)
+            print('Total Storage Remaining:', load_ship_stat(ship_name=load_data('ship'), stat_key='storage'))
+
+            materials_gathered = 1 * mining_efficiency
+            save_ship_data(ship_name=load_data('ship'), stat_key='latinum_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='latinum_storage') + materials_gathered)
+            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - materials_gathered)
+            update_mission_progress('Mine 100 Materials', materials_gathered)
+            mine_depo_mats -= mining_efficiency
+            
+            elapsed_time = time.time() - start_time
+            deposit_var = mine_depo_mats
+            estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
+            update_materials(system_name=systems[load_data('current_system')], mine_name=latinum_mine_num, amount=mining_efficiency)
             
             print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
@@ -1176,6 +1286,10 @@ def load_user_data():
         user_data['ship'] = load_data('ship')
         user_data['current_system'] = load_data('current_system')
         user_data['reputation'] = load_data('reputation')
+        user_data['galaxy_class_blueprints'] = load_data('galaxy_class_blueprints')
+        user_data['federation_shuttlecraft_blueprints'] = load_data('federation_shuttlecraft_blueprints')
+        user_data['stargazer_blueprints'] = load_data('stargazer_blueprints')
+        user_data['uss_grissom_blueprints'] = load_data('uss_grissom_blueprints')
 
         return user_data
     except Exception as e:
@@ -1194,6 +1308,10 @@ def save_user_data(user_data):
         save_data('ship', user_data['ship'])
         save_data('current_system', user_data['current_system'])
         save_data('reputation', user_data['reputation'])
+        save_data('uss_grissom_blueprints', user_data['uss_grissom_blueprints'])
+        save_data('galaxy_class_blueprints', user_data['galaxy_class_blueprints'])
+        save_data('federation_shuttlecraft_blueprints', user_data['federation_shuttlecraft_blueprints'])
+        save_data('stargazer_blueprints', user_data['stargazer_blueprints'])
     except Exception as e:
         print(f"Error saving user data: {e}")
 
@@ -1214,17 +1332,42 @@ def save_shop(shop_data):
 
 # Create a new daily shop with predefined items
 def create_new_shop():
+    # List of available shop items
     shop_items = [
-        {"item_name": "500 Parsteel", "price": 20, "resource_key": "parsteel", "amount": 500},
-        {"item_name": "300 Tritanium", "price": 20, "resource_key": "tritanium", "amount": 300},
-        {"item_name": "200 Dilithium", "price": 10, "resource_key": "dilithium", "amount": 200},
-        {"item_name": "5 Recruit Token", "price": 1, "resource_key": "recruit_tokens", "amount": 5},
-        {"item_name": "1 Construction Speed Up", "price": 20, "resource_key": "speed_up", "amount": 1}  # Example
+        {"item_name": "50 Recruit Tokens", "price": 5, "resource_key": "recruit_tokens", "amount": 50},
+        {"item_name": "100 Recruit Tokens", "price": 10, "resource_key": "recruit_tokens", "amount": 100},
+        {"item_name": "200 Recruit Tokens", "price": 20, "resource_key": "recruit_tokens", "amount": 200},
+        {"item_name": "300 Recruit Tokens", "price": 30, "resource_key": "recruit_tokens", "amount": 300},
+        {"item_name": "400 Recruit Tokens", "price": 40, "resource_key": "recruit_tokens", "amount": 400},
+        {"item_name": "10 Galaxy Class Blueprints", "price": 40, "resource_key": "galaxy_class_blueprints", "amount": 10},
+        {"item_name": "20 Galaxy Class Blueprints", "price": 50, "resource_key": "galaxy_class_blueprints", "amount": 20},
+        {"item_name": "30 Galaxy Class Blueprints", "price": 60, "resource_key": "galaxy_class_blueprints", "amount": 30},
+        {"item_name": "50 Galaxy Class Blueprints", "price": 80, "resource_key": "galaxy_class_blueprints", "amount": 50},
+        {"item_name": "100 Galaxy Class Blueprints", "price": 160, "resource_key": "galaxy_class_blueprints", "amount": 100},
+        {"item_name": "5 Federation Shuttlecraft Blueprints", "price": 20, "resource_key": "federation_shuttlecraft_blueprints", "amount": 5},
+        {"item_name": "15 Federation Shuttlecraft Blueprints", "price": 40, "resource_key": "federation_shuttlecraft_blueprints", "amount": 15},
+        {"item_name": "30 Federation Shuttlecraft Blueprints", "price": 45, "resource_key": "federation_shuttlecraft_blueprints", "amount": 30},
+        {"item_name": "50 Federation Shuttlecraft Blueprints", "price": 60, "resource_key": "federation_shuttlecraft_blueprints", "amount": 50},
+        {"item_name": "100 Federation Shuttlecraft Blueprints", "price": 120, "resource_key": "federation_shuttlecraft_blueprints", "amount": 100},
+        {"item_name": "5 Stargazer Blueprints", "price": 10, "resource_key": "stargazer_blueprints", "amount": 5},
+        {"item_name": "10 Stargazer Blueprints", "price": 15, "resource_key": "stargazer_blueprints", "amount": 10},
+        {"item_name": "20 Stargazer Blueprints", "price": 20, "resource_key": "stargazer_blueprints", "amount": 20},
+        {"item_name": "50 Stargazer Blueprints", "price": 70, "resource_key": "stargazer_blueprints", "amount": 50},
+        {"item_name": "100 Stargazer Blueprints", "price": 100, "resource_key": "stargazer_blueprints", "amount": 100},
+        {"item_name": "5 USS Grissom Blueprints", "price": 10, "resource_key": "uss_grissom_blueprints", "amount": 5},
+        {"item_name": "15 USS Grissom Blueprints", "price": 20, "resource_key": "uss_grissom_blueprints", "amount": 15},
+        {"item_name": "30 USS Grissom Blueprints", "price": 50, "resource_key": "uss_grissom_blueprints", "amount": 30},
+        {"item_name": "60 USS Grissom Blueprints", "price": 80, "resource_key": "uss_grissom_blueprints", "amount": 60},
+        {"item_name": "100 USS Grissom Blueprints", "price": 110, "resource_key": "uss_grissom_blueprints", "amount": 100},
     ]
-    
+
+    # Randomly select 5 items
+    selected_items = random.sample(shop_items, random.randint(5, 8))
+
+    # Create shop data with today's date and selected items
     shop_data = {
         "last_updated": str(datetime.now().date()),
-        "items": shop_items
+        "items": selected_items
     }
     
     save_shop(shop_data)
@@ -1246,7 +1389,8 @@ def update_shop_daily():
 def display_shop(shop_data):
     clear()
     income_display()
-    print("\nDaily Shop")
+    print(f"\n{Fore.BLUE}Daily Shop{Fore.WHITE}")
+    print('')
     for index, item in enumerate(shop_data["items"], start=1):
         print(f"{index}. {item['item_name']} - {item['price']} latinum")
     print("")
@@ -1742,6 +1886,208 @@ def claim_resources():
 
     print(f"{Fore.GREEN}All rescources have been claimed. Parsteel claimed: {parsteel_storage} | Tritanium claimed: {tritanium_storage} | Dilithium claimed: {dilithium_storage}{Fore.WHITE}")
 
+def load_research_data(key, research_name=None):
+    try:
+        with open('research.json', 'r') as file:
+            data = json.load(file)
+
+        if research_name:
+            if research_name in data['research']:
+                return data['research'][research_name]
+            else:
+                print(f"Research topic '{research_name}' not found.")
+                return None
+        else:
+            return data.get(key, None)
+        
+    except FileNotFoundError:
+        print("Research data file not found.")
+        return None
+
+def save_research_data(key, value, research_name=None):
+    try:
+        with open('research.json', 'r+') as file:
+            data = json.load(file)
+
+            if research_name:
+                if research_name in data['research']:
+                    data['research'][research_name][key] = value
+                else:
+                    print(f"Research topic '{research_name}' not found.")
+                    return
+            else:
+                data[key] = value
+
+            file.seek(0)
+            json.dump(data, file, indent=4)
+            file.truncate()
+
+    except FileNotFoundError:
+        print("Research data file not found.")
+
+def start_research(research_name, duration):
+    user_data = load_data('research_queue')
+
+    if user_data['research'] is None:
+        current_time = datetime.now()
+        end_time = (current_time + timedelta(seconds=duration)).isoformat()
+
+        research_data = {
+            'research': research_name,
+            'start_time': current_time.isoformat(),
+            'end_time': end_time
+        }
+        save_data('research_queue', research_data)
+
+        print(f"{Fore.YELLOW}Researching {research_name}. Completion expected at {end_time}{Fore.WHITE}")
+        time.sleep(2)
+    else:
+        print(f"{Fore.RED}Research queue is already occupied.{Fore.WHITE}")
+        time.sleep(2)
+
+def check_research_completion():
+    research_data = load_data('research_queue')
+    
+    if research_data['research'] is not None:
+        end_time = datetime.fromisoformat(research_data['end_time'])
+        current_time = datetime.now()
+
+        if current_time >= end_time:
+            research_name = research_data['research']
+            apply_research(research_name)
+
+            save_data('research_queue', {
+                'research': None,
+                'start_time': None,
+                'end_time': None
+            })
+            print(f"{Fore.GREEN}Research of {research_name} is complete.{Fore.WHITE}")
+            time.sleep(2)
+        else:
+            remaining_time = (end_time - current_time).total_seconds()
+            print(f"{Fore.YELLOW}Research in progress. Time remaining: {round(remaining_time)} seconds.{Fore.WHITE}")
+    else:
+        print(f"{Fore.RED}No research is in progress.{Fore.WHITE}")
+
+def apply_research(research_name):
+    research_data = load_research_data('research', research_name)
+
+    if research_data and research_data['level'] >= 0:
+        research_data['level'] += 1
+        save_research_data('level', research_data['level'], research_name)
+        save_research_data('cost', round((research_data['cost'] ** 1.5)), research_name)
+        print(f"{research_name} level increased to {research_data['level']}.")
+
+def display_available_research():
+    research_data = load_research_data('research')
+    available_research = []
+    unavailable_research = []
+
+    # Categorize research based on prerequisites
+    for name, details in research_data.items():
+        if prerequisites_met(name):
+            available_research.append((name, details))
+        else:
+            # Collect missing prerequisites
+            missing_prereqs = [
+                prereq for prereq in details.get('prerequisites', [])
+                if load_research_data('research', prereq)['level'] < 1
+            ]
+            unavailable_research.append((name, details, missing_prereqs))
+
+    # Display available research
+    print("\nAvailable Research:")
+    for index, (name, details) in enumerate(available_research, start=1):
+        print(f"{index}. {name} - Cost: {details['cost']} dilithium")
+
+    # Display unavailable research with unmet prerequisites
+    print("\nUnavailable Research (Prerequisites Required):")
+    for index, (name, details, missing_prereqs) in enumerate(unavailable_research, start=len(available_research) + 1):
+        print(f"{index}. {name} - Missing prerequisites: {', '.join(missing_prereqs)}")
+
+    print(f"{len(available_research) + len(unavailable_research) + 1}. Exit")
+
+    # Get user selection
+    choice = int(input("\nEnter the number of the research you wish to start, or choose the Exit option: ")) - 1
+
+    # Check if the user chose to exit
+    if choice == len(available_research) + len(unavailable_research):
+        print("Exiting research menu.")
+        return
+
+    # Determine if choice is available
+    if choice < len(available_research) and ask(f"{Fore.YELLOW}Are you sure you want to research this? This costs {available_research[choice][1]['cost']} dilithium. ({load_data('dilithium')} -> {load_data('dilithium') - available_research[choice][1]['cost']}) (Y/N): {Fore.WHITE}"):
+        selected_research = available_research[choice][0]
+        cost = available_research[choice][1]['cost']
+        
+        # Check if the player has enough dilithium
+        if load_data('dilithium') >= cost:
+            save_data('dilithium', load_data('dilithium') - cost)
+            start_research(selected_research, duration=round((cost ** 1.5)))
+            print(f"{Fore.GREEN}Research on {selected_research} has started.{Fore.WHITE}")
+            print(f"Remaining Dilithium: {load_data('dilithium')}")
+            time.sleep(2)
+        else:
+            print(f"{Fore.RED}Not enough dilithium to start this research.{Fore.WHITE}")
+            time.sleep(2)
+    else:
+        print(f"{Fore.RED}Selected research is unavailable or prerequisites have not been met.{Fore.WHITE}")
+        time.sleep(2)
+
+
+# Function to check prerequisites
+def prerequisites_met(research_name):
+    research_data = load_research_data('research', research_name)
+
+    if research_data:
+        prerequisites = research_data.get('prerequisites', [])
+        for prereq in prerequisites:
+            prereq_data = load_research_data('research', prereq)
+            if prereq_data['level'] < 1:
+                return False
+        return True
+    return False
+
+# Define the mapping of research names to JSON stat keys
+research_to_stat_key = {
+    "Warp Mathematics": "warp_range",
+    "Mining Laser": "mining_efficiency",
+    "Inventory Management Systems": "max_storage",
+    "Sheild Dynamics": "max_health",
+    "Phaser Calibration": "firepower",
+    "Targeting Matrix": "accuracy",
+    "Evasive Maneuvers": "evasion",
+}
+
+def research_multi(research_name):
+    # Map the research name to the corresponding JSON key
+    stat_key = research_to_stat_key.get(research_name)
+
+    # Ensure the research name has a mapped stat key
+    if not stat_key:
+        print(f"No stat key found for research '{research_name}'.")
+        return None
+
+    # Load research data and base value from JSON
+    research_data = load_research_data('research')
+    base_value = load_ship_stat(load_data('ship'), stat_key)
+
+    # Check if the research exists in the data and retrieve the level
+    if research_name in research_data:
+        research_level = research_data[research_name]['level']
+        
+        # Define the effect multiplier per level (e.g., 5% per level)
+        multiplier_per_level = 0.05
+        total_multiplier = 1 + (multiplier_per_level * research_level)
+
+        # Calculate the upgraded value without saving
+        upgraded_value = base_value * total_multiplier
+        return upgraded_value
+
+    else:
+        print(f"No research found for '{research_name}'. Returning base value.")
+        return base_value
+
 
 finding_var = 0
 warp_time = 0
@@ -1824,11 +2170,12 @@ while True:
     clear()
     income_display()
     check_construction_completion()
+    check_research_completion()
     background_production()
     print('What would you like to do?')
-    OpList = [f"1: Explore {systems[load_data('current_system')]}", "2: Navigate to Another System", "3: Return to Drydock", "4: Display Missions"]
+    OpList = [f"1: Explore {systems[load_data('current_system')]}", "2: Navigate to Another System", "3: Return to Drydock", "4: Display Missions", "5: Open Shop"]
     print(*OpList, sep = '\n')
-    option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3, 4])
+    option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3, 4, 5])
     time.sleep(0.1)
     if (option == 1):
         clear()
@@ -2033,9 +2380,11 @@ while True:
             save_data('parsteel', (load_data('parsteel') + load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage')))
             save_data('tritanium', (load_data('tritanium') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage')))
             save_data('dilithium', (load_data('dilithium') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage')))
+            save_data('latinum', (load_data('latinum') + load_ship_stat(ship_name=load_data('ship'), stat_key=('latinum_storage'))))
             save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=0)
             save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=0)
             save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=0)
+            save_ship_data(ship_name=load_data('ship'), stat_key='latinum_storage', value=0)
             save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage'))
             income_display()
             save_data('current_system', 1)
@@ -2092,10 +2441,16 @@ while True:
                     income_display()
                     rd_delta = 2
                     print('R&D Menu')
-                    print('1. Start Research\n2. Upgrade R&D Department\n3. Exit')
+                    print('1. Enter Research\n2. Upgrade R&D Department\n3. Exit')
                     rd_option = ask_sanitize("Option: ")
                     if rd_option == 1:
-                        print('')
+                        clear()
+                        income_display()
+                        research_path = ask_sanitize(f"Research Menu\n1. Veiw Research/Start Research\n2. Exit\nOption: ")
+                        if research_path == 1:
+                            display_available_research()
+                        if research_path == 2:
+                            continue
                     if rd_option == 2:
                         if ask(f"{Fore.YELLOW}Are you sure you want to upgrade? This will take {(load_specific_upgrade('starbase', 'R&D') ** rd_delta) * 10} seconds and cost {round(((load_specific_upgrade('starbase', 'R&D') * rd_delta) ** rd_delta) * 10)} parsteel and {round(((load_specific_upgrade('starbase', 'R&D') * rd_delta) ** rd_delta) * 5)} tritanium. (Y/N): ") and load_data('parsteel') >= round(((load_specific_upgrade('starbase', 'R&D') * rd_delta) ** rd_delta) * 10) and load_data('tritanium') >= round(((load_specific_upgrade('starbase', 'R&D') * rd_delta) ** rd_delta) * 5):
                             save_data('parsteel', load_data('parsteel') - round(((load_specific_upgrade('starbase', 'R&D') * rd_delta) ** rd_delta) * 10))
@@ -2111,28 +2466,11 @@ while True:
                     income_display()
                     academy_delta = 2.3
                     print('Academy Menu')
-                    academy_option = ask_sanitize('1. View Officers\n2. Enter Crew Shop\n3. Upgrade Academy\n4. Exit\nOption: ')
+                    academy_option = ask_sanitize('1. View Officers\n2. Enter Shop\n3. Upgrade Academy\n4. Exit\nOption: ')
                     if academy_option == 1:
                         clear()
-                        with open('user_crew_data.json', 'r') as file:
-                            data = json.load(file)
-                        for crew_member in data["crew"]:
-                            print("- " + crew_member["name"])
-                        manifest_option = ask_sanitize('1. View Crew Stats\n2. Upgrade Crew\n3. Exit\nOption: ')
-                        if manifest_option == 1:
-                            clear()
-                            for crew_member in data["crew"]:
-                                print(f"- {crew_member['name']}'s Stats:")
-                                for key, value in crew_member.items():
-                                    print(f"  {key.capitalize()}: {value}")
-                                print() 
-                            if ask(question='Type Y or N to exit: '):
-                                continue
-                        elif manifest_option == 2:
-                            if __name__ == "__main__":
-                                main()
-                        elif manifest_option == 3:
-                            clear()
+                        if __name__ == "__main__":
+                            main()
                         continue
                     if academy_option == 2:
                         shop_loop()
@@ -2150,10 +2488,10 @@ while True:
                 clear()
                 income_display()
                 ship_management_menu(coins=load_data('parsteel'))
-            if drydock_option == 3: #research
+            if drydock_selection == 3: #research
                 clear()
                 income_display()
-                print('no data')
+                display_available_research()
             if drydock_selection == 4:
                 clear()
                 income_display()
@@ -2175,6 +2513,9 @@ while True:
         display_missions()
         if ask("Type Y to exit: "):
             continue
+    if option == 5:
+        clear()
+        shop_loop()
     if option == 800:
         clear()
         with open('user_crew_data.json', 'r') as file:

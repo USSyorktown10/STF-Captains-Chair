@@ -1,35 +1,47 @@
 {
-    "last_updated": "2024-10-24",
+    "last_updated": "2024-10-26",
     "items": [
         {
-            "item_name": "500 Parsteel",
-            "price": 20,
-            "resource_key": "parsteel",
-            "amount": 500
+            "item_name": "50 Recruit Tokens",
+            "price": 5,
+            "resource_key": "recruit_tokens",
+            "amount": 50
         },
         {
-            "item_name": "300 Tritanium",
-            "price": 20,
-            "resource_key": "tritanium",
+            "item_name": "15 Federation Shuttlecraft Blueprints",
+            "price": 40,
+            "resource_key": "federation_shuttlecraft_blueprints",
+            "amount": 15
+        },
+        {
+            "item_name": "300 Recruit Tokens",
+            "price": 30,
+            "resource_key": "recruit_tokens",
             "amount": 300
         },
         {
-            "item_name": "200 Dilithium",
-            "price": 10,
-            "resource_key": "dilithium",
-            "amount": 200
+            "item_name": "30 Galaxy Class Blueprints",
+            "price": 60,
+            "resource_key": "galaxy_class_blueprints",
+            "amount": 30
         },
         {
-            "item_name": "5 Recruit Token",
-            "price": 1,
-            "resource_key": "recruit_tokens",
-            "amount": 5
+            "item_name": "60 USS Grissom Blueprints",
+            "price": 80,
+            "resource_key": "uss_grissom_blueprints",
+            "amount": 60
         },
         {
-            "item_name": "1 Construction Speed Up",
-            "price": 20,
-            "resource_key": "speed_up",
-            "amount": 1
+            "item_name": "10 Stargazer Blueprints",
+            "price": 15,
+            "resource_key": "stargazer_blueprints",
+            "amount": 10
+        },
+        {
+            "item_name": "50 Federation Shuttlecraft Blueprints",
+            "price": 60,
+            "resource_key": "federation_shuttlecraft_blueprints",
+            "amount": 50
         }
     ]
 }

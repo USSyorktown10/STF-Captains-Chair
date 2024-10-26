@@ -1,4 +1,4 @@
-drydock_option1 = ['1: Upgrade Mining Laser', '2: Upgrade Health', '3: Upgrade Warp Range', '4: View Upgrades', '5: Restore Health', '6: Exit']
+            drydock_option1 = ['1: Upgrade Mining Laser', '2: Upgrade Health', '3: Upgrade Warp Range', '4: View Upgrades', '5: Restore Health', '6: Exit']
             print(*drydock_option1, sep = '\n')
             drydock_option_2 = ask_sanitize(question_ask='What would you like to upgrade: ')
             if drydock_option_2 == 1:

@@ -1,7 +1,51 @@
 {
-    "research": [
-    {
-        "sigma": 1
+    "research": {
+        "Warp Mathematics": {
+            "level": 0,
+            "cost": 20,
+            "prerequisites": []
+        },
+        "Mining Laser": {
+            "level": 0,
+            "cost": 30,
+            "prerequisites": [
+                "Warp Mathematics"
+            ]
+        },
+        "Inventory Management Systems": {
+            "level": 0,
+            "cost": 40,
+            "prerequisites": [
+                "Mining Laser"
+            ]
+        },
+        "Sheild Dynamics": {
+            "level": 0,
+            "cost": 40,
+            "prerequisites": [
+                "Inventory Management Systems"
+            ]
+        },
+        "Phaser Calibration": {
+            "level": 0,
+            "cost": 50,
+            "prerequisites": [
+                "Sheild Dynamics"
+            ]
+        },
+        "Targeting Matrix": {
+            "level": 0,
+            "cost": 50,
+            "prerequisites": [
+                "Phaser Calibration"
+            ]
+        },
+        "Evasive Maneuvers": {
+            "level": 0,
+            "cost": 50,
+            "prerequisites": [
+                "Targeting Matrix"
+            ]
+        }
     }
-]
 }
