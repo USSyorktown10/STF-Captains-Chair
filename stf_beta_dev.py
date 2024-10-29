@@ -659,7 +659,7 @@ def main():
 
 
 def income_display():
-     print(f"{Fore.YELLOW}Parsteel:{Fore.WHITE} {load_data('parsteel')} || {Fore.GREEN}Tritanium:{Fore.WHITE} {load_data('tritanium')} || {Fore.CYAN}Dilithium:{Fore.WHITE} {load_data('dilithium')} || {Fore.YELLOW}Latinum:{Fore.WHITE} {load_data('latinum')} || {Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {load_data('ship')} || {Fore.LIGHTBLUE_EX}Current System:{Fore.WHITE} {systems[load_data('current_system')]} || {Fore.BLUE}Health:{Fore.WHITE} {load_ship_stat(ship_name=load_data('ship'), stat_key='health')}/{load_ship_stat(ship_name=load_data('ship'), stat_key='max_health')} || {Fore.GREEN}Storage Avalible:{Fore.WHITE} {load_ship_stat(ship_name=load_data('ship'), stat_key='storage')}/{load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage')}")
+     print(f"{Fore.YELLOW}Parsteel:{Fore.WHITE} {load_data('parsteel')} || {Fore.GREEN}Tritanium:{Fore.WHITE} {load_data('tritanium')} || {Fore.CYAN}Dilithium:{Fore.WHITE} {load_data('dilithium')} || {Fore.YELLOW}Latinum:{Fore.WHITE} {load_data('latinum')} || {Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {load_data('ship')} || {Fore.LIGHTBLUE_EX}Current System:{Fore.WHITE} {systems[load_data('current_system')]} || {Fore.BLUE}Health:{Fore.WHITE} {load_ship_stat(ship_name=load_data('ship'), stat_key='health')}/{research_multi('Sheild Dynamics') * load_ship_stat(ship_name=load_data('ship'), stat_key='max_health')} || {Fore.GREEN}Storage Avalible:{Fore.WHITE} {load_ship_stat(ship_name=load_data('ship'), stat_key='storage')}/{research_multi('Inventory Management Systems') * load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage')}")
 
 def ask(question):
         response = input(question)
@@ -796,17 +796,17 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
     global damdelt
     print(f'{Fore.YELLOW}You are attacking the {opponent_name}! This ship has {opponent_health} health, and if you win, you get {income} materials.{Fore.WHITE}')
     print(f"{Fore.YELLOW}YELLOW ALERT{Fore.WHITE}")
-    print(f"{Fore.BLUE}Your ship stats:\nFirepower: {load_ship_stat(ship_name=load_data('ship'), stat_key='firepower')}\nAccuracy: {load_ship_stat(ship_name=load_data('ship'), stat_key='accuracy')}\nEvasion: {load_ship_stat(ship_name=load_data('ship'), stat_key='evasion')}{Fore.WHITE}")
+    print(f"{Fore.BLUE}Your ship stats:\nFirepower: {(research_multi('Phaser Calibration') * load_ship_stat(ship_name=load_data('ship'), stat_key='firepower'))}\nAccuracy: {(research_multi('Targeting Matrix') * load_ship_stat(ship_name=load_data('ship'), stat_key='accuracy'))}\nEvasion: {(research_multi('Evasive Maneuvers') * load_ship_stat(ship_name=load_data('ship'), stat_key='evasion'))}{Fore.WHITE}")
     print(f"{Fore.YELLOW}Enemy ships stats:\nFirepower: {firepower}\nAccuracy: {accuracy}\nEvasion: {evasion}{Fore.WHITE}")
     if ask('Do you want to battle this enemy? '):
         clear()
         print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
-        while load_ship_stat(ship_name=load_data('ship'), stat_key='health') > 0 or opponent_health > 0:
+        while (research_multi('Sheild Dynamics') * load_ship_stat(ship_name=load_data('ship'), stat_key='health')) > 0 or opponent_health > 0:
             clear
             turn = 'player'
             if turn == 'player':
-                if random.uniform(0, 1) < (load_ship_stat(ship_name=load_data('ship'), stat_key='accuracy') / evasion + 1):
-                    damage = load_ship_stat(ship_name=load_data('ship'), stat_key='firepower') * random.uniform(50, 200)  # Random damage variation
+                if random.uniform(0, 1) < (research_multi('Targeting Matrix') / evasion + 1):
+                    damage = research_multi('Phaser Calibration') * random.uniform(50, 200)  # Random damage variation
                     opponent_health -= damage
                     print(f"{Fore.GREEN}Enemy Hit! {opponent_name} took {damage:.2f} damage. Enemy health: {opponent_health:.2f}{Fore.WHITE}")
                     time.sleep(3)
@@ -815,26 +815,26 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                     print(f"{Fore.RED}You missed!{Fore.RED}")
                     time.sleep(2)
                     turn = 'enemy'
-            if load_ship_stat(ship_name=load_data('ship'), stat_key='health') <= 0:
+            if (research_multi('Sheild Dynamics')) <= 0:
                 break
             if opponent_health <= 0:
                 break
             if turn == 'enemy':
-                if random.uniform(0, 1) < (accuracy / (load_ship_stat(ship_name=load_data('ship'), stat_key='accuracy') + 1)):
+                if random.uniform(0, 1) < (accuracy / (research_multi('Targeting Matrix') + 1)):
                     damage = firepower * random.uniform(50, 150)
-                    save_ship_data(stat_key='health', value=round(load_ship_stat(ship_name=load_data('ship'), stat_key='health') - damage), ship_name=load_data('ship'))
-                    print(f"{Fore.RED}You have been hit! You took {damage:.2f} damage. Your health: {load_ship_stat(ship_name=load_data('ship'), stat_key='health'):.2f}{Fore.WHITE}")
+                    save_ship_data(stat_key='health', value=round(research_multi('Sheild Dynamics') - damage), ship_name=load_data('ship'))
+                    print(f"{Fore.RED}You have been hit! You took {damage:.2f} damage. Your health: {research_multi('Sheild Dynamics'):.2f}{Fore.WHITE}")
                     time.sleep(3)
                     turn = 'player'
                 else:
                     print(f"{Fore.GREEN}{opponent_name} missed!{Fore.WHITE}")
                     time.sleep(2)
                     turn = 'player'
-            if load_ship_stat(ship_name=load_data('ship'), stat_key='health') <= 0:
+            if (research_multi('Sheild Dynamics')) <= 0:
                 break
             if opponent_health <= 0:
                 break
-    if load_ship_stat(stat_key='health', ship_name=load_data('ship')) <= 0:
+    if (research_multi('Sheild Dynamics')) <= 0:
             clear()
             print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
             print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage')}{Fore.WHITE}")
@@ -899,16 +899,17 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 print(f'{Fore.BLUE}Dilithium Gained: {Fore.WHITE}', (income/2))
                 lat_reward = random.randint(1, 5)
                 print(f'{Fore.BLUE}Latinum Gained: {Fore.WHITE}', lat_reward)
+                save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - (income + (income/2) + lat_reward))
                 save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + income)
                 save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + (income/2))
-                save_data('latinum', lat_reward)
+                save_ship_data(ship_name=load_data('ship'), stat_key='latinum_storage', value=load_ship_stat(load_data('ship'), 'latinum_storage') + lat_reward)
                 time.sleep(3)
 
 def mining_deposit_parsteel(parsteel_mine_num):
     income_display()
     print('You have approached a Parsteel Mine!')
     deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=parsteel_mine_num)
-    mining_efficiency = load_ship_stat(ship_name=load_data('ship'), stat_key='mining_efficiency') 
+    mining_efficiency = (research_multi('Mining Laser'))
     deposit_var = deposit_materials / mining_efficiency 
 
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'parsteel.{Fore.WHITE}')
@@ -935,7 +936,7 @@ def mining_deposit_parsteel(parsteel_mine_num):
             
             print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
-            if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') < 0:
+            if research_multi('Inventory Management Systems') < 0:
                 clear()
                 print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
                 time.sleep(2)
@@ -946,7 +947,7 @@ def mining_deposit_tritanium(tritanium_mine_num):
     income_display()
     print('You have approached a Tritanium Mine!')
     deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=tritanium_mine_num)
-    mining_efficiency = load_ship_stat(ship_name=load_data('ship'), stat_key='mining_efficiency') 
+    mining_efficiency = (research_multi('Mining Laser'))
     deposit_var = deposit_materials / mining_efficiency 
 
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'tritanium.{Fore.WHITE}')
@@ -973,7 +974,7 @@ def mining_deposit_tritanium(tritanium_mine_num):
             
             print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
-            if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') < 0:
+            if research_multi('Inventory Management Systems') < 0:
                 clear()
                 print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
                 time.sleep(2)
@@ -984,7 +985,7 @@ def mining_deposit_dilithium(dilithium_mine_num):
     income_display()
     print('You have approached a Dilithium Mine!')
     deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=dilithium_mine_num)
-    mining_efficiency = load_ship_stat(ship_name=load_data('ship'), stat_key='mining_efficiency') 
+    mining_efficiency = (research_multi('Mining Laser'))
     deposit_var = deposit_materials / mining_efficiency 
 
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'dilithium.{Fore.WHITE}')
@@ -1011,7 +1012,7 @@ def mining_deposit_dilithium(dilithium_mine_num):
             
             print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
-            if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') < 0:
+            if research_multi('Inventory Management Systems') < 0:
                 clear()
                 print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
                 time.sleep(2)
@@ -1022,7 +1023,7 @@ def mining_deposit_latinum(latinum_mine_num):
     income_display()
     print('You have approached a Latnium Mine!')
     deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=latinum_mine_num)
-    mining_efficiency = load_ship_stat(ship_name=load_data('ship'), stat_key='mining_efficiency') 
+    mining_efficiency = (research_multi('Mining Laser'))
     deposit_var = deposit_materials / mining_efficiency 
 
     print(f'{Fore.BLUE}This mine has', deposit_materials, f'latinum.{Fore.WHITE}')
@@ -1049,7 +1050,7 @@ def mining_deposit_latinum(latinum_mine_num):
             
             print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
-            if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') < 0:
+            if research_multi('Inventory Management Systems') < 0:
                 clear()
                 print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
                 time.sleep(2)
@@ -1132,6 +1133,7 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     save_ship_data(load_data('ship'), 'dilithium_storage', load_ship_stat(load_data('ship'), 'dilithium_storage') - dil_trade_am)
                     save_ship_data(load_data('ship'), 'tritanium_storage', load_ship_stat(load_data('ship'), 'tritanium_storage') + tri_trade_am)
+                    save_ship_data(load_data('ship'), 'storage', load_ship_stat(load_data('ship'), 'storage') - tri_trade_am)
                     print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
                     time.sleep(2)
                     return
@@ -1151,6 +1153,7 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                 if load_ship_stat(load_data('ship'), 'parsteel_storage') > par_trade_am:
                     save_ship_data(load_data('ship'), 'parsteel_storage',load_ship_stat(load_data('ship'), 'parsteel_storage') - par_trade_am)
                     save_ship_data(load_data('ship'), 'tritanium_storage', load_ship_stat(load_data('ship'), 'tritanium_storage') + tri_trade_am)
+                    save_ship_data(load_data('ship'), 'storage', load_ship_stat(load_data('ship'), 'storage') - tri_trade_am)
                     print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', par_trade_am)
@@ -1173,6 +1176,7 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                 if load_ship_stat(load_data('ship'), 'tritanium_storage') > tri_trade_am:
                     save_ship_data(load_data('ship'), 'tritanium_storage',load_ship_stat(load_data('ship'), 'tritanium_storage') - tri_trade_am)
                     save_ship_data(load_data('ship'), 'parsteel_storage', load_ship_stat(load_data('ship'), 'parsteel_storage') + par_trade_am)
+                    save_ship_data(load_data('ship'), 'storage', load_ship_stat(load_data('ship'), 'storage') - par_trade_am)
                     print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', tri_trade_am)
@@ -1195,6 +1199,7 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                 if load_ship_stat(load_data('ship'), 'parsteel_storage') > par_trade_am:
                     save_ship_data(load_data('ship'), 'parsteel_storage',load_ship_stat(load_data('ship'), 'parsteel_storage') - par_trade_am)
                     save_ship_data(load_data('ship'), 'dilithium_storage',load_ship_stat(load_data('ship'), 'dilithium_storage') + dil_trade_am)
+                    save_ship_data(load_data('ship'), 'storage', load_ship_stat(load_data('ship'), 'storage') - dil_trade_am)
                     print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', par_trade_am)
@@ -1233,7 +1238,7 @@ def navigate():
     global warp_time
     global max_system
 
-    warp_range = load_ship_stat(ship_name=load_data('ship'), stat_key='warp_range')
+    warp_range = round(research_multi('Warp Mathematics'))
     max_system = len(systems)  
 
     reachable_systems = {
@@ -2076,17 +2081,18 @@ def research_multi(research_name):
     if research_name in research_data:
         research_level = research_data[research_name]['level']
         
-        # Define the effect multiplier per level (e.g., 5% per level)
-        multiplier_per_level = 0.05
-        total_multiplier = 1 + (multiplier_per_level * research_level)
+        # If the research level is 0, set total_multiplier to 1
+        if research_level == 0:
+            total_multiplier = 1
+        else:
+            total_multiplier = research_level
 
-        # Calculate the upgraded value without saving
-        upgraded_value = base_value * total_multiplier
-        return upgraded_value
+        return round(total_multiplier)
 
     else:
         print(f"No research found for '{research_name}'. Returning base value.")
-        return base_value
+        return round(base_value)
+
 
 
 finding_var = 0
@@ -2109,7 +2115,7 @@ except subprocess.CalledProcessError:
 print('Necessary packages imported')
 
 while True:
-    if load_ship_stat(stat_key='health', ship_name=load_data('ship')) <= 0:
+    if research_multi('Sheild Dynamics') <= 0:
             clear()
             print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
             print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage')}{Fore.WHITE}")
@@ -2370,6 +2376,61 @@ while True:
             elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
                 scan_system()
+        if load_data('current_system') == 5: # andor dev
+            if load_explored(systems[load_data('current_system')]) == 1:
+                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Tritanium Mine', '4. Parsteel Mine', '5. Latinum Mine']
+                income_display()
+                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
+                print(*system_findings, sep='\n')
+                current_system_rand = ask_sanitize('Option: ')
+                if current_system_rand == 1:
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['dilithium_mine1', 'dilithium_mine2']
+                        mining_deposit_dilithium(dilithium_mine_num=random.choice(rand_min))
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 4:
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['parsteel_mine1', 'parsteel_mine2']
+                        mining_deposit_parsteel(parsteel_mine_num=random.choice(rand_min))
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 3:
+                    clear()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['tritanium_mine1', 'tritanium_mine2']
+                        mining_deposit_tritanium(tritanium_mine_num=random.choice(rand_min))
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 2:
+                    clear()
+                    income_display()
+                    print('You have approached a Mission Planet!')
+                    print(*mission_list_print, sep = '\n')
+                    print(f"{len(mission_list_print) + 1}: Exit")
+                    accept_missions()
+                if current_system_rand == 5:
+                    clear()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['latinum_mine1', 'latinum_mine2']
+                        mining_deposit_latinum(latinum_mine_num=random.choice(rand_min))
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enouh storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+            elif load_explored(systems[load_data('current_system')]) == 2:
+                income_display()
+                scan_system()
     if (option == 2):
         navigate()
     if option == 3:
@@ -2385,7 +2446,7 @@ while True:
             save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=0)
             save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=0)
             save_ship_data(ship_name=load_data('ship'), stat_key='latinum_storage', value=0)
-            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage'))
+            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=(research_multi('Inventory Management Systems') * load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage')))
             income_display()
             save_data('current_system', 1)
             drydock_option = ['1: Enter Station', '2: Enter Shipyard', '3: Open Research', '4: Repair Ship', '5: Exit']
@@ -2495,9 +2556,9 @@ while True:
             if drydock_selection == 4:
                 clear()
                 income_display()
-                if ask(f"{Fore.RED}Are you sure you want to repair your ship? This will cost you {round((load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5)} parsteel. (Y/N): ") and load_data('parsteel') >= round((load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5):
-                    save_data('parsteel', load_data('parsteel') - round((load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5))
-                    save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
+                if ask(f"{Fore.RED}Are you sure you want to repair your ship? This will cost you {round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5)} parsteel. (Y/N): ") and load_data('parsteel') >= round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5):
+                    save_data('parsteel', load_data('parsteel') - round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5))
+                    save_ship_data(ship_name=load_data('ship'), stat_key='health', value=(research_multi('Sheild Dynamics') * load_ship_stat(ship_name=load_data('ship'), stat_key='max_health')))
                     print(f"{Fore.GREEN}Repair Completed. You now have {load_ship_stat(load_data('ship'), 'health')} health.{Fore.WHITE}")
                     time.sleep(2)
                     continue
