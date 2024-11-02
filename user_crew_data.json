@@ -4,25 +4,41 @@
             "name": "Kirk",
             "skill_level": 10,
             "skill": "Command",
-            "rarity": "Common"
+            "rarity": "Common",
+            "ability": {
+                "stat": "firepower",
+                "boost": 0.1
+            }
         },
         {
             "name": "Spock",
             "skill_level": 10,
             "skill": "Science",
-            "rarity": "Common"
+            "rarity": "Common",
+            "ability": {
+                "stat": "mining_efficiency",
+                "boost": 0.1
+            }
         },
         {
             "name": "Scotty",
             "skill_level": 10,
             "skill": "Engineering",
-            "rarity": "Common"
+            "rarity": "Common",
+            "ability": {
+                "stat": "accuracy",
+                "boost": 0.1
+            }
         },
         {
             "name": "McCoy",
             "skill_level": 10,
             "skill": "Medical",
-            "rarity": "Common"
+            "rarity": "Common",
+            "ability": {
+                "stat": "max_health",
+                "boost": 0.1
+            }
         }
     ]
 }

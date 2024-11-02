@@ -1,23 +1,29 @@
 {
-    "last_updated": "2024-10-26",
+    "last_updated": "2024-10-31",
     "items": [
-        {
-            "item_name": "50 Recruit Tokens",
-            "price": 5,
-            "resource_key": "recruit_tokens",
-            "amount": 50
-        },
-        {
-            "item_name": "15 Federation Shuttlecraft Blueprints",
-            "price": 40,
-            "resource_key": "federation_shuttlecraft_blueprints",
-            "amount": 15
-        },
         {
             "item_name": "300 Recruit Tokens",
             "price": 30,
             "resource_key": "recruit_tokens",
             "amount": 300
+        },
+        {
+            "item_name": "5 USS Grissom Blueprints",
+            "price": 10,
+            "resource_key": "uss_grissom_blueprints",
+            "amount": 5
+        },
+        {
+            "item_name": "20 Stargazer Blueprints",
+            "price": 20,
+            "resource_key": "stargazer_blueprints",
+            "amount": 20
+        },
+        {
+            "item_name": "100 Federation Shuttlecraft Blueprints",
+            "price": 120,
+            "resource_key": "federation_shuttlecraft_blueprints",
+            "amount": 100
         },
         {
             "item_name": "30 Galaxy Class Blueprints",
@@ -26,21 +32,15 @@
             "amount": 30
         },
         {
-            "item_name": "60 USS Grissom Blueprints",
-            "price": 80,
+            "item_name": "15 USS Grissom Blueprints",
+            "price": 20,
             "resource_key": "uss_grissom_blueprints",
-            "amount": 60
+            "amount": 15
         },
         {
-            "item_name": "10 Stargazer Blueprints",
-            "price": 15,
-            "resource_key": "stargazer_blueprints",
-            "amount": 10
-        },
-        {
-            "item_name": "50 Federation Shuttlecraft Blueprints",
-            "price": 60,
-            "resource_key": "federation_shuttlecraft_blueprints",
+            "item_name": "50 Galaxy Class Blueprints",
+            "price": 80,
+            "resource_key": "galaxy_class_blueprints",
             "amount": 50
         }
     ]

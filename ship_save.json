@@ -36,10 +36,17 @@
             "parsteel_storage": 0,
             "tritanium_storage": 0,
             "dilithium_storage": 0,
+            "latinum_storage": 0,
             "mining_efficiency": 2,
             "warp_range": 4,
             "owned": false,
-            "equipped": false
+            "equipped": false,
+            "crew": {
+                "captain": null,
+                "bridge1": null,
+                "bridge2": null,
+                "bridge3": null
+            }
         },
         {
             "name": "Federation Shuttlecraft",
@@ -53,10 +60,17 @@
             "parsteel_storage": 0,
             "tritanium_storage": 0,
             "dilithium_storage": 0,
+            "latinum_storage": 0,
             "mining_efficiency": 2,
             "warp_range": 4,
             "owned": false,
-            "equipped": false
+            "equipped": false,
+            "crew": {
+                "captain": null,
+                "bridge1": null,
+                "bridge2": null,
+                "bridge3": null
+            }
         },
         {
             "name": "Galaxy Class",
@@ -70,10 +84,17 @@
             "parsteel_storage": 0,
             "tritanium_storage": 0,
             "dilithium_storage": 0,
+            "latinum_storage": 0,
             "mining_efficiency": 4,
             "warp_range": 8,
             "owned": false,
-            "equipped": false
+            "equipped": false,
+            "crew": {
+                "captain": null,
+                "bridge1": null,
+                "bridge2": null,
+                "bridge3": null
+            }
         }
     ]
 }
