@@ -808,7 +808,7 @@ def complete_mission(mission_name):
     if not missions[mission_name]['completed']:
         missions[mission_name]['completed'] = True
         missions[mission_name]['accepted'] = False
-        reward = mission_rewards[mission_name]
+        reward = load_building_data('buildings')['starbase']['upgrades']['Ops'] * mission_rewards[mission_name]
         coins += reward
         save_data('missions', missions)
         save_data('latinum', coins)
@@ -915,6 +915,9 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + income)
                 save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + (income/2))
                 save_ship_data(ship_name=load_data('ship'), stat_key='latinum_storage', value=load_ship_stat(load_data('ship'), 'latinum_storage') + lat_reward)
+                update_mission_progress('Defeat 1 Enemy', 1)
+                update_mission_progress('Defeat 3 Enemies', 1)
+                update_mission_progress('Defeat 5 Enemies', 1)
                 time.sleep(3)
 
 base_ship_stats = {
@@ -961,7 +964,6 @@ def check_health():
         clear()
         print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
         print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='latinum_storage')}{Fore.WHITE}")
-        time.sleep(2)
         save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=0)
         save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=0)
         save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=0)
@@ -980,6 +982,7 @@ def check_health():
         save_data('ship', 'Stargazer')
         save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
         save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+        time.sleep(5)
             
 
 def mining_deposit(mine_type, mine_num, mine_capitilize):
@@ -1682,6 +1685,13 @@ def check_construction_completion():
             upgrade_part = construction_data.get('upgrade_part')  # Get the upgrade part if it exists
             
             print(f"{Fore.GREEN}Construction of {upgrade_part} is complete!{Fore.WHITE}")
+            if upgrade_part == 'Academy':
+                random_val = random.randint((load_building_data('buildings')['starbase']['upgrades']['Academy']) * 10, (load_building_data('buildings')['starbase']['upgrades']['Academy']) * 20)
+                print(f"{Fore.GREEN}Recruit Tokens Earned: {random_val}{Fore.WHITE}")
+                save_data('recruit_tokens', load_data('recruit_tokens') + random_val)
+                random_val = random.randint((load_building_data('buildings')['starbase']['upgrades']['Academy']), (load_building_data('buildings')['starbase']['upgrades']['Academy']) * 3)
+                print(f"{Fore.GREEN}Latinum Earned: {random_val}{Fore.WHITE}")
+                save_data('latinum', load_data('latinum') + random_val)
 
             apply_upgrade(building_name, upgrade_part)  # Apply the specific upgrade
 
@@ -1693,7 +1703,7 @@ def check_construction_completion():
                 'upgrade_part': None  # Reset the upgrade part
             })
             
-            time.sleep(2)  # Optional: wait for a moment before continuing the game loop
+            time.sleep(2) 
 
         else:
             # Calculate remaining time
@@ -1752,6 +1762,8 @@ def calculate_production_rate(building_name, upgrade_part):
     else:
         print(f"Building '{building_name}' not found.")
         return None
+
+starbase_upgrades = load_building_data('buildings')['starbase']['upgrades']
 
 def calculate_production(upgrade_level):
     base_rate = 10  # The base production rate per minute for level 1
@@ -2174,7 +2186,30 @@ def distress_call_scenario_pt2():
         print(f"{Fore.GREEN}The second ship is fleeing!\nVictory!{Fore.WHITE}")
         update_mission_progress('Respond to Distress Signal in Regula', 1)
         time.sleep(2)
-                                                        
+              
+def xindi_station():
+    clear()
+    income_display()
+    first_itteration = True
+    while True:
+        if first_itteration == True:
+            center_text(f"{Fore.BLUE}<=============== Welcome to Xindi Starbase 9! ===============>{Fore.WHITE}")
+            first_itteration = False
+            time.sleep(2)
+        else:
+            center_text(f"{Fore.BLUE}<=============== Xindi Starbase 9 ===============>{Fore.WHITE}")
+        xindi_option = ask_sanitize("1. Trade\n2. Get briefed on Xindi Missions\n3. Participate in Training Drills\n4. Apply for Xindi Mission Board\n5. Search for classified Xindi knowledge\n6. Get info on all of these topics\n7. Undock and Exit\nOption: ")
+        if xindi_option == 6:
+            clear()
+            income_display()
+            typing_animation("Acessing LCARS...")
+            time.sleep(2)
+            typing_animation("All information will be displayed in 5 seconds.")
+            time.sleep(5)
+            clear()
+            time.sleep(0.5)
+            print(f"{Fore.BLUE}TRADE INFO{Fore.WHITE}\nTrade materials such as parsteel, tritanium, dilithium, and latinum for one another.\n{Fore.BLUE}XINDI MISSIONS{Fore.WHITE}\nTake part in missions with the Xindi, and help your relations with them as you help.")
+                                          
 finding_var = 0 
 warp_time = 0
 
@@ -2209,9 +2244,9 @@ while True:
     print(*OpList, sep = '\n')
     option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3, 4, 5])
     time.sleep(0.1)
-    if (option == 1):
+    if option == 1:
         clear()
-        if load_data('current_system') == 1:
+        if load_data('current_system') == 1: #Sol
             if load_explored(systems[load_data('current_system')]) == 1:
                 system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Orion Pirate']
                 income_display()
@@ -2232,14 +2267,11 @@ while True:
                     income_display()
                     print('You have approached an Orion Pirate!')
                     print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship'] #hail the ship
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
                     print(*op_1, sep='\n')
                     ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                     if ori_ship == 1:
                         battle_stat(opponent_health=random.randint(500,900), opponent_name='Orion Pirate', firepower=1, accuracy=1, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                        update_mission_progress('Defeat 1 Enemy', 1)
-                        update_mission_progress('Defeat 3 Enemies', 1)
-                        update_mission_progress('Defeat 5 Enemies', 1)
                     if ori_ship == 2:
                         hailing_frequency()
                 if current_system_rand == 2:
@@ -2252,9 +2284,9 @@ while True:
             elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
                 scan_system()
-        if load_data('current_system') == 2: # vulcan dev
+        if load_data('current_system') == 2: # Vulcan 
             if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Orion Pirate', '4. Tritanium Mine']
+                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Vulcan Dissident', '4. Tritanium Mine']
                 income_display()
                 print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
                 print(*system_findings, sep='\n')
@@ -2280,18 +2312,15 @@ while True:
                 if current_system_rand == 3:
                     clear()
                     income_display()
-                    print('You have approached an Orion Pirate!')
+                    print('You have approached an Vulcan Dissident!')
                     print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship'] #hail the ship
                     print(*op_1, sep='\n')
                     ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                     if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(600,1000), opponent_name='Orion Pirate', firepower=1, accuracy=2, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                        update_mission_progress('Defeat 1 Enemy', 1)
-                        update_mission_progress('Defeat 3 Enemies', 1)
-                        update_mission_progress('Defeat 5 Enemies', 1)
+                        battle_stat(opponent_health=random.randint(600,1000), opponent_name='Vulcan Dissident', firepower=1, accuracy=2, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
                     if ori_ship == -2:
-                        print('Hailing Frequency are in development.')
+                        hailing_frequency()
                 if current_system_rand == 2:
                     clear()
                     income_display()
@@ -2302,9 +2331,9 @@ while True:
             elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
                 scan_system()
-        if load_data('current_system') == 3: # tellar dev
+        if load_data('current_system') == 3: # Tellar 
             if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Orion Pirate', '4. Tritanium Mine']
+                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Nausicaan Raider', '4. Tritanium Mine']
                 income_display()
                 print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
                 print(*system_findings, sep='\n')
@@ -2330,18 +2359,15 @@ while True:
                 if current_system_rand == 3:
                     clear()
                     income_display()
-                    print('You have approached an Orion Pirate!')
+                    print('You have approached an Nausicaan Raider!')
                     print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship'] 
                     print(*op_1, sep='\n')
                     ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                     if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(700,1100), opponent_name='Orion Pirate', firepower=2, accuracy=2, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                        update_mission_progress('Defeat 1 Enemy', 1)
-                        update_mission_progress('Defeat 3 Enemies', 1)
-                        update_mission_progress('Defeat 5 Enemies', 1)
-                    if ori_ship == -2:
-                        print('Hailing Frequency are in development.')
+                        battle_stat(opponent_health=random.randint(700,1100), opponent_name='Nausicaan Raider', firepower=2, accuracy=2, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    if ori_ship == 2:
+                        hailing_frequency()
                 if current_system_rand == 2:
                     clear()
                     income_display()
@@ -2352,9 +2378,9 @@ while True:
             elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
                 scan_system()
-        if load_data('current_system') == 4: # andor dev
+        if load_data('current_system') == 4: # Andor
             if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Orion Pirate', '4. Parsteel Mine']
+                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Tholian Incursion Ship', '4. Parsteel Mine']
                 income_display()
                 print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
                 print(*system_findings, sep='\n')
@@ -2380,18 +2406,15 @@ while True:
                 if current_system_rand == 3:
                     clear()
                     income_display()
-                    print('You have approached an Orion Pirate!')
+                    print('You have approached an Tholian Incursion Ship!')
                     print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship'] #hail the ship
                     print(*op_1, sep='\n')
                     ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                     if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(800,1200), opponent_name='Orion Pirate', firepower=3, accuracy=3, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                        update_mission_progress('Defeat 1 Enemy', 1)
-                        update_mission_progress('Defeat 3 Enemies', 1)
-                        update_mission_progress('Defeat 5 Enemies', 1)
-                    if ori_ship == -2:
-                        print('Hailing Frequency are in development.')
+                        battle_stat(opponent_health=random.randint(800,1200), opponent_name='Tholian Incursion Ship', firepower=3, accuracy=3, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    if ori_ship == 2:
+                        hailing_frequency()
                 if current_system_rand == 2:
                     clear()
                     income_display()
@@ -2402,7 +2425,7 @@ while True:
             elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
                 scan_system()
-        if load_data('current_system') == 5: # andor dev
+        if load_data('current_system') == 5: # Omicron II
             if load_explored(systems[load_data('current_system')]) == 1:
                 system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Tritanium Mine', '4. Parsteel Mine', '5. Latinum Mine']
                 income_display()
@@ -2457,9 +2480,9 @@ while True:
             elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
                 scan_system()
-        if load_data('current_system') == 6: #regula
+        if load_data('current_system') == 6: # Regula
             if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Orion Pirate', '2. Mission Planet', '3. Tritanium Mine']
+                system_findings = ['1. Klingon Intelligence Operative', '2. Latinum Mine', '3. Dilithium Mine']
                 income_display()
                 print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
                 print(*system_findings, sep='\n')
@@ -2470,31 +2493,31 @@ while True:
                 if current_system_rand == 1:
                     clear()
                     income_display()
-                    print('You have approached an Orion Pirate!')
+                    print('You have approached an Klingon Intelligence Operative!')
                     print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship'] #hail the ship
                     print(*op_1, sep='\n')
                     ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                     if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(800,1200), opponent_name='Orion Pirate', firepower=3, accuracy=3, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                        update_mission_progress('Defeat 1 Enemy', 1)
-                        update_mission_progress('Defeat 3 Enemies', 1)
-                        update_mission_progress('Defeat 5 Enemies', 1)
-                    if ori_ship == -2:
-                        print('Hailing Frequency are in development.')
+                        battle_stat(opponent_health=random.randint(900,1300), opponent_name='Klingon Intelligence Operative', firepower=4, accuracy=3, evasion=4, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    if ori_ship == 2:
+                        hailing_frequency()
                 if current_system_rand == 2:
                     clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['latinum_mine1']
+                        mining_deposit('latinum', random.choice(rand_min), 'Latinum')
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
                 if current_system_rand == 3:
                     clear()
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
-                        rand_min = ['tritanium_mine1', 'tritanium_mine2']
-                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
+                        rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4']
+                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
                     else:
                         clear()
                         income_display()
@@ -2506,9 +2529,9 @@ while True:
             elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
                 scan_system()
-        if load_data('current_system') == 7: #solaria
+        if load_data('current_system') == 7: # Solaria
             if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Orion Pirate', '2. Mission Planet', '3. Tritanium Mine']
+                system_findings = ['1. Hirogen Tracker', '2. Parsteel Mine', '3. Tritanium Mine']
                 income_display()
                 print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
                 print(*system_findings, sep='\n')
@@ -2519,30 +2542,30 @@ while True:
                 if current_system_rand == 1:
                     clear()
                     income_display()
-                    print('You have approached an Orion Pirate!')
+                    print('You have approached an Hirogen Tracker!')
                     print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Ignore the Ship'] #hail the ship
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
                     print(*op_1, sep='\n')
                     ori_ship = ask_sanitize(question_ask='What would you like to do: ')
                     if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(800,1200), opponent_name='Orion Pirate', firepower=3, accuracy=3, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                        update_mission_progress('Defeat 1 Enemy', 1)
-                        update_mission_progress('Defeat 3 Enemies', 1)
-                        update_mission_progress('Defeat 5 Enemies', 1)
-                    if ori_ship == -2:
-                        print('Hailing Frequency are in development.')
+                        battle_stat(opponent_health=random.randint(1000,1400), opponent_name='Hirogen Tracker', firepower=4, accuracy=5, evasion=4, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    if ori_ship == 2:
+                        hailing_frequency()
                 if current_system_rand == 2:
                     clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3']
+                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
                 if current_system_rand == 3:
                     clear()
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
-                        rand_min = ['tritanium_mine1', 'tritanium_mine2']
+                        rand_min = ['tritanium_mine1', 'tritanium_mine2', 'tritanium_mine3']
                         mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
                     else:
                         clear()
@@ -2552,6 +2575,145 @@ while True:
                     clear()
                     income_display()
                     distress_call_scenario_pt2()
+            elif load_explored(systems[load_data('current_system')]) == 2:
+                income_display()
+                scan_system()
+        if load_data('current_system') == 8: # Tarkalea XII
+            if load_explored(systems[load_data('current_system')]) == 1:
+                system_findings = ['1. Orion Slaver', '2. Dilithium Mine', '3. Mission Planet']
+                income_display()
+                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
+                print(*system_findings, sep='\n')
+                current_system_rand = ask_sanitize('Option: ')
+                if current_system_rand == 1:
+                    clear()
+                    income_display()
+                    print('You have approached an Orion Slaver!')
+                    print('What do you want to do?')
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
+                    print(*op_1, sep='\n')
+                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+                    if ori_ship == 1:
+                        battle_stat(opponent_health=random.randint(1100,1500), opponent_name='Orion Slaver', firepower=5, accuracy=5, evasion=6, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    if ori_ship == 2:
+                        hailing_frequency()
+                if current_system_rand == 2:
+                    clear()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4']
+                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 3:
+                    clear()
+                    income_display()
+                    print('You have approached a Mission Planet!')
+                    print(*mission_list_print, sep = '\n')
+                    print(f"{len(mission_list_print) + 1}: Exit")
+                    accept_missions()
+            elif load_explored(systems[load_data('current_system')]) == 2:
+                income_display()
+                scan_system()
+        if load_data('current_system') == 9: # Xindi Starbase 9
+            if load_explored(systems[load_data('current_system')]) == 1:
+                system_findings = ['1. Xindi Patroller', '2. Latinum Mine', '3. Dock with the Starbase']
+                income_display()
+                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
+                print(*system_findings, sep='\n')
+                current_system_rand = ask_sanitize('Option: ')
+                if current_system_rand == 1:
+                    clear()
+                    income_display()
+                    print('You have approached an Xindi Patroller!')
+                    print('What do you want to do?')
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
+                    print(*op_1, sep='\n')
+                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+                    if ori_ship == 1:
+                        battle_stat(opponent_health=random.randint(1200,1600), opponent_name='Xindi Patroller', firepower=6, accuracy=7, evasion=5, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    if ori_ship == 2:
+                        hailing_frequency()
+                if current_system_rand == 2:
+                    clear()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['latinum_mine1', 'latinum_mine2', 'latinum_mine3', 'latinum_mine4']
+                        mining_deposit('latinum', random.choice(rand_min), 'Latinum')
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 3:
+                    clear()
+                    income_display()
+                    print(f"{Fore.BLUE}Requesting permission for docking...{Fore.WHITE}")
+                    time.sleep(2)
+                    print(f"{Fore.RED}Request Denied. Turn back now.{Fore.WHITE}")
+                    time.sleep(2)
+                    #colored_gradient_loading_bar(duration=6)
+                    #xindi_station()
+            elif load_explored(systems[load_data('current_system')]) == 2:
+                income_display()
+                scan_system()
+        if load_data('current_system') == 10: # Altor IV
+            if load_explored(systems[load_data('current_system')]) == 1:
+                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Latinum Mine', "4. Jem'Hadar Vanguard", '5. Tritanium Mine']
+                income_display()
+                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
+                print(*system_findings, sep='\n')
+                current_system_rand = ask_sanitize('Option: ')
+                if current_system_rand == 2:
+                    clear()
+                    income_display()
+                    print('You have approached a Mission Planet!')
+                    print(*mission_list_print, sep = '\n')
+                    print(f"{len(mission_list_print) + 1}: Exit")
+                    accept_missions()
+                if current_system_rand == 4:
+                    clear()
+                    income_display()
+                    print("You have approached an Jem'Hadar Vanguard!")
+                    print('What do you want to do?')
+                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
+                    print(*op_1, sep='\n')
+                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+                    if ori_ship == 1:
+                        battle_stat(opponent_health=random.randint(1300,1700), opponent_name="Jem'Hadar Vanguard", firepower=8, accuracy=7, evasion=7, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
+                    if ori_ship == 2:
+                        hailing_frequency()
+                if current_system_rand == 1:
+                    clear()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['parsteel_mine1']
+                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 5:
+                    clear()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['tritanium_mine1']
+                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+                if current_system_rand == 3:
+                    clear()
+                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+                        clear()
+                        rand_min = ['latinum_mine1']
+                        mining_deposit('latinum', random.choice(rand_min), 'Latinum')
+                    else:
+                        clear()
+                        income_display()
+                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
             elif load_explored(systems[load_data('current_system')]) == 2:
                 income_display()
                 scan_system()
@@ -2620,7 +2782,20 @@ while True:
                 if station_selection == 2:
                     clear()
                     income_display()
-                    ship_management_menu(coins=load_data('parsteel'))
+                    shipyard_delta = 2.4
+                    shipyard_op = ask_sanitize("1. Enter Shipyard\n2. Upgrade Shipyard\n3. Exit\nOption: ")
+                    if shipyard_op == 1:
+                        ship_management_menu(coins=load_data('parsteel'))
+                    elif shipyard_op == 2:
+                        if ask(f"{Fore.YELLOW}Are you sure you want to upgrade? This will take {(load_specific_upgrade('starbase', 'Shipyard') ** shipyard_delta) * 10} seconds and will cost you {round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 10)} parsteel and {round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 5)} tritanium. (Y/N): {Fore.WHITE}") and load_data('parsteel') >= round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 10) and load_data('tritanium') >= round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 5):
+                            save_data('parsteel', load_data('parsteel') - round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 10))
+                            save_data('tritanium', load_data('tritanium') - round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 5))
+                            start_construction('starbase', (load_specific_upgrade('starbase', 'Shipyard') ** shipyard_delta) * 10, 'Shipyard')
+                        else:
+                            print(f"{Fore.RED}You either canceled the upgrade, or you do not have enough parsteel or tritanium.{Fore.WHITE}")
+                            time.sleep(2)
+                    elif shipyard_op == 3:
+                        continue
                 if station_selection == 3: #R&D
                     clear()
                     income_display()

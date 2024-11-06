@@ -5,12 +5,12 @@
     "latinum": 0,
     "recruit_tokens": 20,
     "ship": "Stargazer",
-    "current_system": 6,
+    "current_system": 9,
     "reputation": 50,
-    "last_production_time": "2024-11-02T11:45:00.903288",
-    "parsteel_storage": 680,
-    "tritanium_storage": 660,
-    "dilithium_storage": 660,
+    "last_production_time": "2024-11-06T16:15:52.367022",
+    "parsteel_storage": 750,
+    "tritanium_storage": 730,
+    "dilithium_storage": 730,
     "stargazer_blueprints": 0,
     "uss_grissom_blueprints": 0,
     "federation_shuttlecraft_blueprints": 0,
@@ -59,7 +59,7 @@
         "Respond to the Distress Signal in Regula": {
             "progress": 0,
             "completed": false,
-            "accepted": true
+            "accepted": false
         }
     },
     "explored": {
@@ -67,8 +67,12 @@
         "Vulcan": 2,
         "Tellar": 2,
         "Andor": 2,
+        "Omicron II": 2,
         "Regula": 1,
-        "Solaria": 1
+        "Solaria": 1,
+        "Tarkalea XII": 2,
+        "Xindi Starbase 9": 1,
+        "Altor IV": 2
     },
     "construction_queue": {
         "building": null,
