@@ -8,7 +8,7 @@ import sys
 from datetime import datetime, timedelta
 
 def clear():
-        os.system('cls' if os.name == 'nt' else 'clear')
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 shuttle_bays = 1
 original_crew_file_path = 'crew_list.json'
@@ -17,7 +17,6 @@ user_game_file_path = 'user_data.json'
 ship_save = 'ship_save.json'
 json_file_path = 'system_data.json'
 
-# Function to load the JSON data from the file
 def load_json_data():
     try:
         with open(json_file_path, 'r') as file:
@@ -27,17 +26,14 @@ def load_json_data():
         print("Error: JSON file not found.")
         return None
 
-# Function to load the material amount from a specific mining node
 def get_material_in_node(system_name, mine_name):
     data = load_json_data()
     
     if data is None:
         return None
 
-    # Find the system with the given name
     for system in data["system data"]:
         if system["name"] == system_name:
-            # Check if the specified mine exists in the system
             if mine_name in system:
                 return system[mine_name]
             else:
@@ -47,37 +43,28 @@ def get_material_in_node(system_name, mine_name):
         print(f"Error: System {system_name} not found.")
         return None
 
-# Function to save the updated JSON data back to the file
 def save_json_data(data):
     with open(json_file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-# Function to update the mining node materials
 def update_materials(system_name, mine_name, amount):
     data = load_json_data()
-    
     if data is None:
         return
-
-    # Find the system with the given name
     for system in data["system data"]:
         if system["name"] == system_name:
-            # Update the material in the specified mine
             if mine_name in system:
                 system[mine_name] -= amount
-
-                # Reset the mine to 100 if the materials go below or equal to 0
                 if system[mine_name] <= 0:
                     system[mine_name] = 100
                     print(f"{mine_name} in {system_name} has been reset to 100.")
-
-                save_json_data(data)  # Save the updated data
+                # trunk-ignore(git-diff-check/error)
+                save_json_data(data)
             else:
                 print(f"Error: {mine_name} does not exist in {system_name}.")
             break
     else:
         print(f"Error: System {system_name} not found.")
-
 
 def ask_sanitize(question_ask, follow_up_question=None):
     if follow_up_question is None:
@@ -95,7 +82,6 @@ def ask_sanitize(question_ask, follow_up_question=None):
 def ask_sanitize_lobby(question_ask, follow_up_question=None, valid_options=None):
     if follow_up_question is None:
         follow_up_question = question_ask
-    
     while True:
         response = input(question_ask)
         try:
@@ -107,15 +93,12 @@ def ask_sanitize_lobby(question_ask, follow_up_question=None, valid_options=None
         except ValueError:
             print("Please enter a valid number.")
             continue
-        
     return response
 
-# Load data from JSON file
 def load_data(key):
     try:
         with open('user_data.json', 'r') as file:
             data = json.load(file)
-        # Traverse nested dictionaries if necessary
         if key in data:
             return data[key]
         else:
@@ -127,52 +110,26 @@ def load_data(key):
     except KeyError as e:
         print(e)
 
-# Save data to JSON file
 def save_data(key, value):
     try:
-        # Use 'r+' for both reading and writing without truncating the file
         with open('user_data.json', 'r+') as file:
-            data = json.load(file)  # Read existing data
-
-            # Update the key or nested key
+            data = json.load(file)  
             if key in data:
                 data[key] = value
             else:
                 print(f"Key '{key}' not found. Adding it at the top level.")
-                data[key] = value  # Add new key if not found
-
-            # Seek back to the beginning to overwrite the file
+                data[key] = value
             file.seek(0)
             json.dump(data, file, indent=4)
-            file.truncate()  # Ensure file size is adjusted
+            file.truncate()
 
     except FileNotFoundError:
         print("Game data file not found.")
-
-def increment_upgrade(upgrade_type):
-    """Increment the value of a specified upgrade type by 1 and save it to the JSON file."""
-    # Load the existing upgrades dictionary
-    upgrades = load_data('upgrades')
-    
-    if upgrades is None:
-        return
-    
-    # Check if the upgrade_type exists in the dictionary
-    if upgrade_type in upgrades:
-        # Increment the value of the specified upgrade type
-        upgrades[upgrade_type] += 1
-    else:
-        return
-    
-    # Save the updated upgrades dictionary back to the JSON file
-    save_data('upgrades', upgrades)
 
 def save_ship_data(ship_name, stat_key, value):
     try:
         with open('ship_save.json', 'r+') as file:
             data = json.load(file)
-
-            # Find the ship and update the stat
             for ship in data['ship selection']:
                 if ship['name'] == ship_name:
                     if stat_key in ship:
@@ -180,14 +137,39 @@ def save_ship_data(ship_name, stat_key, value):
                     else:
                         print(f"Stat '{stat_key}' not found for ship '{ship_name}'.")
                         return
-            
-            # Save updated data back to the JSON file
-            file.seek(0)  # Move the file pointer to the beginning
+            file.seek(0)
             json.dump(data, file, indent=4)
-            file.truncate()  # Remove any leftover data from the previous file size
-
+            file.truncate() 
     except FileNotFoundError:
         print("Ship data file not found.")
+        
+
+def reset_crew_positions(ship_name):
+    try:
+        with open('ship_save.json', 'r+') as file:
+            data = json.load(file)
+
+            for ship in data['ship selection']:
+                if ship['name'] == ship_name:
+                    if "crew" in ship:
+                        ship['crew'] = {
+                            "captain": None,
+                            "bridge1": None,
+                            "bridge2": None,
+                            "bridge3": None
+                        }
+                        print(f"Crew positions for '{ship_name}' have been reset to null.")
+                        break
+                    else:
+                        print(f"No crew data found for '{ship_name}'.")
+                        return
+            file.seek(0)  
+            json.dump(data, file, indent=4)
+            file.truncate()  
+            
+    except FileNotFoundError:
+        print("Ship data file not found.")
+
 
 def load_ship_stat(ship_name, stat_key):
     try:
@@ -196,8 +178,7 @@ def load_ship_stat(ship_name, stat_key):
 
             for ship in data['ship selection']:
                 if ship['name'] == ship_name:
-                    return ship.get(stat_key, None)  # Return None if the stat doesn't exist
-
+                    return ship.get(stat_key, None) 
         print(f"Ship '{ship_name}' not found.")
         return None
     except FileNotFoundError:
@@ -211,8 +192,7 @@ def is_ship_owned(ship_name):
 
             for ship in data['ship selection']:
                 if ship['name'] == ship_name:
-                    return ship.get('owned', False)  # Return False if 'owned' key is missing
-
+                    return ship.get('owned', False)  
         print(f"Ship '{ship_name}' not found.")
         return False
     except FileNotFoundError:
@@ -226,7 +206,7 @@ def set_ship_owned_status(ship_name, owned_status):
 
             for ship in data['ship selection']:
                 if ship['name'] == ship_name:
-                    ship['owned'] = owned_status  # Update the 'owned' status
+                    ship['owned'] = owned_status 
 
             file.seek(0)
             json.dump(data, file, indent=4)
@@ -237,25 +217,17 @@ def set_ship_owned_status(ship_name, owned_status):
 
 def equip_ship_in_game(ship_name):
     try:
-        # Load user game data
         with open('user_data.json', 'r+') as user_file:
             user_data = json.load(user_file)
-            
-            # Load available ships data
             with open('ship_save.json', 'r') as ship_file:
                 ship_data = json.load(ship_file)
-
-            # Check if the selected ship is owned
             for ship in ship_data['ship selection']:
                 if ship['name'] == ship_name and ship.get('owned', False):
-                    # Equip the ship by updating the user game data
                     user_data['ship'] = ship_name
                     print(f"{ship_name} is now equipped in your game data!")
                     break
             else:
                 print(f"You do not own the ship: {ship_name}")
-
-            # Save the updated game data back to the JSON file
             user_file.seek(0)
             json.dump(user_data, user_file, indent=4)
             user_file.truncate()
@@ -265,7 +237,7 @@ def equip_ship_in_game(ship_name):
     except Exception as e:
         print(f"An error occurred: {e}")
     
-def upgrade_ship(ship_name, stat, coins):
+def upgrade_ship(ship_name, stat):
     try:
         with open('ship_save.json', 'r+') as file:
             data = json.load(file)
@@ -311,11 +283,8 @@ def equip_ship(ship_name):
 
             for ship in data['ship selection']:
                 if ship['name'] == ship_name and ship.get('owned', False):
-                    # Set all ships to not equipped
                     for s in data['ship selection']:
                         s['equipped'] = False
-
-                    # Equip the selected ship
                     ship['equipped'] = True
                     save_data('ship', ship_name)
                     print(f"{Fore.GREEN}{ship_name} is now equipped.{Fore.GREEN}")
@@ -389,8 +358,6 @@ def view_ship_details(ship_name):
                 print(f"Owned: {ship['owned']}")
                 if ask('Type Y or N to exit: '):
                     return
-
-
         print(f"Ship '{ship_name}' not found.")
     except FileNotFoundError:
         print("Ship data file not found.")
@@ -494,7 +461,7 @@ def ship_management_menu(coins):
             if stat_num == 5:
                 stat = 'mining_efficiency'
             if ask(f"{Fore.YELLOW}Are you sure you want to upgrade {stat}? (Y/N): "):
-                upgrade_ship(ship_name, stat, coins)
+                upgrade_ship(ship_name, stat)
             else:
                 print(f"{Fore.RED}Upgrade Canceled.{Fore.WHITE}")
                 time.sleep(1)
@@ -515,8 +482,6 @@ def ship_management_menu(coins):
             print("Invalid option. Please try again.")
             time.sleep(2)
 
-
-# Upgrades, Costs, Deltas, Systems, and Other Game Data
 costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20, "Warp Range": 15}
 deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2, "Warp Range": 2}
 system_deltas = {'Material Cluster': 1.5, 'Trading Post': 2, 'Enemy Ships Loot': 1.5, 'Enemy Ships Health': 1.3}
@@ -525,31 +490,25 @@ systems = {
     6: 'Regula', 7: 'Solaria', 8: 'Tarkalea XII', 9: 'Xindi Starbase 9', 10: 'Altor IV'
 }
 
-# Load crew data
 def load_crew_data(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
 
-# Save crew data
 def save_crew_data(file_path, data):
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-# Load game state data
 def load_game_data(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
 
-# Save game state data
 def save_game_data(file_path, data):
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-# Check if player has played before
 def has_played_before(file_path):
     return os.path.exists(file_path)
 
-# Initialize game data
 def initialize_game_data():
     if has_played_before(user_game_file_path):
         with open(user_game_file_path, 'r') as file:
@@ -557,7 +516,6 @@ def initialize_game_data():
     else:
         return game_state
 
-# Initialize crew data
 def initialize_crew_data():
     if has_played_before(user_crew_file_path):
         with open(user_crew_file_path, 'r') as file:
@@ -567,13 +525,11 @@ def initialize_crew_data():
         save_crew_data(user_crew_file_path, original_crew_data)
         return original_crew_data
 
-# Display owned crew
 def display_crew(crew_data):
     print("\nCurrent Crew Members:")
     for index, member in enumerate(crew_data['crew']):
         print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Skill Level: {member['skill_level']}, Rarity: {member['rarity']})")
 
-# Display available crew for purchase
 def display_available_crew(crew_data, available_crew):
     print("\nAvailable Crew for Purchase:")
     owned_crew_names = [member['name'] for member in crew_data['crew']]
@@ -581,10 +537,10 @@ def display_available_crew(crew_data, available_crew):
         if member['name'] not in owned_crew_names:
             print(f"{index + 1}. {member['name']} (Skill: {member['skill']}, Rarity: {member['rarity']}, Price: {member['price']} Recruit Tokens)")
 
-# Upgrade crew member
-def upgrade_crew_member(game_state, crew_data, member_index, cost):
+def upgrade_crew_member(crew_data, member_index, cost):
     if load_data('recruit_tokens') >= cost:
-        crew_data['crew'][member_index]['skill_level'] += 5  # Increase skill level
+        crew_data['crew'][member_index]['skill_level'] += 5
+        crew_data['crew'][member_index]['ability']['boost'] += 0.3
         save_data('recruit_tokens', load_data('recruit_tokens') - cost)
         print(f"{Fore.GREEN}\n{crew_data['crew'][member_index]['name']}'s skill level increased to {crew_data['crew'][member_index]['skill_level']}!{Fore.WHITE}")
         print(f"{Fore.YELLOW}Remaining Recruit Tokens: {load_data('recruit_tokens')}{Fore.WHITE}")
@@ -593,13 +549,11 @@ def upgrade_crew_member(game_state, crew_data, member_index, cost):
         print(f"{Fore.RED}\nNot enough recruit tokens to upgrade.{Fore.WHITE}")
         time.sleep(2)
 
-# Purchase a new crew member
-def purchase_crew_member(game_state, crew_data, available_crew, member_index):
+def purchase_crew_member(crew_data, available_crew, member_index):
     if load_data('recruit_tokens') >= available_crew[member_index]['price']:
-        # Deduct tokens and add the new crew member
         save_data('recruit_tokens', load_data('recruit_tokens') - available_crew[member_index]['price'])
-        crew_data['crew'].append(available_crew[member_index])  # Add to owned crew
-        save_crew_data(user_crew_file_path, crew_data)  # Save updated crew
+        crew_data['crew'].append(available_crew[member_index])  
+        save_crew_data(user_crew_file_path, crew_data)  
         print(f"{Fore.GREEN}\n{available_crew[member_index]['name']} has been recruited!{Fore.WHITE}")
         print(f"{Fore.YELLOW}Remaining Recruit Tokens: {load_data('recruit_tokens')}{Fore.WHITE}")
         time.sleep(2)
@@ -607,7 +561,6 @@ def purchase_crew_member(game_state, crew_data, available_crew, member_index):
         print(f"{Fore.RED}\nNot enough recruit tokens to purchase this crew member.{Fore.WHITE}")
         time.sleep(2)
 
-# Main function
 def main():
     global game_state
     game_state = initialize_game_data()
@@ -637,7 +590,7 @@ def main():
             cost = 10
             print(f"{Fore.YELLOW}Upgrading {crew_data['crew'][crew_choice]['name']} will cost {cost} recruit tokens. ({load_data('recruit_tokens')}->{load_data('recruit_tokens') - cost}){Fore.WHITE}")
             if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}") and load_data('recruit_tokens') >= cost:
-                upgrade_crew_member(game_state, crew_data, crew_choice, cost)
+                upgrade_crew_member(crew_data, crew_choice, cost)
                 save_crew_data(user_crew_file_path, crew_data)  # Save updated user crew data to file
             else:
                 print(f"{Fore.RED}\nRather the Upgrade canceled or you do not have enough recruit tokens.{Fore.WHITE}")
@@ -648,7 +601,7 @@ def main():
             display_available_crew(crew_data, available_crew)
             crew_choice = int(input(f"{Fore.BLUE}Enter the number of the crew member to buy: {Fore.WHITE}")) - 1  # Convert to 0-based index
             if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}"):
-                purchase_crew_member(game_state, crew_data, available_crew, crew_choice)
+                purchase_crew_member(crew_data, available_crew, crew_choice)
             else:
                 print(f"{Fore.RED}\nPurchase canceled.{Fore.WHITE}")
                 time.sleep(1)
@@ -660,82 +613,6 @@ def main():
             print(f"{Fore.RED}Invalid choice{Fore.WHITE}")
             time.sleep(1)
 
-def assign_owned_crew_to_owned_ship(user_crew_file, ship_file):
-    try:
-        # Load crew and ship data
-        with open(user_crew_file, 'r') as crew_file, open(ship_file, 'r+') as ship_file:
-            crew_data = json.load(crew_file)
-            ship_data = json.load(ship_file)
-
-            # Filter owned crew and owned ships
-            owned_crew = [member for member in crew_data['crew']]
-            owned_ships = [ship for ship in ship_data['ship selection'] if ship['owned']]
-
-            # Check if any crew or ships are available
-            if not owned_crew:
-                print("No owned crew members available.")
-                return
-            if not owned_ships:
-                print("No owned ships available.")
-                return
-
-            # Display available owned ships
-            print("\nOwned Ships:")
-            for idx, ship in enumerate(owned_ships, start=1):
-                print(f"{idx}. {ship['name']}")
-
-            # Select ship
-            ship_choice = int(input("\nEnter the number of the ship you want to assign crew to: ")) - 1
-            selected_ship = owned_ships[ship_choice]
-
-            # Display available crew positions
-            available_positions = [pos for pos, member in selected_ship['crew'].items() if member is None]
-            if not available_positions:
-                print("No available crew positions on this ship.")
-                return
-
-            print("\nAvailable Crew Positions:", ", ".join(available_positions))
-
-            # Display owned crew members
-            print("\nOwned Crew Members:")
-            for idx, member in enumerate(owned_crew, start=1):
-                print(f"{idx}. {member['name']} - {member['ability']['stat']} boost")
-
-            # Select crew member
-            crew_choice = int(input("\nEnter the number of the crew member to assign: ")) - 1
-            selected_crew = owned_crew[crew_choice]['name']
-            crew_ability = owned_crew[crew_choice]['ability']
-            skill_level = owned_crew[crew_choice]['skill_level']
-
-            # Prevent duplicate assignment
-            if selected_crew in selected_ship['crew'].values():
-                print(f"{selected_crew} is already assigned to this ship.")
-                return
-
-            # Select position for the crew member
-            position_choice = input(f"Choose position for {selected_crew} ({', '.join(available_positions)}): ").lower()
-            if position_choice not in available_positions:
-                print("Invalid position selected.")
-                return
-
-            # Assign crew to the ship
-            selected_ship['crew'][position_choice] = selected_crew
-
-            # Apply the crew member's ability to the ship stat
-            stat_key = crew_ability['stat']
-            stat_boost = crew_ability['boost'] * skill_level
-            selected_ship[stat_key] = selected_ship.get(stat_key, 1) * (1 + stat_boost)
-
-            # Save changes
-            ship_file.seek(0)  # Move to the beginning of the file
-            json.dump(ship_data, ship_file, indent=4)
-            ship_file.truncate()  # Clear any remaining data if file size changed
-            print(f"\nAssigned {selected_crew} to {position_choice} on {selected_ship['name']} and increased {stat_key} by {stat_boost*100}%.")
-
-    except FileNotFoundError as e:
-        print(f"File not found: {e.filename}")
-    except (IndexError, ValueError) as e:
-        print("Invalid input. Please enter a valid number.")
 
 def get_ship_stats_with_crew_effects(ship_name, ship_file):
     try:
@@ -744,11 +621,8 @@ def get_ship_stats_with_crew_effects(ship_name, ship_file):
             for ship in data['ship selection']:
                 if ship['name'] == ship_name:
                     stats_with_effects = ship.copy()
-
-                    # Apply each crew member's boost effect to the ship stats
                     for position, crew_member in ship['crew'].items():
                         if crew_member:
-                            # Find the crew member data
                             crew_data = next((c for c in data['crew'] if c['name'] == crew_member), None)
                             if crew_data:
                                 ability = crew_data['ability']
@@ -762,83 +636,43 @@ def get_ship_stats_with_crew_effects(ship_name, ship_file):
     except FileNotFoundError:
         print("Ship data file not found.")
         return None
-
-
-def get_ship_stats_with_crew_effects(ship_name, ship_file):
-    try:
-        with open(ship_file, 'r') as file:
-            data = json.load(file)
-            for ship in data['ship selection']:
-                if ship['name'] == ship_name:
-                    stats_with_effects = ship.copy()
-
-                    # Apply each crew member's boost effect to the ship stats
-                    for position, crew_member in ship['crew'].items():
-                        if crew_member:
-                            # Find the crew member data
-                            crew_data = next((c for c in data['crew'] if c['name'] == crew_member), None)
-                            if crew_data:
-                                ability = crew_data['ability']
-                                boost = crew_data['skill_level'] * ability['boost']
-                                stats_with_effects[ability['stat']] *= (1 + boost)
-
-                    return stats_with_effects
-
-        print(f"Ship '{ship_name}' not found.")
-        return None
-    except FileNotFoundError:
-        print("Ship data file not found.")
-        return None
-
-import json
 
 def format_position(position):
     if 'bridge' in position.lower():
-        return f"Bridge {position[-1]}"  # For positions like 'bridge1', format as 'Bridge 1'
-    return position.capitalize()  # Capitalize positions like 'captain'
+        return f"Bridge {position[-1]}"  
+    return position.capitalize() 
 
 def format_ability(ability):
-    return ' '.join(word.capitalize() for word in ability.split('_'))  # Capitalize ability names and replace underscores with spaces
+    return ' '.join(word.capitalize() for word in ability.split('_')) 
 
 def assign_crew_and_adjust_stats(user_crew_file, ship_file):
     try:
-        # Load crew and ship data
         with open(user_crew_file, 'r') as crew_file, open(ship_file, 'r+') as ship_file:
             crew_data = json.load(crew_file)
             ship_data = json.load(ship_file)
-
-            # Filter owned crew and owned ships
             owned_crew = [member for member in crew_data['crew']]
             owned_ships = [ship for ship in ship_data['ship selection'] if ship['owned']]
 
-            # Check if any crew or ships are available
             if not owned_crew:
                 print("No owned crew members available.")
                 return
             if not owned_ships:
                 print("No owned ships available.")
                 return
-
-            # Display available owned ships
             print("\nOwned Ships:")
             for idx, ship in enumerate(owned_ships, start=1):
                 print(f"{idx}. {ship['name']}")
 
-            # Select ship
-            ship_choice = int(input("\nEnter the number of the ship you want to assign crew to: ")) - 1
+            ship_choice = ask_sanitize("\nEnter the number of the ship you want to assign crew to: ") - 1
             selected_ship = owned_ships[ship_choice]
-
-            # Display available crew positions with enumeration
             available_positions = [pos for pos, member in selected_ship['crew'].items() if member is None]
             if not available_positions:
                 print(f"{Fore.RED}No available crew positions on this ship.{Fore.WHITE}")
                 time.sleep(2)
                 return
-
-            # Select crew member
             print("\nOwned Crew Members:")
             for idx, member in enumerate(owned_crew, start=1):
-                ability = format_ability(member['ability']['stat'])  # Format ability
+                ability = format_ability(member['ability']['stat']) 
                 print(f"{idx}. {member['name']} - {ability} Boost")
 
             crew_choice = int(input("\nEnter the number of the crew member to assign: ")) - 1
@@ -846,16 +680,14 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
             crew_ability = owned_crew[crew_choice]['ability']
             skill_level = owned_crew[crew_choice]['skill_level']
 
-            # Prevent duplicate assignment
             if selected_crew in selected_ship['crew'].values():
                 print(f"{Fore.RED}{selected_crew} is already assigned to this ship.{Fore.WHITE}")
                 time.sleep(2)
                 return
 
-            # Select position for the crew member using enumeration
             print("\nAvailable Crew Positions:")
             for idx, position in enumerate(available_positions, start=1):
-                print(f"{idx}. {format_position(position)}")  # Format position
+                print(f"{idx}. {format_position(position)}")  
             position_choice_index = int(input(f"Choose position for {selected_crew} (enter the number): ")) - 1
             if position_choice_index < 0 or position_choice_index >= len(available_positions):
                 print(f"{Fore.RED}Invalid position selected.{Fore.WHITE}")
@@ -864,18 +696,15 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
 
             position_choice = available_positions[position_choice_index]
 
-            # Assign crew to the ship
             selected_ship['crew'][position_choice] = selected_crew
 
-            # Apply the crew member's ability to the ship stat
             stat_key = crew_ability['stat']
             stat_boost = crew_ability['boost'] * skill_level
             selected_ship[stat_key] = selected_ship.get(stat_key, 1) * (1 + stat_boost)
 
-            # Save changes
-            ship_file.seek(0)  # Move to the beginning of the file
+            ship_file.seek(0)  
             json.dump(ship_data, ship_file, indent=4)
-            ship_file.truncate()  # Clear any remaining data if file size changed
+            ship_file.truncate() 
             print(f"{Fore.BLUE}\nAssigned {selected_crew} to {format_position(position_choice)} on {selected_ship['name']} and increased {format_ability(stat_key)} by {stat_boost * 100}%.{Fore.WHITE}")
             time.sleep(3)
 
@@ -884,19 +713,14 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
     except (IndexError, ValueError) as e:
         print("Invalid input. Please enter a valid number.")
 
-import json
-
 def display_crew_assignments(ship_file):
     try:
         with open(ship_file, 'r') as file:
             ship_data = json.load(file)
-
             owned_ships = [ship for ship in ship_data['ship selection'] if ship['owned']]
-            
             if not owned_ships:
                 print("No owned ships available.")
                 return
-            
             print("\nCrew Assignments on Owned Ships:")
             for ship in owned_ships:
                 print(f"\n{ship['name']} Crew Assignments:")
@@ -912,7 +736,6 @@ def display_crew_assignments(ship_file):
         print("Error decoding JSON from the ship data file.")
 
 def format_position(position):
-    # Capitalize and format position names
     if position == 'captain':
         return 'Captain'
     else:
@@ -924,19 +747,6 @@ def income_display():
 def ask(question): 
         response = input(question)
         return response.lower() in ["y", "yes"] 
-
-def upgrade(type):
-        current_upgrade_level = load_data('upgrades')[type]
-        current_upgrade_cost = costs[type] * (deltas[type] **  current_upgrade_level) 
-        if load_data('coins') >= current_upgrade_cost: 
-                print(f"{Fore.YELLOW}You are upgrading your {type} from level {current_upgrade_level} to {current_upgrade_level + 1}.\n {Fore.RED}This upgrade will cost you {current_upgrade_cost} coins. ({load_data('coins')} -> {load_data('coins') - current_upgrade_cost}){Fore.WHITE} ")
-                if ask(f"{Fore.RED}Are you sure you want to continue?{Fore.WHITE} "):  
-                        save_data('coins', load_data('coins') - current_upgrade_cost)
-                        increment_upgrade(type)  
-                        return True  
-        else:
-                print(f"{Fore.YELLOW}You can't upgrade your {type} from level {current_upgrade_level} to {current_upgrade_level + 1} because you don't have enough coins (current: {load_data('coins')}, required: {current_upgrade_cost}).{Fore.WHITE}")
-                return False
 
 def view_upgrades():
     clear()
@@ -963,12 +773,10 @@ def accept_mission(mission_id):
 def update_mission_progress(mission_name, progress_increment):
     missions = load_data('missions')
 
-    # Only update if the mission is accepted and not completed
     if mission_name in missions and missions[mission_name]['accepted'] and not missions[mission_name]['completed']:
         missions[mission_name]['progress'] += progress_increment
         save_data('missions', missions)
 
-        # Check if mission is complete
         if mission_name == 'Mine 100 Materials' and missions[mission_name]['progress'] >= 100:
             complete_mission(mission_name)
         elif mission_name == 'Defeat 1 Enemy' and missions[mission_name]['progress'] >= 1:
@@ -1008,7 +816,6 @@ def complete_mission(mission_name):
         time.sleep(2)
         
 def display_missions():
-    # Load mission data from JSON
     mission_data = load_data('missions')
 
     if mission_data is None:
@@ -1018,20 +825,18 @@ def display_missions():
     print("Current Missions:")
 
     for mission_name, mission_info in mission_data.items():
-        # Check mission status
         if mission_info["accepted"]:
             status = "Accepted"
             progress = mission_info["progress"]
-            progress_message = f"Progress: {progress}"  # Or use the actual number if more detailed
+            progress_message = f"Progress: {progress}"  
         else:
             status = "Not Accepted"
             progress_message = "Progress: N/A"
 
         if mission_info["completed"]:
             status = "Completed"
-            progress_message = "Progress: 100%"  # If completed, progress is 100%
+            progress_message = "Progress: 100%" 
 
-        # Print mission information
         print(f"{Fore.BLUE}{mission_name}: {Fore.GREEN}{status} - {Fore.YELLOW}{progress_message}{Fore.WHITE}")
 
 
@@ -1065,11 +870,11 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
         clear()
         print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
         while (research_multi('Sheild Dynamics') * load_ship_stat(ship_name=load_data('ship'), stat_key='health')) > 0 or opponent_health > 0:
-            clear
+            clear()
             turn = 'player'
             if turn == 'player':
                 if random.uniform(0, 1) < (research_multi('Targeting Matrix') / evasion + 1):
-                    damage = research_multi('Phaser Calibration') * random.uniform(50, 200)  # Random damage variation
+                    damage = research_multi('Phaser Calibration') * random.uniform(50, 200) 
                     opponent_health -= damage
                     print(f"{Fore.GREEN}Enemy Hit! {opponent_name} took {damage:.2f} damage. Enemy health: {opponent_health:.2f}{Fore.WHITE}")
                     time.sleep(3)
@@ -1098,63 +903,7 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
             if opponent_health <= 0:
                 break
     if (research_multi('Sheild Dynamics')) <= 0:
-            clear()
-            print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
-            print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage')}{Fore.WHITE}")
-            save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=0)
-            save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=0)
-            save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=0)
-            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage'))
-            save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-            save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-            if load_data('ship') == 'Stargazer':
-                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
-                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=2)
-                save_data('ship', 'Stargazer')
-                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
-            if load_data('ship') == 'USS Grissom':
-                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
-                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=4)
-                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-                save_data('ship', 'Stargazer')
-                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
-            if load_data('ship') == 'Federation Shuttlecraft':
-                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
-                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=3)
-                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=4)
-                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-                save_data('ship', 'Stargazer')
-                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
-            if load_data('ship') == 'Galaxy Class':
-                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
-                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=5)
-                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=6)
-                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=5)
-                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=4)
-                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=8)
-                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-                save_data('ship', 'Stargazer')
-                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
-            time.sleep(5)
-            return
+            check_health()
     if opponent_health <= 0:
                 clear()
                 print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
@@ -1168,34 +917,94 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 save_ship_data(ship_name=load_data('ship'), stat_key='latinum_storage', value=load_ship_stat(load_data('ship'), 'latinum_storage') + lat_reward)
                 time.sleep(3)
 
-def mining_deposit_parsteel(parsteel_mine_num):
-    income_display()
-    print('You have approached a Parsteel Mine!')
-    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=parsteel_mine_num)
-    mining_efficiency = (research_multi('Mining Laser'))
-    deposit_var = deposit_materials / mining_efficiency 
+base_ship_stats = {
+    "Stargazer": {
+        "firepower": 1,
+        "accuracy": 1,
+        "evasion": 1,
+        "health": 1000,
+        "storage": 750,
+        "mining": 1,
+        "warp": 2
+    },
+    "USS Grissom": {
+        "firepower": 1,
+        "accuracy": 2,
+        "evasion": 2,
+        "health": 2000,
+        "storage": 800,
+        "mining": 2,
+        "warp": 4
+    },
+    "Federation Shuttlecraft": {
+        "firepower": 1,
+        "accuracy": 2,
+        "evasion": 3,
+        "health": 3500,
+        "storage": 750,
+        "mining": 2,
+        "warp": 4
+    },
+    "Galaxy Class": {
+        "firepower": 5,
+        "accuracy": 6,
+        "evasion": 5,
+        "health": 5000,
+        "storage": 2500,
+        "mining": 4,
+        "warp": 8
+    }
+}
 
-    print(f'{Fore.BLUE}This mine has', deposit_materials, f'parsteel.{Fore.WHITE}')
-    print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
+def check_health():
+    if research_multi('Sheild Dynamics') <= 0:
+        clear()
+        print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
+        print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='latinum_storage')}{Fore.WHITE}")
+        time.sleep(2)
+        save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=0)
+        save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=0)
+        save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=0)
+        save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=base_ship_stats[load_data('ship')]["storage"])
+        save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
+        save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
+        save_ship_data(ship_name=load_data('ship'), stat_key='health', value=base_ship_stats[load_data('ship')]["health"])
+        save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=base_ship_stats[load_data('ship')]["firepower"])
+        save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=base_ship_stats[load_data('ship')]["accuracy"])
+        save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=base_ship_stats[load_data('ship')]["evasion"])
+        save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=base_ship_stats[load_data('ship')]["mining"])
+        save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=base_ship_stats[load_data('ship')]["warp"])
+        save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
+        save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
+        reset_crew_positions(load_data('ship'))
+        save_data('ship', 'Stargazer')
+        save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
+        save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+            
+
+def mining_deposit(mine_type, mine_num, mine_capitilize):
+    income_display()
+    print(f"You have approached a {mine_capitilize} Mine!")
+    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=mine_num)
+    mining_efficiency = research_multi('Mining Laser')
+    deposit_var = deposit_materials / mining_efficiency
+    print(f"{Fore.BLUE}This mine has {deposit_materials} {mine_type}.{Fore.WHITE}")
+    print(f"{Fore.GREEN}Estimated mining time: {deposit_var * 0.5} seconds{Fore.WHITE}")
     if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
         mine_depo_mats = ask_sanitize(f'{Fore.GREEN}How much would you like to mine? (1 - {deposit_materials}){Fore.WHITE}')
-        start_time = time.time()
-        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=parsteel_mine_num) <= 0:
+        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=mine_num) <= 0:
             clear()
-            print('Mining...')
-            print('Parsteel Remaining:', mine_depo_mats)
+            print("Mining...")
+            print(f"{mine_capitilize} Remaining: {mine_depo_mats}")
             print('Total Storage Remaining:', load_ship_stat(ship_name=load_data('ship'), stat_key='storage'))
-
             materials_gathered = 1 * mining_efficiency
-            save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + materials_gathered)
+            save_ship_data(ship_name=load_data('ship'), stat_key=f'{mine_type}_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key=f'{mine_type}_storage') + materials_gathered)
             save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - materials_gathered)
             update_mission_progress('Mine 100 Materials', materials_gathered)
             mine_depo_mats -= mining_efficiency
-            
-            elapsed_time = time.time() - start_time
             deposit_var = mine_depo_mats
             estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
-            update_materials(system_name=systems[load_data('current_system')], mine_name=parsteel_mine_num, amount=mining_efficiency)
+            update_materials(system_name=systems[load_data('current_system')], mine_name=mine_num, amount=mining_efficiency)
             
             print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
             time.sleep(0.5)
@@ -1204,121 +1013,6 @@ def mining_deposit_parsteel(parsteel_mine_num):
                 print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
                 time.sleep(2)
                 break
-            continue
-
-def mining_deposit_tritanium(tritanium_mine_num):
-    income_display()
-    print('You have approached a Tritanium Mine!')
-    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=tritanium_mine_num)
-    mining_efficiency = (research_multi('Mining Laser'))
-    deposit_var = deposit_materials / mining_efficiency 
-
-    print(f'{Fore.BLUE}This mine has', deposit_materials, f'tritanium.{Fore.WHITE}')
-    print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
-    if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
-        mine_depo_mats = ask_sanitize(f'{Fore.GREEN}How much would you like to mine? (1 - {deposit_materials}){Fore.WHITE}')
-        start_time = time.time()
-        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=tritanium_mine_num) <= 0:
-            clear()
-            print('Mining...')
-            print('Tritanium Remaining:', mine_depo_mats)
-            print('Total Storage Remaining:', load_ship_stat(ship_name=load_data('ship'), stat_key='storage'))
-
-            materials_gathered = 1 * mining_efficiency
-            save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + materials_gathered)
-            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - materials_gathered)
-            update_mission_progress('Mine 100 Materials', materials_gathered)
-            mine_depo_mats -= mining_efficiency
-            
-            elapsed_time = time.time() - start_time
-            deposit_var = mine_depo_mats
-            estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
-            update_materials(system_name=systems[load_data('current_system')], mine_name=tritanium_mine_num, amount=mining_efficiency)
-            
-            print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
-            time.sleep(0.5)
-            if research_multi('Inventory Management Systems') < 0:
-                clear()
-                print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
-                time.sleep(2)
-                break
-            continue
-
-def mining_deposit_dilithium(dilithium_mine_num):
-    income_display()
-    print('You have approached a Dilithium Mine!')
-    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=dilithium_mine_num)
-    mining_efficiency = (research_multi('Mining Laser'))
-    deposit_var = deposit_materials / mining_efficiency 
-
-    print(f'{Fore.BLUE}This mine has', deposit_materials, f'dilithium.{Fore.WHITE}')
-    print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
-    if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
-        mine_depo_mats = ask_sanitize(f'{Fore.GREEN}How much would you like to mine? (1 - {deposit_materials}){Fore.WHITE}')
-        start_time = time.time()
-        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=dilithium_mine_num) <= 0:
-            clear()
-            print('Mining...')
-            print('Dilithium Remaining:', mine_depo_mats)
-            print('Total Storage Remaining:', load_ship_stat(ship_name=load_data('ship'), stat_key='storage'))
-
-            materials_gathered = 1 * mining_efficiency
-            save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + materials_gathered)
-            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - materials_gathered)
-            update_mission_progress('Mine 100 Materials', materials_gathered)
-            mine_depo_mats -= mining_efficiency
-            
-            elapsed_time = time.time() - start_time
-            deposit_var = mine_depo_mats
-            estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
-            update_materials(system_name=systems[load_data('current_system')], mine_name=dilithium_mine_num, amount=mining_efficiency)
-            
-            print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
-            time.sleep(0.5)
-            if research_multi('Inventory Management Systems') < 0:
-                clear()
-                print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
-                time.sleep(2)
-                break
-            continue
-        
-def mining_deposit_latinum(latinum_mine_num):
-    income_display()
-    print('You have approached a Latnium Mine!')
-    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=latinum_mine_num)
-    mining_efficiency = (research_multi('Mining Laser'))
-    deposit_var = deposit_materials / mining_efficiency 
-
-    print(f'{Fore.BLUE}This mine has', deposit_materials, f'latinum.{Fore.WHITE}')
-    print(f'{Fore.GREEN}Estimated mining time:', deposit_var * 0.5, f'Seconds {Fore.WHITE}')
-    if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
-        mine_depo_mats = ask_sanitize(f'{Fore.GREEN}How much would you like to mine? (1 - {deposit_materials}){Fore.WHITE}')
-        start_time = time.time()
-        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=latinum_mine_num) <= 0:
-            clear()
-            print('Mining...')
-            print('Latinum Remaining:', mine_depo_mats)
-            print('Total Storage Remaining:', load_ship_stat(ship_name=load_data('ship'), stat_key='storage'))
-
-            materials_gathered = 1 * mining_efficiency
-            save_ship_data(ship_name=load_data('ship'), stat_key='latinum_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='latinum_storage') + materials_gathered)
-            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - materials_gathered)
-            update_mission_progress('Mine 100 Materials', materials_gathered)
-            mine_depo_mats -= mining_efficiency
-            
-            elapsed_time = time.time() - start_time
-            deposit_var = mine_depo_mats
-            estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
-            update_materials(system_name=systems[load_data('current_system')], mine_name=latinum_mine_num, amount=mining_efficiency)
-            
-            print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
-            time.sleep(0.5)
-            if research_multi('Inventory Management Systems') < 0:
-                clear()
-                print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
-                time.sleep(2)
-                break
-            continue
         
 def accept_missions():
     mission_selection = ask_sanitize('Select mission to accept: ')
@@ -1369,7 +1063,6 @@ def accept_missions():
                         return
     if mission_selection == len(mission_list_print) + 1:
                 return
-    return
 
 def scan_system():
     exploration_time = random.randint(10, 60)
@@ -1394,7 +1087,7 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
         for i, option in enumerate(avalible, 1):  # Start enumeration at 1
             print(f"{i}. {option}")
         print(f"{len(avalible) + 1}. Exit")
-        trade_input = ask_sanitize(f"Option: ")
+        trade_input = ask_sanitize("Option: ")
         if trade_input == 1 and (load_ship_stat(load_data('ship'), 'dilithium_storage') > dil_trade_am or load_data('dilithium') > dil_trade_am):
             if ask(f"{Fore.YELLOW}You are going to trade {dil_trade_am} dilithium for {tri_trade_am} tritanium. Are you sure you want to do this? (Y/N): {Fore.WHITE}"):
                 if load_ship_stat(load_data('ship'), 'dilithium_storage') > dil_trade_am:
@@ -1404,18 +1097,15 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                     save_ship_data(load_data('ship'), 'storage', load_ship_stat(load_data('ship'), 'storage') - tri_trade_am)
                     print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
                     time.sleep(2)
-                    return
                 else:
                     save_data('dilithium', load_data('dilithium') - dil_trade_am)
                     save_data('tritanium', load_data('tritanium') + tri_trade_am)
                     print(f"{Fore.GREEN}Trade Completed.{Fore.WHITE}")
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     time.sleep(2)
-                    return
             else:
                 print('Trade Canceled.')
                 time.sleep(1)
-                return
         elif trade_input == 2 and (load_ship_stat(load_data('ship'), 'parsteel_storage') > par_trade_am or load_data('parsteel') > par_trade_am):
             if ask(f"{Fore.YELLOW}You are going to trade {par_trade_am} parsteel for {tri_trade_am} tritanium. Are you sure you want to do this? (Y/N): {Fore.WHITE}"):
                 if load_ship_stat(load_data('ship'), 'parsteel_storage') > par_trade_am:
@@ -1426,7 +1116,6 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', par_trade_am)
                     time.sleep(2)
-                    return
                 else:
                     save_data('parsteel', load_data('parsteel') - par_trade_am)
                     save_data('tritanium', load_data('tritanium') + tri_trade_am)
@@ -1434,11 +1123,9 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', par_trade_am)
                     time.sleep(2)
-                    return
             else:
                 print('Trade Canceled.')
                 time.sleep(1)
-                return
         elif trade_input == 3 and (load_ship_stat(load_data('ship'), 'tritanium_storage') > tri_trade_am or load_data('tritanium') > tri_trade_am):
             if ask(f"{Fore.YELLOW}You are going to trade {tri_trade_am} tritanium for {par_trade_am} parsteel. Are you sure you want to do this? (Y/N): {Fore.WHITE}"):
                 if load_ship_stat(load_data('ship'), 'tritanium_storage') > tri_trade_am:
@@ -1449,7 +1136,6 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', tri_trade_am)
                     time.sleep(2)
-                    return
                 else:
                     save_data('tritanium', load_data('tritanium') - tri_trade_am)
                     save_data('parsteel', load_data('parsteel') + par_trade_am)
@@ -1457,11 +1143,9 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', tri_trade_am)
                     time.sleep(2)
-                    return
             else:
                 print('Trade Canceled.')
                 time.sleep(1)
-                return
         elif trade_input == 4 and (load_ship_stat(load_data('ship'), 'parsteel_storage') > dil_trade_am or load_data('parsteel') > dil_trade_am):
             if ask(f"{Fore.YELLOW}You are going to trade {par_trade_am} parsteel for {dil_trade_am} dilithium. Are you sure you want to do this? (Y/N): {Fore.WHITE}"):
                 if load_ship_stat(load_data('ship'), 'parsteel_storage') > par_trade_am:
@@ -1472,7 +1156,6 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', par_trade_am)
                     time.sleep(2)
-                    return
                 else:
                     save_data('parsteel', load_data('parsteel') - par_trade_am)
                     save_data('dilithium', load_data('dilithium') + dil_trade_am)
@@ -1480,15 +1163,12 @@ def trading(dil_trade_am, tri_trade_am, par_trade_am):
                     update_mission_progress('Complete 2 Sucessful Trades', 1)
                     update_mission_progress('Trade 200 Materials With a Ship', par_trade_am)
                     time.sleep(2)
-                    return
             else:
                 print('Trade Canceled.')
                 time.sleep(1)
-                return
         elif trade_input == 5:
             print('Exiting Trade.')
             time.sleep(1)
-            return
         else:
             print('Please input a valid number.')
                 
@@ -1698,11 +1378,9 @@ def purchase_item(item_index, shop_data, user_data):
             print(f"Remaining latinum: {load_data('latinum')}")
             save_data(resource_key, load_data(resource_key) + amount)
             time.sleep(2)
-            return
         else:
             print(f"Invalid resource key: {resource_key}.")
             time.sleep(2)
-            return
     else:
         print(f"{Fore.RED}Not enough latinum to buy this item.{Fore.WHITE}")
 
@@ -1874,7 +1552,7 @@ def hailing_frequency():
                 save_data('reputation', player_reputation)
 
             elif choice == 2 and current_ship == "neutral" and progress['greeted']:
-                print(f"The neutral ship is considering trading with you.")
+                print("The neutral ship is considering trading with you.")
                 player_reputation += 5
                 save_data('reputation', player_reputation)
 
@@ -1899,13 +1577,13 @@ def load_building_data(key, building_name=None):
         with open('buildings.json', 'r') as file:
             data = json.load(file)
 
-        if building_name:  # If building_name is specified, return that specific building's data
+        if building_name: 
             if building_name in data['buildings']:
                 return data['buildings'][building_name]
             else:
                 print(f"Building '{building_name}' not found in buildings data.")
                 return None
-        else:  # If no building_name is specified, return the whole 'buildings' section
+        else: 
             return data.get(key, None)
         
     except FileNotFoundError:
@@ -1919,12 +1597,8 @@ def load_specific_upgrade(building_name, upgrade_part):
     try:
         with open('buildings.json', 'r') as file:
             data = json.load(file)
-
-        # Check if the building exists
         if building_name in data['buildings']:
             building = data['buildings'][building_name]
-            
-            # Check if the upgrade part exists in the building
             if upgrade_part in building['upgrades']:
                 return building['upgrades'][upgrade_part]
             else:
@@ -1944,16 +1618,15 @@ def save_building_data(key, value, building_name=None):
         with open('buildings.json', 'r+') as file:
             data = json.load(file)
 
-            if building_name:  # Update a specific building's data
+            if building_name:  
                 if building_name in data['buildings']:
                     data['buildings'][building_name][key] = value
                 else:
                     print(f"Building '{building_name}' not found in buildings data.")
                     return
-            else:  # Update general data (if necessary)
+            else:  
                 data[key] = value
 
-            # Rewind file pointer and write updated data
             file.seek(0)
             json.dump(data, file, indent=4)
             file.truncate()
@@ -1965,11 +1638,11 @@ def save_building_data(key, value, building_name=None):
 def start_construction(building_name, completion_time, upgrade_part=None):
     user_data = load_data('construction_queue')
 
-    # Check if the construction queue is empty
+
     if user_data['building'] is None:
         current_time = datetime.now()
-        start_time = current_time.isoformat()  # Record start time
-        end_time = (current_time + timedelta(seconds=completion_time)).isoformat()  # Record end time
+        start_time = current_time.isoformat()  
+        end_time = (current_time + timedelta(seconds=completion_time)).isoformat()  
 
         # Update the construction queue in user data
         construction_data = {
@@ -2361,6 +2034,20 @@ def research_multi(research_name):
         print(f"No research found for '{research_name}'. Returning base value.")
         return round(base_value)
     
+def calculate_repair_cost(base_repair_cost):
+    # Load the current shipyard level
+    shipyard_level = load_specific_upgrade("starbase", "Shipyard")
+
+    if shipyard_level is None or shipyard_level == 0:
+        print("Invalid shipyard level. Defaulting repair cost to base amount.")
+        return base_repair_cost
+
+    # Calculate adjusted repair cost
+    adjusted_repair_cost = base_repair_cost // shipyard_level
+    
+    return adjusted_repair_cost
+
+    
 def colored_gradient_loading_bar(total=30, duration=5):
     # ANSI escape sequences for colors
     RESET = "\033[0m"
@@ -2474,7 +2161,6 @@ def distress_call_scenario_pt2():
         print(f"{Fore.GREEN}The second ship is fleeing!\nVictory!{Fore.WHITE}")
         update_mission_progress('Respond to Distress Signal in Regula', 1)
         time.sleep(2)
-        return
     else:
         print(f"{Fore.RED}The ships have fired on you!{Fore.WHITE}")
         save_ship_data(load_data('ship'), 'health', load_ship_stat(load_data('ship'), 'health') - random.randint(100, 350))
@@ -2488,7 +2174,6 @@ def distress_call_scenario_pt2():
         print(f"{Fore.GREEN}The second ship is fleeing!\nVictory!{Fore.WHITE}")
         update_mission_progress('Respond to Distress Signal in Regula', 1)
         time.sleep(2)
-        return
                                                         
 finding_var = 0 
 warp_time = 0
@@ -2510,63 +2195,7 @@ print('Necessary packages imported')
 
 while True:
     if research_multi('Sheild Dynamics') <= 0:
-            clear()
-            print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
-            print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage')}{Fore.WHITE}")
-            save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=0)
-            save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=0)
-            save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=0)
-            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage'))
-            save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-            save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-            if load_data('ship') == 'Stargazer':
-                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
-                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=2)
-                save_data('ship', 'Stargazer')
-                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
-            if load_data('ship') == 'USS Grissom':
-                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
-                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=4)
-                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-                save_data('ship', 'Stargazer')
-                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
-            if load_data('ship') == 'Federation Shuttlecraft':
-                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
-                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=1)
-                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=3)
-                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=2)
-                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=4)
-                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-                save_data('ship', 'Stargazer')
-                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
-            if load_data('ship') == 'Galaxy Class':
-                save_ship_data(ship_name=load_data('ship'), stat_key='health', value=load_ship_stat(ship_name=load_data('ship'), stat_key='max_health'))
-                save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=5)
-                save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=6)
-                save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=5)
-                save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=4)
-                save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=8)
-                save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-                save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-                save_data('ship', 'Stargazer')
-                save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-                save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
-            time.sleep(5)
-            continue
+        check_health()
     clear()
     mission_data = load_data('missions').get("Respond to the Distress Signal in Regula", {})
     if mission_data.get("accepted") and mission_data.get("progress") == 0:
@@ -2593,7 +2222,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3', 'parsteel_mine4', 'parsteel_mine5']
-                        mining_deposit_parsteel(parsteel_mine_num=random.choice(rand_min))
+                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
                     else:
                         clear()
                         income_display()
@@ -2634,7 +2263,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3']
-                        mining_deposit_parsteel(parsteel_mine_num=random.choice(rand_min))
+                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
                     else:
                         clear()
                         income_display()
@@ -2643,7 +2272,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['tritanium_mine1', 'tritanium_mine2', 'tritanium_mine3']
-                        mining_deposit_tritanium(tritanium_mine_num=random.choice(rand_min))
+                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
                     else:
                         clear()
                         income_display()
@@ -2684,7 +2313,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4']
-                        mining_deposit_dilithium(dilithium_mine_num=random.choice(rand_min))
+                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
                     else:
                         clear()
                         income_display()
@@ -2693,7 +2322,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['tritanium_mine1', 'tritanium_mine2']
-                        mining_deposit_tritanium(tritanium_mine_num=random.choice(rand_min))
+                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
                     else:
                         clear()
                         income_display()
@@ -2734,7 +2363,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3']
-                        mining_deposit_dilithium(dilithium_mine_num=random.choice(rand_min))
+                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
                     else:
                         clear()
                         income_display()
@@ -2743,7 +2372,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3']
-                        mining_deposit_parsteel(parsteel_mine_num=random.choice(rand_min))
+                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
                     else:
                         clear()
                         income_display()
@@ -2784,7 +2413,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['dilithium_mine1', 'dilithium_mine2']
-                        mining_deposit_dilithium(dilithium_mine_num=random.choice(rand_min))
+                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
                     else:
                         clear()
                         income_display()
@@ -2793,7 +2422,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['parsteel_mine1', 'parsteel_mine2']
-                        mining_deposit_parsteel(parsteel_mine_num=random.choice(rand_min))
+                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
                     else:
                         clear()
                         income_display()
@@ -2803,7 +2432,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['tritanium_mine1', 'tritanium_mine2']
-                        mining_deposit_tritanium(tritanium_mine_num=random.choice(rand_min))
+                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
                     else:
                         clear()
                         income_display()
@@ -2820,7 +2449,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['latinum_mine1', 'latinum_mine2']
-                        mining_deposit_latinum(latinum_mine_num=random.choice(rand_min))
+                        mining_deposit('latinum', random.choice(rand_min), 'Latinum')
                     else:
                         clear()
                         income_display()
@@ -2865,7 +2494,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['tritanium_mine1', 'tritanium_mine2']
-                        mining_deposit_tritanium(tritanium_mine_num=random.choice(rand_min))
+                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
                     else:
                         clear()
                         income_display()
@@ -2914,7 +2543,7 @@ while True:
                     if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
                         clear()
                         rand_min = ['tritanium_mine1', 'tritanium_mine2']
-                        mining_deposit_tritanium(tritanium_mine_num=random.choice(rand_min))
+                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
                     else:
                         clear()
                         income_display()
@@ -3002,7 +2631,7 @@ while True:
                     if rd_option == 1:
                         clear()
                         income_display()
-                        research_path = ask_sanitize(f"Research Menu\n1. View Research/Start Research\n2. Exit\nOption: ")
+                        research_path = ask_sanitize("Research Menu\n1. View Research\nStart Research\n2. Exit\nOption: ")
                         if research_path == 1:
                             display_available_research()
                         if research_path == 2:
@@ -3040,10 +2669,39 @@ while True:
                             time.sleep(2)
                     if academy_option == 4:
                         continue
+                if station_selection == 5: #ops
+                    clear()
+                    income_display()
+                    ops_delta = 2.1
+                    print("Ops Menu")
+                    ops_option = ask_sanitize("1. Upgrade Ops\n2. Exit\nOption: ")
+                    if ops_option == 1:
+                        if ask(f"{Fore.YELLOW}Are you sure you want to upgrade? This will take {(load_specific_upgrade('starbase', 'Ops') ** ops_delta) * 10} seconds and cost {round(((load_specific_upgrade('starbase', 'Ops') * ops_delta) ** ops_delta) * 10)} parsteel and {round(((load_specific_upgrade('starbase', 'Ops') * ops_delta) ** ops_delta) * 5)} tritanium. (Y/N): ") and load_data('parsteel') >= round(((load_specific_upgrade('starbase', 'Ops') * ops_delta) ** ops_delta) * 10) and load_data('tritanium') >= round(((load_specific_upgrade('starbase', 'Ops') * ops_delta) ** ops_delta) * 5):
+                            save_data('parsteel', load_data('parsteel') - round(((load_specific_upgrade('starbase', 'Ops') * ops_delta) ** ops_delta) * 10))
+                            save_data('tritanium', load_data('tritanium') - round(((load_specific_upgrade('starbase', 'Ops') * ops_delta) ** ops_delta) * 5))
+                            start_construction('starbase', (load_specific_upgrade('starbase', 'Ops') ** ops_delta) * 10, 'Ops')
+                        else:
+                            print(f"{Fore.RED}You either canceled the upgrade, or do not have enough parsteel or tritanium.{Fore.WHITE}")
+                            time.sleep(2)
+                    if ops_option == 2:
+                        continue
             if drydock_selection == 2: #Shipyard
                 clear()
                 income_display()
-                ship_management_menu(coins=load_data('parsteel'))
+                shipyard_delta = 2.4
+                shipyard_op = ask_sanitize("1. Enter Shipyard\n2. Upgrade Shipyard\n3. Exit\nOption: ")
+                if shipyard_op == 1:
+                    ship_management_menu(coins=load_data('parsteel'))
+                elif shipyard_op == 2:
+                    if ask(f"{Fore.YELLOW}Are you sure you want to upgrade? This will take {(load_specific_upgrade('starbase', 'Shipyard') ** shipyard_delta) * 10} seconds and will cost you {round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 10)} parsteel and {round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 5)} tritanium. (Y/N): {Fore.WHITE}") and load_data('parsteel') >= round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 10) and load_data('tritanium') >= round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 5):
+                        save_data('parsteel', load_data('parsteel') - round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 10))
+                        save_data('tritanium', load_data('tritanium') - round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 5))
+                        start_construction('starbase', (load_specific_upgrade('starbase', 'Shipyard') ** shipyard_delta) * 10, 'Shipyard')
+                    else:
+                        print(f"{Fore.RED}You either canceled the upgrade, or you do not have enough parsteel or tritanium.{Fore.WHITE}")
+                        time.sleep(2)
+                elif shipyard_op == 3:
+                    continue
             if drydock_selection == 3: #research
                 clear()
                 income_display()
@@ -3051,8 +2709,8 @@ while True:
             if drydock_selection == 4:
                 clear()
                 income_display()
-                if ask(f"{Fore.RED}Are you sure you want to repair your ship? This will cost you {round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5)} parsteel. (Y/N): ") and load_data('parsteel') >= round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5):
-                    save_data('parsteel', load_data('parsteel') - round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5))
+                if ask(f"{Fore.RED}Are you sure you want to repair your ship? This will cost you {calculate_repair_cost(round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5))} parsteel. (Y/N): ") and load_data('parsteel') >= calculate_repair_cost(round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5)):
+                    save_data('parsteel', load_data('parsteel') - calculate_repair_cost(round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=load_data('ship'), stat_key='max_health') - load_ship_stat(ship_name=load_data('ship'), stat_key='health')) / 5)))
                     save_ship_data(ship_name=load_data('ship'), stat_key='health', value=(research_multi('Sheild Dynamics') * load_ship_stat(ship_name=load_data('ship'), stat_key='max_health')))
                     print(f"{Fore.GREEN}Repair Completed. You now have {load_ship_stat(load_data('ship'), 'health')} health.{Fore.WHITE}")
                     time.sleep(2)
@@ -3072,27 +2730,3 @@ while True:
     if option == 5:
         clear()
         shop_loop()
-    if option == 800:
-        clear()
-        with open('user_crew_data.json', 'r') as file:
-            data = json.load(file)
-        for crew_member in data["crew"]:
-            print("- " + crew_member["name"])
-        manifest_option = ask_sanitize(question_ask='Would you like to view crew stats (1) or upgrade crew (2) or exit (3)? ')
-        if manifest_option == 1:
-            clear()
-            for crew_member in data["crew"]:
-                print(f"- {crew_member['name']}'s Stats:")
-                for key, value in crew_member.items():
-                    print(f"  {key.capitalize()}: {value}")
-                print() 
-            if ask(question='Type Y or N to exit: '):
-                continue
-            continue
-        elif manifest_option == 2:
-            if __name__ == "__main__":
-                main()
-        elif manifest_option == 3:
-            clear()
-            continue
-        continue 

@@ -4,7 +4,8 @@
             "upgrades": {
                 "Ops": 1,
                 "R&D": 1,
-                "Academy": 1
+                "Academy": 1,
+                "Shipyard": 1
             }
         },
         "generators": {
