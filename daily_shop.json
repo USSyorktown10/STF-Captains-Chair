@@ -1,47 +1,47 @@
 {
-    "last_updated": "2024-10-31",
+    "last_updated": "2024-11-11",
     "items": [
         {
-            "item_name": "300 Recruit Tokens",
-            "price": 30,
-            "resource_key": "recruit_tokens",
-            "amount": 300
-        },
-        {
-            "item_name": "5 USS Grissom Blueprints",
+            "item_name": "60 USS Grissom Blueprints Blueprints",
             "price": 10,
-            "resource_key": "uss_grissom_blueprints",
-            "amount": 5
+            "resource_key": "USS Grissom Blueprints",
+            "amount": 60
         },
         {
-            "item_name": "20 Stargazer Blueprints",
-            "price": 20,
-            "resource_key": "stargazer_blueprints",
+            "item_name": "20 Galaxy Class Blueprints Blueprints",
+            "price": 40,
+            "resource_key": "Galaxy Class Blueprints",
             "amount": 20
         },
         {
-            "item_name": "100 Federation Shuttlecraft Blueprints",
-            "price": 120,
-            "resource_key": "federation_shuttlecraft_blueprints",
-            "amount": 100
-        },
-        {
-            "item_name": "30 Galaxy Class Blueprints",
-            "price": 60,
-            "resource_key": "galaxy_class_blueprints",
-            "amount": 30
-        },
-        {
-            "item_name": "15 USS Grissom Blueprints",
-            "price": 20,
-            "resource_key": "uss_grissom_blueprints",
+            "item_name": "15 USS Grissom Blueprints Blueprints",
+            "price": 10,
+            "resource_key": "USS Grissom Blueprints",
             "amount": 15
         },
         {
-            "item_name": "50 Galaxy Class Blueprints",
-            "price": 80,
-            "resource_key": "galaxy_class_blueprints",
-            "amount": 50
+            "item_name": "100 Galaxy Class Blueprints Blueprints",
+            "price": 40,
+            "resource_key": "Galaxy Class Blueprints",
+            "amount": 100
+        },
+        {
+            "item_name": "20 Stargazer Blueprints Blueprints",
+            "price": 10,
+            "resource_key": "Stargazer Blueprints",
+            "amount": 20
+        },
+        {
+            "item_name": "300 Recruit Tokens Blueprints",
+            "price": 5,
+            "resource_key": "Recruit Tokens",
+            "amount": 300
+        },
+        {
+            "item_name": "100 Stargazer Blueprints Blueprints",
+            "price": 10,
+            "resource_key": "Stargazer Blueprints",
+            "amount": 100
         }
     ]
 }
