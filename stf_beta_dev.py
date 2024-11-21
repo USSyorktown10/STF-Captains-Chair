@@ -2,10 +2,12 @@ import json
 import time
 import random
 import os
-from colorama import Fore
+from colorama import init, Fore
 import subprocess
 import sys
 from datetime import datetime, timedelta
+
+init()
 
 # Clear the terminal for a new menu or screen
 def clear():
@@ -381,14 +383,30 @@ def display_ship_menu():
         print("Ship data file not found.")
 
 def ship_management_menu(coins):
+    global tutorial_highlight7
     global ship_name
     while True:
         clear()
+        if load_data('tutorial') == 7:
+            print(f"{Fore.YELLOW}Welcome to the shipyard! You can see ship's details, build ships, equip them, change their crew, and upgrade it.\nRight now, you are going to upgrade the Stargazer. Type 4 to upgrade a ship.{Fore.WHITE}")
+            time.sleep(2)
+            tutorial_highlight7 = Fore.YELLOW
+            tutorial_highlight8 = Fore.WHITE
+        if load_data('tutorial') == 8:
+            print(f"{Fore.YELLOW}Great job upgrading your ship! As you get more blueprints, you will be able to upgrade your ship more. Now that you have done that, lets assign some crew to your ship.\nSelect 5 to enter the crew menu.{Fore.WHITE}")
+            time.sleep(2)
+            tutorial_highlight8 = Fore.YELLOW
+            tutorial_highlight7 = Fore.WHITE
+        else:
+            if load_data('tutorial') == 9:
+                print(f"{Fore.YELLOW}Type 7 to exit the shipyard.{Fore.WHITE}")
+            tutorial_highlight8 = Fore.WHITE
+            tutorial_highlight7 = Fore.WHITE
         income_display()
         print(f"Stargazer BP: {load_data('stargazer_blueprints')} || USS Grissom BP: {load_data('uss_grissom_blueprints')} || Fed. Shuttle. BP: {load_data('federation_shuttlecraft_blueprints')} || Galaxy C. BP: {load_data('galaxy_class_blueprints')}")
         display_ship_menu()
 
-        choice = ask_sanitize(question_ask=f"\nOptions:\n1. View Ship Details\n2. Build Ship\n3. Equip Ship\n4. Upgrade Ship\n5. Change Crew on {load_data('ship')}\n6. View Ship Manifest\n7. Exit\nSelect an option: ")
+        choice = ask_sanitize(question_ask=f"\nOptions:\n1. View Ship Details\n2. Build Ship\n3. Equip Ship\n{tutorial_highlight7}4. Upgrade Ship{Fore.WHITE}\n{tutorial_highlight8}5. Change Crew on {load_data('ship')}{Fore.WHITE}\n6. View Ship Manifest\n7. Exit\nSelect an option: ")
 
         if choice == 1:
             clear()
@@ -443,6 +461,8 @@ def ship_management_menu(coins):
 
         elif choice == 4:
             clear()
+            if load_data('tutorial') == 7:
+                print(f"{Fore.YELLOW}Upgrade the stargazer by typing 1.{Fore.WHITE}")
             income_display()
             display_ship_menu()
             ship_num = ask_sanitize(question_ask='What ship would you like to upgrade? ')
@@ -454,7 +474,9 @@ def ship_management_menu(coins):
                 ship_name = 'Federation Shuttlecraft'
             elif ship_num == 4:
                 ship_name = 'Galaxy Class'
-            stat_num = ask_sanitize("Enter the stat to upgrade (1. Firepower, 2. Accuracy, 3. Evasion, 4. Warp Range, 5. Storage, 6. Mining Efficiency): ")
+            if load_data('tutorial') == 7:
+                print(f"{Fore.YELLOW}Lets upgrade the warp range. Type 4.{Fore.WHITE}")
+            stat_num = ask_sanitize(f"Enter the stat to upgrade (1. Firepower, 2. Accuracy, 3. Evasion, {tutorial_highlight7}4. Warp Range{Fore.WHITE}, 5. Storage, 6. Mining Efficiency): ")
             if stat_num == 1:
                 stat = 'firepower'
             if stat_num == 2:
@@ -469,6 +491,8 @@ def ship_management_menu(coins):
                 stat = 'mining_efficiency'
             if ask(f"{Fore.YELLOW}Are you sure you want to upgrade {stat}? (Y/N): "):
                 upgrade_ship(ship_name, stat)
+                if load_data('tutorial') == 7:
+                    save_data('tutorial', 8)
             else:
                 print(f"{Fore.RED}Upgrade Canceled.{Fore.WHITE}")
                 time.sleep(1)
@@ -552,6 +576,8 @@ def upgrade_crew_member(crew_data, member_index, cost):
         save_data('recruit_tokens', load_data('recruit_tokens') - cost)
         print(f"{Fore.GREEN}\n{crew_data['crew'][member_index]['name']}'s skill level increased to {crew_data['crew'][member_index]['skill_level']}!{Fore.WHITE}")
         print(f"{Fore.YELLOW}Remaining Recruit Tokens: {load_data('recruit_tokens')}{Fore.WHITE}")
+        if load_data('tutorial') == 9:
+            save_data('tutorial', 10)
         time.sleep(2)
     else:
         print(f"{Fore.RED}\nNot enough recruit tokens to upgrade.{Fore.WHITE}")
@@ -582,6 +608,10 @@ def main():
 
     while True:
         clear()
+        if load_data('tutorial') == 9:
+            print(f"{Fore.YELLOW}Select 1 to upgrade crew.{Fore.WHITE}")
+        if load_data('tutorial') == 10:
+            print(f"{Fore.YELLOW}Type 3 to exit.{Fore.WHITE}")
         income_display()
         display_crew(crew_data)
 
@@ -595,13 +625,19 @@ def main():
         if choice == 'upgrade':
             # Upgrade crew
             # Convert to 0-based index
-            crew_choice = int(input(f"{Fore.BLUE}Enter the number of the crew member to upgrade: {Fore.WHITE}")) - 1
+            if load_data('tutorial') == 9:
+                print(f"{Fore.YELLOW}Upgrade any crew member:{Fore.WHITE}")
+            crew_choice = ask_sanitize(f"{Fore.BLUE}Enter the number of the crew member to upgrade: {Fore.WHITE}") - 1
             cost = 10
             print(f"{Fore.YELLOW}Upgrading {crew_data['crew'][crew_choice]['name']} will cost {cost} recruit tokens. ({load_data('recruit_tokens')}->{load_data('recruit_tokens') - cost}){Fore.WHITE}")
             if ask(f"{Fore.RED}Do you want to proceed? (y/n): {Fore.WHITE}") and load_data('recruit_tokens') >= cost:
                 upgrade_crew_member(crew_data, crew_choice, cost)
                 # Save updated user crew data to file
                 save_crew_data(user_crew_file_path, crew_data)
+                if load_data('tutorial') == 9:
+                    print(f"{Fore.GREEN}Great job upgrading {crew_data['crew'][crew_choice]['name']}. Now you know how to upgrade crew. Exit the crew menu by typing 3 at the menu.{Fore.WHITE}")
+                    save_data('tutorial', 10)
+                    time.sleep(2)
             else:
                 print(f"{Fore.RED}\nRather the Upgrade canceled or you do not have enough recruit tokens.{Fore.WHITE}")
                 time.sleep(1)
@@ -670,6 +706,8 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
             if not owned_ships:
                 print("No owned ships available.")
                 return
+            if load_data('tutorial') == 8:
+                print(f"{Fore.YELLOW}Select the stargazer to assign crew to.{Fore.WHITE}")
             print("\nOwned Ships:")
             for idx, ship in enumerate(owned_ships, start=1):
                 print(f"{idx}. {ship['name']}")
@@ -681,11 +719,12 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
                 print(f"{Fore.RED}No available crew positions on this ship.{Fore.WHITE}")
                 time.sleep(2)
                 return
+            if load_data('tutorial') == 8:
+                print(f"{Fore.YELLOW}Select any crew memeber to assign.{Fore.WHITE}")
             print("\nOwned Crew Members:")
             for idx, member in enumerate(owned_crew, start=1):
                 ability = format_ability(member['ability']['stat'])
                 print(f"{idx}. {member['name']} - {ability} Boost")
-
             crew_choice = int(input("\nEnter the number of the crew member to assign: ")) - 1
             selected_crew = owned_crew[crew_choice]['name']
             crew_ability = owned_crew[crew_choice]['ability']
@@ -695,7 +734,8 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
                 print(f"{Fore.RED}{selected_crew} is already assigned to this ship.{Fore.WHITE}")
                 time.sleep(2)
                 return
-
+            if load_data('tutorial') == 8:
+                print(f"{Fore.YELLOW}Select any position to assign.{Fore.WHITE}")
             print("\nAvailable Crew Positions:")
             for idx, position in enumerate(available_positions, start=1):
                 print(f"{idx}. {format_position(position)}")
@@ -717,6 +757,7 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
             json.dump(ship_data, ship_file, indent=4)
             ship_file.truncate()
             print(f"{Fore.BLUE}\nAssigned {selected_crew} to {format_position(position_choice)} on {selected_ship['name']} and increased {format_ability(stat_key)} by {stat_boost * 100}%.{Fore.WHITE}")
+            save_data('tutorial', 9)
             time.sleep(3)
 
     except FileNotFoundError as e:
@@ -793,8 +834,7 @@ def update_mission_progress(mission_name, progress_increment):
         if mission_name in mission_targets and missions[mission_name]['progress'] >= mission_targets[mission_name]:
             complete_mission(mission_name)
     else:
-        print(f"{Fore.RED}CODE ERROR: MISSION NOT FOUND\nPLEASE CREATE AN ISSUE ON GITHUB TO REPORT THIS ISSUE{Fore.WHITE}")
-        time.sleep(2)
+        return
 
 
 def complete_mission(mission_name):
@@ -864,8 +904,7 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
     if ask('Do you want to battle this enemy? '):
         clear()
         print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
-        while (research_multi('Sheild Dynamics') * load_ship_stat(ship_name=load_data('ship'), stat_key='health')) > 0 or opponent_health > 0:
-            clear()
+        while (load_ship_stat(ship_name=load_data('ship'), stat_key='health')) > 0 or opponent_health > 0:
             turn = 'player'
             if turn == 'player':
                 if random.uniform(0, 1) < (research_multi('Targeting Matrix') / evasion + 1):
@@ -878,26 +917,26 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                     print(f"{Fore.RED}You missed!{Fore.RED}")
                     time.sleep(2)
                     turn = 'enemy'
-            if (research_multi('Sheild Dynamics')) <= 0:
+            if (load_ship_stat(load_data('ship'), 'health')) <= 0:
                 break
             if opponent_health <= 0:
                 break
             if turn == 'enemy':
                 if random.uniform(0, 1) < (accuracy / (research_multi('Targeting Matrix') + 1)):
                     damage = firepower * random.uniform(50, 150)
-                    save_ship_data(stat_key='health', value=round(research_multi('Sheild Dynamics') - damage), ship_name=load_data('ship'))
-                    print(f"{Fore.RED}You have been hit! You took {damage:.2f} damage. Your health: {research_multi('Sheild Dynamics'):.2f}{Fore.WHITE}")
+                    save_ship_data(stat_key='health', value=round(load_ship_stat(load_data('ship'), 'health') - damage), ship_name=load_data('ship'))
+                    print(f"{Fore.RED}You have been hit! You took {damage:.2f} damage. Your health: {load_ship_stat(load_data('ship'), 'health'):.2f}{Fore.WHITE}")
                     time.sleep(3)
                     turn = 'player'
                 else:
                     print(f"{Fore.GREEN}{opponent_name} missed!{Fore.WHITE}")
                     time.sleep(2)
                     turn = 'player'
-            if (research_multi('Sheild Dynamics')) <= 0:
+            if (load_ship_stat(load_data('ship'), 'health')) <= 0:
                 break
             if opponent_health <= 0:
                 break
-    if (research_multi('Sheild Dynamics') * load_ship_stat(load_data('ship'), 'health')) <= 0:
+    if (load_ship_stat(load_data('ship'), 'health')) <= 0:
             check_health()
     if opponent_health <= 0:
                 clear()
@@ -959,7 +998,7 @@ base_ship_stats = {
 }
 
 def check_health():
-    if (research_multi('Sheild Dynamics') * load_ship_stat(load_data('ship'), 'health')) <= 0:
+    if (load_ship_stat(load_data('ship'), 'health')) <= 0:
         clear()
         print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
         print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='latinum_storage')}{Fore.WHITE}")
@@ -988,10 +1027,12 @@ def mining_deposit(mine_type, mine_num, mine_capitilize):
     global tutorial_highlight
     income_display()
     if load_data('tutorial') == 0:
-        print("Type y to enter mining mode, and then select how much parsteel you want to mine.")
+        print(f"{Fore.YELLOW}Type y to enter mining mode, and then select how much parsteel you want to mine.\n{Fore.WHITE}")
+    if load_data('tutorial') == 6:
+        print("Type y to enter mining mode, and then select how much tritanium you want to mine.\n")
     print(f"You have approached a {mine_capitilize} Mine!")
     deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=mine_num)
-    mining_efficiency = research_multi('Mining Laser')
+    mining_efficiency = research_multi('Mining Laser') * load_ship_stat(load_data('ship'), 'mining_efficiency')
     deposit_var = deposit_materials / mining_efficiency
     print(f"{Fore.BLUE}This mine has {deposit_materials} {mine_type}.{Fore.WHITE}")
     print(f"{Fore.GREEN}Estimated mining time: {deposit_var * 0.5} seconds{Fore.WHITE}")
@@ -1017,7 +1058,10 @@ def mining_deposit(mine_type, mine_num, mine_capitilize):
                 print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
                 time.sleep(2)
                 break
-        save_data('tutorial', 1)
+        if load_data('tutorial') == 0:
+            save_data('tutorial', 1)
+        if load_data('tutorial') == 6:
+            save_data('tutorial', 7)
         tutorial_highlight1 = Fore.WHITE
         tutorial_highlight = Fore.WHITE
 
@@ -1033,6 +1077,9 @@ def accept_missions():
 
 def scan_system():
     exploration_time = random.randint(10, 60)
+    if load_data('tutorial') == 6:
+        print(f"{Fore.YELLOW}When you come across a new system and you havent explored it, you need to scan the system. Type y to explore it.{Fore.WHITE}")
+        time.sleep(2)
     if ask(f"{Fore.RED}System {systems[load_data('current_system')]} has not been explored. Would you like to scan this system? This will take you {exploration_time} seconds. (Y/N): {Fore.WHITE}"):
         while exploration_time > 0:
             clear()
@@ -1108,6 +1155,7 @@ def navigate():
     global current_system
     global warp_time
     global max_system
+    global tutorial_highlight6
 
     warp_range = round(research_multi('Warp Mathematics') * load_ship_stat(load_data('ship'), 'warp_range'))
     max_system = len(systems)
@@ -1127,7 +1175,9 @@ def navigate():
 
         while True:
             try:
-                system_number = int(input(f'{Fore.BLUE}Which system number would you like to travel to? {Fore.WHITE}'))
+                if load_data('tutorial') == 5:
+                    print(f"{Fore.YELLOW}Type 2 to navigate to vulcan.{Fore.WHITE}")
+                system_number = ask_sanitize(f'{Fore.BLUE}Which system number would you like to travel to? {Fore.WHITE}')
                 if system_number in reachable_systems:
                     target_system = system_number
                     warp_time = abs(load_data('current_system') - target_system) * 10
@@ -1139,6 +1189,8 @@ def navigate():
                         time.sleep(1)
                     save_data('current_system', target_system)
                     print(f"Arrived at {systems[load_data('current_system')]}.")
+                    if load_data('current_system') == 2 and load_data('tutorial') == 5:
+                        save_data('tutorial', 6)
                     time.sleep(2)
                     break
                 else:
@@ -1301,11 +1353,15 @@ def shop_loop():
     shop_data = update_shop_daily()
 
     while True:
+        if load_data('tutorial') == 11:
+            print(f"{Fore.YELLOW}This is the ship! Here, everything costs latinum. To get latinum, you need to complete missions by exploring a system, and accepting missions from a mission planet.{Fore.WHITE}")
         display_shop(shop_data)
         command = input("Enter the number to buy, or 'e' to leave: ")
 
         if command.lower() == "e":
             print("Exiting shop.")
+            if load_data('tutorial') == 11:
+                save_data('tutorial', 12)
             break
 
         if command.isdigit():
@@ -1678,6 +1734,10 @@ def claim_resources():
     save_data('dilithium_storage', 0)
 
     print(f"{Fore.GREEN}All resources have been claimed. Parsteel claimed: {parsteel_storage} | Tritanium claimed: {tritanium_storage} | Dilithium claimed: {dilithium_storage}{Fore.WHITE}")
+    if load_data('tutorial') == 10:
+        print(f"{Fore.GREEN}Great job! Every once and awhile, come back here to claim your materials.{Fore.WHITE}")
+        save_data('tutorial', 11)
+        time.sleep(2)
 
 def load_research_data(key, research_name=None):
     try:
@@ -1786,7 +1846,8 @@ def display_available_research():
                 if load_research_data('research', prereq)['level'] < 1
             ]
             unavailable_research.append((name, details, missing_prereqs))
-
+    if load_data('tutorial') == 4:
+        print(f"{Fore.YELLOW}Now select 1 and start the resarch, because you have this one ready. As you go through research, more will become avalible as you progress through the research tree.{Fore.WHITE}")
     # Display available research
     print("\nAvailable Research:")
     for index, (name, details) in enumerate(available_research, start=1):
@@ -1818,6 +1879,9 @@ def display_available_research():
             start_research(selected_research, duration=round((cost ** 1.5)))
             print(f"{Fore.GREEN}Research on {selected_research} has started.{Fore.WHITE}")
             print(f"Remaining Dilithium: {load_data('dilithium')}")
+            if load_data('tutorial') == 4:
+                print(f"{Fore.GREEN}Great work! Research will improve your stats on what you are researching. Look at the Wiki to see what each part of the research tree affects.{Fore.WHITE}")
+                save_data('tutorial', 5)
             time.sleep(2)
         else:
             print(f"{Fore.RED}Not enough dilithium to start this research.{Fore.WHITE}")
@@ -2005,7 +2069,7 @@ def distress_call_scenario_pt2():
     print("Scans have show the ships shields are up, and weapons are armed.")
     if ask("Attack the ships? Health: 2000, Firepower: 5, Accuracy 6, Evasion 5 (Y/N): "):
         battle_stat(2000, 'Unknown Ship', random.randint(300, 500), 6, 5, 5)
-        if research_multi('Sheild Dynamics') <= 0:
+        if load_ship_stat(load_data('ship'), 'health') <= 0:
             return
         print(f"{Fore.GREEN}You have defeated one of the enemy ships!{Fore.WHITE}")
         time.sleep(2)
@@ -2018,7 +2082,7 @@ def distress_call_scenario_pt2():
         print("Prepare for battle!")
         time.sleep(4)
         battle_stat(2000, 'Unknown Ship', random.randint(300, 500), 6, 5, 5)
-        if research_multi('Sheild Dynamics') <= 0:
+        if load_ship_stat(load_data('ship'), 'health') <= 0:
             return
         print(f"{Fore.GREEN}You have defeated one of the enemy ships!{Fore.WHITE}")
         time.sleep(2)
@@ -2050,48 +2114,93 @@ def xindi_station():
             time.sleep(0.5)
             print(f"{Fore.BLUE}TRADE INFO{Fore.WHITE}\nTrade materials such as parsteel, tritanium, dilithium, and latinum for one another.\n{Fore.BLUE}XINDI MISSIONS{Fore.WHITE}\nTake part in missions with the Xindi, and help your relations with them as you help.")
 
+tutorial_highlight11 = False
+tutorial_highlight2 = False
+tutorial_highlight1 = False
+tutorial_highlight4 = False
+tutorial_highlight6 = False
+
 def tutorial():
-    global tutorial_highlight2
-    global tutorial_highlight1
-    global tutorial_highlight4
-    if load_data('tutorial') == 0:
-        print(f"{Fore.BLUE}Welcome to STF: Captains Chair. You are an independent commander. Your job is to build up your ships, expand your fleet, and become one of the strongest independent commanders the universe has ever seen, with even the factions fearing you. Explore new worlds and collect valuable materials!{Fore.WHITE}")
-        time.sleep(5)
-        print("Welcome to your new command on board the starship Stargazer. The ship computer will help you get orinted with your ship, and your station.")
-        time.sleep(3)
-        print(f"{Fore.YELLOW}This below is what the menu looks like. Start by pressing 1 to explore sol.{Fore.WHITE}")
-        tutorial_highlight2 = Fore.YELLOW
-        tutorial_highlight1 = Fore.WHITE
-        tutorial_highlight4 = Fore.WHITE
-    if load_data('tutorial') == 1:
-        print(f"{Fore.YELLOW}Now that you know how to mine, return to drydock by pressing 3 and enter.{Fore.WHITE}")
-        time.sleep(2)
-        tutorial_highlight1 = Fore.YELLOW
-        tutorial_highlight2 = Fore.WHITE
-        tutorial_highlight4 = Fore.WHITE
-    if load_data('tutorial') == 2:
-        print(f"{Fore.YELLOW}Now that you have upgraded your generators and know the basics of upgrading, its time to battle.{Fore.WHITE}")
-        time.sleep(2)
-        print(f"{Fore.YELLOW}Press 1 to explore sol.{Fore.WHITE}")
-        tutorial_highlight2 = Fore.YELLOW
-        tutorial_highlight1 = Fore.WHITE
-        tutorial_highlight4 = Fore.YELLOW
-    if load_data('tutorial') == 3:
-        print(f"{Fore.YELLOW}Now that you have won a battle, return to drydock and cash in your materials.{Fore.WHITE}")
-        time.sleep(2)
-        tutorial_highlight1 = Fore.YELLOW
-        tutorial_highlight2 = Fore.WHITE
-        tutorial_highlight4 = Fore.WHITE
-    if load_data('tutorial') == 4:
-        print(f"{Fore.YELLOW}Now that you know how to repair your ship, its time to start some research.{Fore.WHITE}")
-        time.sleep(2)
-        tutorial_highlight1 = Fore.YELLOW
-        tutorial_highlight2 = Fore.WHITE
-        tutorial_highlight4 = Fore.WHITE
+    global tutorial_highlight1, tutorial_highlight2, tutorial_highlight4, tutorial_highlight6, tutorial_highlight11
+
+    # Define tutorial steps
+    tutorial_steps = {
+        0: {
+            "message": (
+                f"{Fore.BLUE}Welcome to STF: Captain's Chair. You are an independent commander. Your job is to build up your ships, expand your fleet, "
+                f"and become one of the strongest independent commanders the universe has ever seen, with even the factions fearing you. Explore new worlds "
+                f"and collect valuable materials!{Fore.WHITE}\n\n"
+                "Welcome to your new command on board the starship Stargazer. The ship computer will help you get oriented with your ship, and your station.\n\n"
+                f"{Fore.YELLOW}This below is what the menu looks like. Start by pressing 1 to explore Sol.\n\n{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight2": Fore.YELLOW},
+            "sleep": 8,
+        },
+        1: {
+            "message": f"{Fore.YELLOW}Now that you know how to mine, return to drydock by pressing 3 and enter.\n{Fore.WHITE}",
+            "highlights": {"tutorial_highlight1": Fore.YELLOW},
+        },
+        2: {
+            "message": (
+                f"{Fore.YELLOW}Now that you have upgraded your generators and know the basics of upgrading, it's time to battle.\n"
+                f"Press 1 to explore Sol.{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight2": Fore.YELLOW, "tutorial_highlight4": Fore.YELLOW},
+        },
+        # Add more steps here in similar format...
+        12: {
+            "message": (
+                f"{Fore.WHITE}Great job! You have finished the tutorial.\n"
+                f"{Fore.BLUE}There are many more functions than just these, so feel free to explore them all! You can upgrade all buildings, start research to boost stats, "
+                f"and buy more crew.\n{Fore.YELLOW}Also, if you approach a ship, type 2 to hail it, and if it's friendly, you can trade with it.\n"
+                f"{Fore.GREEN}Once again, great job with the tutorial, Commander! If you have any questions, ideas, or bugs, please report an issue on GitHub. "
+                f"Check the wiki for more info on the whole game.{Fore.WHITE}\n\n"
+                f"{Fore.GREEN}This counts as your first mission, so here are some rewards!{Fore.WHITE}\n"
+                f"{Fore.GREEN}Parsteel Reward: 300 | Tritanium Reward: 200 | Dilithium Reward: 100 | All types of BP's: 25 | Recruit Tokens: 50 | Latinum: 50{Fore.WHITE}"
+            ),
+            "highlights": {},
+            "rewards": {
+                "parsteel": 300,
+                "tritanium": 200,
+                "dilithium": 100,
+                "stargazer_blueprints": 25,
+                "uss_grissom_blueprints": 25,
+                "federation_shuttlecraft_blueprints": 25,
+                "galaxy_class_blueprints": 25,
+                "recruit_tokens": 50,
+                "latinum": 50,
+            },
+            "end_tutorial": True,
+        },
+    }
+
+    tutorial_step = load_data("tutorial")
+    step_data = tutorial_steps.get(tutorial_step)
+
+    if step_data:
+        # Display message
+        print(step_data["message"])
+        time.sleep(step_data.get("sleep", 2))
+
+        # Set highlight colors
+        global_vars = globals()
+        for var in ["tutorial_highlight1", "tutorial_highlight2", "tutorial_highlight4", "tutorial_highlight6", "tutorial_highlight11"]:
+            global_vars[var] = step_data["highlights"].get(var, Fore.WHITE)
+
+        # Handle rewards and tutorial completion
+        if "rewards" in step_data:
+            for key, value in step_data["rewards"].items():
+                save_data(key, value)
+            input("Press Enter to finish the tutorial.")
+            save_data("tutorial", 50)
+            clear()
+
+        if step_data.get("end_tutorial"):
+            print(f"{Fore.GREEN}Tutorial complete!{Fore.WHITE}")
     else:
-        tutorial_highlight2 = Fore.WHITE
-        tutorial_highlight1 = Fore.WHITE
-        tutorial_highlight4 = Fore.WHITE
+        # Reset highlights if no step matches
+        tutorial_highlight1 = tutorial_highlight2 = tutorial_highlight4 = tutorial_highlight6 = tutorial_highlight11 = Fore.WHITE
+
 
 def upgrade_generator(generator_type):
     # Calculate the upgrade time and cost for the specific generator
@@ -2105,12 +2214,76 @@ def upgrade_generator(generator_type):
         start_construction('generators', upgrade_time, generator_type)
         # Tutorial message
         if load_data('tutorial') == 1:
-            print(f"{Fore.GREEN}Great work! You have started construction of the {generator_type.lower()}. This timer will run in the background, and when you come back to the menu and the timer is out, the upgrades will apply.\nNow you know how to upgrade buildings!{Fore.WHITE}")
+            print(f"{Fore.BLUE}Great work! You have started construction of the {generator_type.lower()}. This timer will run in the background, and when you come back to the menu and the timer is out, the upgrades will apply.\nNow you know how to upgrade buildings!{Fore.WHITE}")
             save_data('tutorial', 2)
-            time.sleep(2)
+            time.sleep(8)
     else:
         print(f"{Fore.RED}You have either canceled the upgrade, or do not have enough parsteel.{Fore.WHITE}")
         time.sleep(2)
+
+
+tutorial_highlight3 = False
+tutorial_highlight5 = False
+tutorial_highlight7 = False
+tutorial_highlight9 = False
+
+def process_tutorial_step():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9
+
+    # Define tutorial steps
+    tutorial_steps = {
+        1: {
+            "message": (
+                f"{Fore.YELLOW}When you return to drydock, all of the storage in your ship returns to normal, "
+                f"and the storage goes into your actual currency.{Fore.WHITE}\n\n"
+                "Now that you have some materials, press 1 to enter the station.\n"
+            ),
+            "highlights": {"tutorial_highlight3": Fore.YELLOW},
+        },
+        3: {
+            "message": f"{Fore.YELLOW}Your ship is damaged from battle. Type 4 to repair your ship.\n{Fore.WHITE}",
+            "highlights": {"tutorial_highlight5": Fore.YELLOW},
+        },
+        4: {
+            "message": f"{Fore.YELLOW}Type 3 to open research.\n{Fore.WHITE}",
+            "highlights": {},
+        },
+        7: {
+            "message": f"{Fore.YELLOW}Now, it's time to upgrade your ship. Enter the shipyard.\n{Fore.WHITE}",
+            "highlights": {"tutorial_highlight7": Fore.YELLOW},
+        },
+        9: {
+            "message": None,
+            "highlights": {"tutorial_highlight9": Fore.YELLOW, "tutorial_highlight3": Fore.YELLOW},
+        },
+        10: {
+            "message": None,
+            "highlights": {"tutorial_highlight3": Fore.YELLOW},
+        },
+    }
+
+    # Default highlight values
+    default_highlights = {
+        "tutorial_highlight3": Fore.WHITE,
+        "tutorial_highlight5": Fore.WHITE,
+        "tutorial_highlight7": Fore.WHITE,
+        "tutorial_highlight9": Fore.WHITE,
+    }
+
+    # Get the current tutorial step
+    tutorial_step = load_data("tutorial")
+    step_data = tutorial_steps.get(tutorial_step, {"highlights": {}})
+
+    # Print the message if it exists
+    if "message" in step_data and step_data["message"]:
+        print(step_data["message"])
+        time.sleep(2)
+
+    # Update highlight colors
+    global_vars = globals()
+    for var, color in {**default_highlights, **step_data.get("highlights", {})}.items():
+        global_vars[var] = color
+
 
 finding_var = 0
 warp_time = 0
@@ -2131,7 +2304,7 @@ except subprocess.CalledProcessError:
 print('Necessary packages imported')
 
 while True:
-    if (research_multi('Sheild Dynamics') * load_ship_stat(load_data('ship'), 'health')) <= 0:
+    if (load_ship_stat(load_data('ship'), 'health')) <= 0:
         check_health()
     clear()
     mission_data = load_data('missions').get("Respond to the Distress Signal in Regula", {})
@@ -2143,7 +2316,7 @@ while True:
     check_research_completion()
     background_production()
     print('What would you like to do?')
-    OpList = [f"{tutorial_highlight2}1: Explore {systems[load_data('current_system')]}{Fore.WHITE}", "2: Navigate to Another System", f"{tutorial_highlight1}3: Return to Drydock{Fore.WHITE}", "4: Display Missions", "5: Open Shop"]
+    OpList = [f"{tutorial_highlight2}1: Explore {systems[load_data('current_system')]}{Fore.WHITE}", f"{tutorial_highlight6}2: Navigate to Another System{Fore.WHITE}", f"{tutorial_highlight1}3: Return to Drydock{Fore.WHITE}", "4: Display Missions", f"{tutorial_highlight11}5: Open Shop{Fore.WHITE}"]
     print(*OpList, sep = '\n')
     option = ask_sanitize_lobby(question_ask='Option: ', valid_options=[1, 2, 3, 4, 5])
     time.sleep(0.1)
@@ -2153,12 +2326,14 @@ while True:
             if load_explored(systems[load_data('current_system')]) == 1:
                 if load_data('tutorial') == 0:
                     tutorial_highlight = Fore.YELLOW
-                    print(f"{Fore.YELLOW}This is what the menu will look like. Navigate to a parsteel mine by typing 1 and pressing enter.{Fore.WHITE}")
+                    print(f"{Fore.YELLOW}This is what the menu will look like. Navigate to a parsteel mine by typing 1 and pressing enter.\n{Fore.WHITE}")
                 elif load_data('tutorial') == 2:
                     print(f"{Fore.YELLOW}Navigate to the enemy ship by typing 3.{Fore.WHITE}")
                     tutorial_highlight = Fore.WHITE
+                    tutorial_highlight4 = Fore.YELLOW
                 else:
                     tutorial_highlight = Fore.WHITE
+                    tutorial_highlight4 = Fore.WHITE
                 system_findings = [f'{tutorial_highlight}1. Parsteel Mine{Fore.WHITE}', '2. Mission Planet', f'{tutorial_highlight4}3. Orion Pirate{Fore.WHITE}']
                 income_display()
                 print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
@@ -2202,7 +2377,9 @@ while True:
                 scan_system()
         if load_data('current_system') == 2: # Vulcan
             if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Vulcan Dissident', '4. Tritanium Mine']
+                if load_data('tutorial') == 6:
+                    print(f"{Fore.YELLOW}Navigate to a tritanium mine.{Fore.WHITE}")
+                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Vulcan Dissident', f'{tutorial_highlight6}4. Tritanium Mine{Fore.WHITE}']
                 income_display()
                 print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
                 print(*system_findings, sep='\n')
@@ -2643,8 +2820,13 @@ while True:
     if option == 3:
         if ask(f"{Fore.RED}Are you sure you want to travel back to Sol? (Y/N) {Fore.WHITE}"):
             warp_time = abs(load_data('current_system') - 1) * 10
-            time.sleep(warp_time)
+            while warp_time > 0:
+                clear()
+                print(f"{Fore.BLUE}Time remaining: {warp_time}{Fore.WHITE}")
+                time.sleep(1)
+                warp_time -= 1
             clear()
+            save_data('current_system', 1)
             save_data('parsteel', (load_data('parsteel') + load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage')))
             save_data('tritanium', (load_data('tritanium') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage')))
             save_data('dilithium', (load_data('dilithium') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage')))
@@ -2656,38 +2838,36 @@ while True:
             save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=(research_multi('Inventory Management Systems') * load_ship_stat(ship_name=load_data('ship'), stat_key='max_storage')))
             income_display()
             save_data('current_system', 1)
-            if load_data('tutorial') == 1:
-                print(f"{Fore.YELLOW}When you return to drydock, all of the storage in your ship returns to normal, and the storage goes into your actual currency.{Fore.WHITE}")
-                time.sleep(2)
-                print("Now that you have some materials, press 1 to enter the station.")
-                tutorial_highlight3 = Fore.YELLOW
-            elif load_data('tutorial') == 3:
-                print(f"{Fore.YELLOW}Your ship is damaged from battle. Type 4 to repair your ship.{Fore.WHITE}")
-                time.sleep(2)
-                tutorial_highlight3 = Fore.WHITE
-                tutorial_highlight5 = Fore.YELLOW
-            else:
-                tutorial_highlight3 = Fore.WHITE
-                tutorial_highlight5 = Fore.WHITE
-            drydock_option = [f'{tutorial_highlight3}1: Enter Station{Fore.WHITE}', '2: Enter Shipyard', '3: Open Research', f'{tutorial_highlight5}4: Repair Ship{Fore.WHITE}', '5: Exit']
-            print(f"{Fore.RED}The Station is currently not functional.{Fore.WHITE}")
+            process_tutorial_step()
+            drydock_option = [f'{tutorial_highlight3}1: Enter Station{Fore.WHITE}', f'{tutorial_highlight7}2: Enter Shipyard{Fore.WHITE}', '3: Open Research', f'{tutorial_highlight5}4: Repair Ship{Fore.WHITE}', '5: Exit']
             print(*drydock_option, sep='\n')
             drydock_selection = ask_sanitize('Option: ')
             if drydock_selection == 1: #Enter station
                 clear()
                 income_display()
                 if load_data('tutorial') == 1:
-                    print("Now that you are inside of the station, lets upgrade the generators. These produce parsteel, tritanium, and dilithium every few minutes. When you upgrade them, they produce more.\nPress 1 and enter the generators.")
-                station_options = [f'{tutorial_highlight3}1: Enter Generators{Fore.WHITE}', '2: Enter Shipyard', '3: Enter R&D Department', '4: Enter Academy', '5: Enter Ops', '6: Exit']
+                    print(f"{Fore.YELLOW}Now that you are inside of the station, lets upgrade the generators. These produce parsteel, tritanium, and dilithium every few minutes. When you upgrade them, they produce more.\nPress 1 and enter the generators.{Fore.WHITE}")
+                    time.sleep(2)
+                elif load_data('tutorial') == 10:
+                    print(f"{Fore.YELLOW}Enter generators.{Fore.WHITE}")
+                else:
+                    tutorial_highlight3 = Fore.WHITE
+                station_options = [f'{tutorial_highlight3}1: Enter Generators{Fore.WHITE}', '2: Enter Shipyard', '3: Enter R&D Department', f'{tutorial_highlight9}4: Enter Academy{Fore.WHITE}', '5: Enter Ops', '6: Exit']
                 print(*station_options, sep='\n')
                 station_selection = ask_sanitize('Option: ')
                 if station_selection == 1:
                     clear()
                     income_display()
                     if load_data('tutorial') == 1:
-                        print("Every once and awhile, comeback to claim all generator material. For now, press 2 to upgrade a generator.")
+                        print(f"{Fore.YELLOW}Every once and awhile, comeback to claim all generator material. For now, press 2 to upgrade a generator.{Fore.WHITE}")
+                    if load_data('tutorial') == 10:
+                        print("Now you can claim your generator material.")
+                        tutorial_highlight3 = Fore.WHITE
+                        tutorial_highlight10 = Fore.YELLOW
+                    else:
+                        tutorial_highlight10 = Fore.WHITE
                     print('Generator Menu')
-                    print(f'1. Claim all generator material\n{tutorial_highlight3}2. Upgrade a Generator{Fore.WHITE}\n3. Exit')
+                    print(f'{tutorial_highlight10}1. Claim all generator material{Fore.WHITE}\n{tutorial_highlight3}2. Upgrade a Generator{Fore.WHITE}\n3. Exit')
                     generator_option = ask_sanitize("Option: ")
                     if generator_option == 1:
                         claim_resources()
@@ -2729,15 +2909,19 @@ while True:
                         continue
                 if station_selection == 3: #R&D
                     clear()
+                    if load_data('tutorial') == 4:
+                        print(f"{Fore.YELLOW}Press 1 to enter research.{Fore.WHITE}")
                     income_display()
                     rd_delta = 2
                     print('R&D Menu')
-                    print('1. Enter Research\n2. Upgrade R&D Department\n3. Exit')
+                    print(f'{tutorial_highlight1}1. Enter Research{Fore.WHITE}\n2. Upgrade R&D Department\n3. Exit')
                     rd_option = ask_sanitize("Option: ")
                     if rd_option == 1:
                         clear()
+                        if load_data('tutorial') == 4:
+                            print(f"{Fore.YELLOW}Press 1 to View and Start research.{Fore.WHITE}")
                         income_display()
-                        research_path = ask_sanitize("Research Menu\n1. View Research\nStart Research\n2. Exit\nOption: ")
+                        research_path = ask_sanitize(f"Research Menu\n{tutorial_highlight1}1. View Research - Start Research{Fore.WHITE}\n2. Exit\nOption: ")
                         if research_path == 1:
                             display_available_research()
                         if research_path == 2:
@@ -2754,10 +2938,12 @@ while True:
                         continue
                 if station_selection == 4: #academy
                     clear()
+                    if load_data('tutorial') == 9:
+                        print(f"{Fore.YELLOW}View the officer menu by typing 1.{Fore.WHITE}")
                     income_display()
                     academy_delta = 2.3
                     print('Academy Menu')
-                    academy_option = ask_sanitize('1. View Officers\n2. Enter Shop\n3. Upgrade Academy\n4. Exit\nOption: ')
+                    academy_option = ask_sanitize(f'{tutorial_highlight9}1. View Officers{Fore.WHITE}\n2. Enter Shop\n3. Upgrade Academy\n4. Exit\nOption: ')
                     if academy_option == 1:
                         clear()
                         if __name__ == "__main__":
@@ -2795,7 +2981,7 @@ while True:
                 clear()
                 income_display()
                 shipyard_delta = 2.4
-                shipyard_op = ask_sanitize("1. Enter Shipyard\n2. Upgrade Shipyard\n3. Exit\nOption: ")
+                shipyard_op = ask_sanitize(f"{tutorial_highlight7}1. Enter Shipyard{Fore.WHITE}\n2. Upgrade Shipyard\n3. Exit\nOption: ")
                 if shipyard_op == 1:
                     ship_management_menu(coins=load_data('parsteel'))
                 elif shipyard_op == 2:
@@ -2839,3 +3025,4 @@ while True:
     if option == 5:
         clear()
         shop_loop()
+# 3000 lines!

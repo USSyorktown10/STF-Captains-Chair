@@ -1,47 +1,41 @@
 {
-    "last_updated": "2024-11-11",
+    "last_updated": "2024-11-15",
     "items": [
         {
-            "item_name": "60 USS Grissom Blueprints Blueprints",
-            "price": 10,
-            "resource_key": "USS Grissom Blueprints",
-            "amount": 60
-        },
-        {
-            "item_name": "20 Galaxy Class Blueprints Blueprints",
-            "price": 40,
-            "resource_key": "Galaxy Class Blueprints",
-            "amount": 20
-        },
-        {
-            "item_name": "15 USS Grissom Blueprints Blueprints",
-            "price": 10,
-            "resource_key": "USS Grissom Blueprints",
-            "amount": 15
-        },
-        {
-            "item_name": "100 Galaxy Class Blueprints Blueprints",
-            "price": 40,
-            "resource_key": "Galaxy Class Blueprints",
-            "amount": 100
-        },
-        {
-            "item_name": "20 Stargazer Blueprints Blueprints",
-            "price": 10,
-            "resource_key": "Stargazer Blueprints",
-            "amount": 20
-        },
-        {
-            "item_name": "300 Recruit Tokens Blueprints",
+            "item_name": "400 Recruit Tokens Blueprints",
             "price": 5,
             "resource_key": "Recruit Tokens",
-            "amount": 300
+            "amount": 400
         },
         {
-            "item_name": "100 Stargazer Blueprints Blueprints",
+            "item_name": "50 Stargazer Blueprints Blueprints",
             "price": 10,
             "resource_key": "Stargazer Blueprints",
+            "amount": 50
+        },
+        {
+            "item_name": "100 Recruit Tokens Blueprints",
+            "price": 5,
+            "resource_key": "Recruit Tokens",
             "amount": 100
+        },
+        {
+            "item_name": "50 Galaxy Class Blueprints Blueprints",
+            "price": 40,
+            "resource_key": "Galaxy Class Blueprints",
+            "amount": 50
+        },
+        {
+            "item_name": "50 Federation Shuttlecraft Blueprints Blueprints",
+            "price": 20,
+            "resource_key": "Federation Shuttlecraft Blueprints",
+            "amount": 50
+        },
+        {
+            "item_name": "15 Federation Shuttlecraft Blueprints Blueprints",
+            "price": 20,
+            "resource_key": "Federation Shuttlecraft Blueprints",
+            "amount": 15
         }
     ]
 }

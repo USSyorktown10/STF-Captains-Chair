@@ -1,7 +1,7 @@
 {
     "research": {
         "Warp Mathematics": {
-            "level": 1,
+            "level": 0,
             "cost": 20,
             "prerequisites": []
         },
