@@ -9,7 +9,7 @@ Please open an issue if you find any bugs!
 
 - ### Game Stats
     - Current Version: `ALPHA`
-    - Sub Version: `BETA dev 1.10`
+    - Sub Version: `BETA dev 1.11`
     - Bug Amount: Low
     - Non-Optimized Code: Low
 - ### Startup

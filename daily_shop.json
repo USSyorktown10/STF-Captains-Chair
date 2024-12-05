@@ -1,41 +1,59 @@
 {
-    "last_updated": "2024-11-15",
+    "last_updated": "2024-12-05",
     "items": [
         {
-            "item_name": "400 Recruit Tokens Blueprints",
-            "price": 5,
-            "resource_key": "Recruit Tokens",
-            "amount": 400
-        },
-        {
-            "item_name": "50 Stargazer Blueprints Blueprints",
+            "item_name": "5 Stargazer Blueprints",
             "price": 10,
-            "resource_key": "Stargazer Blueprints",
-            "amount": 50
+            "resource_key": "stargazer_blueprints",
+            "amount": 5
         },
         {
-            "item_name": "100 Recruit Tokens Blueprints",
-            "price": 5,
-            "resource_key": "Recruit Tokens",
+            "item_name": "100 USS Enterprise (NCC-1701 D) Blueprints",
+            "price": 100,
+            "resource_key": "uss_enterprise_(ncc-1701_d)_blueprints",
             "amount": 100
         },
         {
-            "item_name": "50 Galaxy Class Blueprints Blueprints",
-            "price": 40,
-            "resource_key": "Galaxy Class Blueprints",
+            "item_name": "10 USS Enterprise (NCC-1701 D) Blueprints",
+            "price": 100,
+            "resource_key": "uss_enterprise_(ncc-1701_d)_blueprints",
+            "amount": 10
+        },
+        {
+            "item_name": "50 USS Enterprise (NCC-1701 D) Blueprints",
+            "price": 100,
+            "resource_key": "uss_enterprise_(ncc-1701_d)_blueprints",
             "amount": 50
         },
         {
-            "item_name": "50 Federation Shuttlecraft Blueprints Blueprints",
-            "price": 20,
-            "resource_key": "Federation Shuttlecraft Blueprints",
+            "item_name": "5 Ambassadors Shuttle Blueprints",
+            "price": 30,
+            "resource_key": "ambassadors_shuttle_blueprints",
+            "amount": 5
+        },
+        {
+            "item_name": "60 USS Grissom Blueprints",
+            "price": 10,
+            "resource_key": "uss_grissom_blueprints",
+            "amount": 60
+        },
+        {
+            "item_name": "100 Romulan Warbird Blueprints",
+            "price": 80,
+            "resource_key": "romulan_warbird_blueprints",
+            "amount": 100
+        },
+        {
+            "item_name": "50 Ambassadors Shuttle Blueprints",
+            "price": 30,
+            "resource_key": "ambassadors_shuttle_blueprints",
             "amount": 50
         },
         {
-            "item_name": "15 Federation Shuttlecraft Blueprints Blueprints",
-            "price": 20,
-            "resource_key": "Federation Shuttlecraft Blueprints",
-            "amount": 15
+            "item_name": "50 Recruit Tokens",
+            "price": 5,
+            "resource_key": "recruit_tokens",
+            "amount": 50
         }
     ]
 }

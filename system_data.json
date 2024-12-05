@@ -2,86 +2,86 @@
     "system data": [
         {
             "name": "Sol",
-            "parsteel_mine1": 100,
-            "parsteel_mine2": 100,
-            "parsteel_mine3": 100,
-            "parsteel_mine4": 100,
-            "parsteel_mine5": 100
+            "parsteel_mine1": 467,
+            "parsteel_mine2": 592,
+            "parsteel_mine3": 434,
+            "parsteel_mine4": 748,
+            "parsteel_mine5": 529
         },
         {
             "name": "Vulcan",
-            "parsteel_mine1": 100,
-            "tritanium_mine1": 100,
-            "parsteel_mine2": 100,
-            "tritanium_mine2": 100,
-            "parsteel_mine3": 100,
-            "tritanium_mine3": 100
+            "parsteel_mine1": 675,
+            "tritanium_mine1": 587,
+            "parsteel_mine2": 492,
+            "tritanium_mine2": 374,
+            "parsteel_mine3": 689,
+            "tritanium_mine3": 469
         },
         {
             "name": "Tellar",
-            "tritanium_mine1": 100,
-            "tritanium_mine2": 100,
-            "dilithium_mine1": 100,
-            "dilithium_mine2": 100,
-            "dilithium_mine3": 100,
-            "dilithium_mine4": 100
+            "tritanium_mine1": 636,
+            "tritanium_mine2": 448,
+            "dilithium_mine1": 594,
+            "dilithium_mine2": 453,
+            "dilithium_mine3": 737,
+            "dilithium_mine4": 379
         },
         {
             "name": "Andor",
-            "dilithium_mine1": 100,
-            "dilithium_mine2": 100,
-            "dilithium_mine3": 100,
-            "parsteel_mine1": 100,
-            "parsteel_mine2": 100,
-            "parsteel_mine3": 100
+            "dilithium_mine1": 755,
+            "dilithium_mine2": 634,
+            "dilithium_mine3": 601,
+            "parsteel_mine1": 482,
+            "parsteel_mine2": 694,
+            "parsteel_mine3": 358
         },
         {
             "name": "Omicron II",
-            "dilithium_mine1": 100,
-            "dilithium_mine2": 100,
-            "tritanium_mine1": 100,
-            "tritanium_mine2": 100,
-            "parsteel_mine1": 100,
-            "parsteel_mine2": 100,
-            "latinum_mine1": 100,
-            "latinum_mine2": 100
+            "dilithium_mine1": 578,
+            "dilithium_mine2": 456,
+            "tritanium_mine1": 510,
+            "tritanium_mine2": 704,
+            "parsteel_mine1": 665,
+            "parsteel_mine2": 390,
+            "latinum_mine1": 413,
+            "latinum_mine2": 551
         },
         {
             "name": "Regula",
-            "latinum_mine1": 100,
-            "dilithium_mine1": 100,
-            "dilithium_mine2": 100,
-            "dilithium_mine3": 100,
-            "dilithium_mine4": 100
+            "latinum_mine1": 515,
+            "dilithium_mine1": 629,
+            "dilithium_mine2": 726,
+            "dilithium_mine3": 423,
+            "dilithium_mine4": 568
         },
         {
             "name": "Solaria",
-            "parsteel_mine1": 100,
-            "parsteel_mine2": 100,
-            "parsteel_mine3": 100,
-            "tritanium_mine1": 100,
-            "tritanium_mine2": 100,
-            "tritanium_mine3": 100
+            "parsteel_mine1": 373,
+            "parsteel_mine2": 719,
+            "parsteel_mine3": 642,
+            "tritanium_mine1": 452,
+            "tritanium_mine2": 694,
+            "tritanium_mine3": 573
         },
         {
             "name": "Tarkalea XII",
-            "dilithium_mine1": 100,
-            "dilithium_mine2": 100,
-            "dilithium_mine3": 100,
-            "dilithium_mine4": 100
+            "dilithium_mine1": 416,
+            "dilithium_mine2": 585,
+            "dilithium_mine3": 499,
+            "dilithium_mine4": 688
         },
         {
             "name": "Xindi Starbase 9",
-            "latinum_mine1": 100,
-            "latinum_mine2": 100,
-            "latinum_mine3": 100,
-            "latinum_mine4": 100
+            "latinum_mine1": 358,
+            "latinum_mine2": 672,
+            "latinum_mine3": 479,
+            "latinum_mine4": 758
         },
         {
             "name": "Altor IV",
-            "parsteel_mine1": 100,
-            "tritanium_mine1": 100,
-            "latinum_mine1": 100
+            "parsteel_mine1": 302,
+            "tritanium_mine1": 423,
+            "latinum_mine1": 654
         }
     ]
 }

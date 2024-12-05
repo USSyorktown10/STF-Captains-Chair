@@ -6,8 +6,10 @@ from colorama import init, Fore
 import subprocess
 import sys
 from datetime import datetime, timedelta
+import threading
 
 init()
+cache = {}
 
 # Clear the terminal for a new menu or screen
 def clear():
@@ -251,37 +253,48 @@ def upgrade_ship(ship_name, stat):
         with open(ship_save, 'r+') as file:
             data = json.load(file)
 
+            ship_blueprints = {
+                "Stargazer": ("stargazer_blueprints", 20),
+                "Daedalus Class Medical": ("daedalus_class_medical_blueprints", 30),
+                "Ambassadors Shuttle": ("ambassadors_shuttle_blueprints", 40),
+                "Realta": ("realta_blueprints", 50),
+                "USS Grissom": ("uss_grissom_blueprints", 60),
+                "Federation Shuttlecraft": ("federation_shuttlecraft_blueprints", 70),
+                "USS Constitution": ("uss_constitution_blueprints", 80),
+                "Ferengi DKora": ("ferengi_dkora_blueprints", 90),
+                "Galaxy Class": ("galaxy_class_blueprints", 100),
+                "Klingon KVort": ("klingon_kvort_blueprints", 110),
+                "USS Excelsior": ("uss_excelsior_blueprints", 120),
+                "Romulan Warbird": ("romulan_warbird_blueprints", 130),
+                "USS Enterprise (NCC-1701 D)": ("uss_enterprise_(ncc-1701_d)_blueprints", 140),
+            }
+
+            # Find the ship in the data
             for ship in data[ship_sel]:
                 if ship['name'] == ship_name and ship.get('owned', False):
-                    if ship_name == 'Galaxy Class':
-                        upgrade_cost = 150
-                        json_save_data = 'galaxy_class_blueprints'
-                    if ship_name == 'Federation Shuttlecraft':
-                        upgrade_cost = 100
-                        json_save_data = 'federation_shuttlecraft_blueprints'
-                    if ship_name == 'USS Grissom':
-                        upgrade_cost = 75
-                        json_save_data = 'uss_grissom_blueprints'
-                    if ship_name == 'Stargazer':
-                        upgrade_cost = 50
-                        json_save_data = 'stargazer_blueprints'
+                    if ship_name not in ship_blueprints:
+                        raise ValueError("Invalid ship name provided.")
+
+                    json_save_data, upgrade_cost = ship_blueprints[ship_name]
+
                     if load_data(json_save_data) >= upgrade_cost:
                         ship[stat] += 1
                         save_data(json_save_data, load_data(json_save_data) - upgrade_cost)
                         print(f"{Fore.GREEN}{ship_name}'s {stat} has been upgraded to {ship[stat]}.{Fore.WHITE}")
-                        time.sleep(2)
                     else:
                         print(f"{Fore.RED}Not enough blueprints to upgrade {stat}.{Fore.WHITE}")
-                        time.sleep(2)
-
+                    time.sleep(2)
                     break
 
+            # Save updated data back to the file
             file.seek(0)
             json.dump(data, file, indent=4)
             file.truncate()
 
     except FileNotFoundError:
         print("Ship data file not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
     return load_data('parsteel')
 
@@ -313,22 +326,36 @@ def buy_ship(ship_name, coins):
         with open(ship_save, 'r+') as file:
             data = json.load(file)
 
+            ship_prices = {
+                "Stargazer": ("stargazer_blueprints", 200),
+                "Daedalus Class Medical": ("daedalus_class_medical_blueprints", 250),
+                "Ambassadors Shuttle": ("ambassadors_shuttle_blueprints", 300),
+                "Realta": ("realta_blueprints", 350),
+                "USS Grissom": ("uss_grissom_blueprints", 400),
+                "Federation Shuttlecraft": ("federation_shuttlecraft_blueprints", 450),
+                "USS Constitution": ("uss_constitution_blueprints", 600),
+                "Ferengi DKora": ("ferengi_dkora_blueprints", 750),
+                "Galaxy Class": ("galaxy_class_blueprints", 1000),
+                "Klingon KVort": ("klingon_kvort_blueprints", 1200),
+                "USS Excelsior": ("uss_excelsior_blueprints", 1500),
+                "Romulan Warbird": ("romulan_warbird_blueprints", 2000),
+                "USS Enterprise (NCC-1701 D)": ("uss_enterprise_(ncc-1701_d)_blueprints", 2500),
+            }
+
             for ship in data[ship_sel]:
                 if ship['name'] == ship_name and not ship['owned']:
-                    if ship_name == 'Galaxy Class':
-                        price = 1000
-                        json_save_data = 'galaxy_class_blueprints'
-                    elif ship_name == 'Federation Shuttlecraft':
-                        price = 400
-                        json_save_data = 'federation_shuttlecraft_blueprints'
-                    elif ship_name == 'USS Grissom':
-                        price = 350
-                        json_save_data = 'uss_grissom_blueprints'
-                    else:
-                        price = 200
-                        json_save_data = 'stargazer_blueprints'
+                    if ship_name not in ship_prices:
+                        raise ValueError("Invalid ship name provided.")
+
+                    json_save_data, price = ship_prices[ship_name]
                     current_coins = load_data(json_save_data)
-                    if ask(f"{Fore.RED}Are you sure you want to buy this ship? It costs {price} {ship_name} blueprints ({load_data(json_save_data)}->{load_data(json_save_data) - price}): {Fore.WHITE}"):
+
+                    confirmation_message = (
+                        f"{Fore.RED}Are you sure you want to buy this ship? It costs {price} {ship_name} blueprints "
+                        f"({current_coins}->{current_coins - price}): {Fore.WHITE}"
+                    )
+                    
+                    if ask(confirmation_message):
                         if current_coins >= price:
                             clear()
                             ship['owned'] = True
@@ -336,20 +363,24 @@ def buy_ship(ship_name, coins):
                             print(f"{Fore.GREEN}You have purchased {ship_name}.{Fore.WHITE}")
                             time.sleep(2)
                         else:
-                            print("Not enough blueprints to buy this ship.")
+                            print(f"{Fore.RED}Not enough blueprints to buy this ship.{Fore.WHITE}")
                             time.sleep(2)
-                        break
+                        break  # Exit the loop after the transaction
                     else:
-                        break
+                        break  # Exit the loop if the user cancels
 
+            # Save updated data back to the file
             file.seek(0)
             json.dump(data, file, indent=4)
             file.truncate()
 
     except FileNotFoundError:
         print("Ship data file not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
     return coins
+
 
 def view_ship_details(ship_name):
     try:
@@ -381,138 +412,149 @@ def display_ship_menu():
 
     except FileNotFoundError:
         print("Ship data file not found.")
-
+            
 def ship_management_menu(coins):
     global tutorial_highlight7
     global ship_name
+
+    # Ship dictionary for lookup
+    ships = {
+        1: 'Stargazer',
+        2: 'USS Grissom',
+        3: 'Realta',
+        4: 'Federation Shuttlecraft',
+        5: 'Daedalus Class Medical',
+        6: 'Ambassadors Shuttle',
+        7: 'USS Constitution',
+        8: 'Galaxy Class',
+        9: 'Ferengi DKora',
+        10: 'Klingon KVort',
+        11: 'Romulan Warbird',
+        12: 'USS Excelsior',
+        13: 'USS Enterprise (NCC-1701 D)'
+    }
+
+    # Stat dictionary for lookup
+    stats = {
+        1: 'firepower',
+        2: 'accuracy',
+        3: 'evasion',
+        4: 'warp_range',
+        5: 'storage',
+        6: 'mining_efficiency'
+    }
+
     while True:
         clear()
-        if load_data('tutorial') == 7:
-            print(f"{Fore.YELLOW}Welcome to the shipyard! You can see ship's details, build ships, equip them, change their crew, and upgrade it.\nRight now, you are going to upgrade the Stargazer. Type 4 to upgrade a ship.{Fore.WHITE}")
-            time.sleep(2)
-            tutorial_highlight7 = Fore.YELLOW
-            tutorial_highlight8 = Fore.WHITE
-        if load_data('tutorial') == 8:
-            print(f"{Fore.YELLOW}Great job upgrading your ship! As you get more blueprints, you will be able to upgrade your ship more. Now that you have done that, lets assign some crew to your ship.\nSelect 5 to enter the crew menu.{Fore.WHITE}")
-            time.sleep(2)
-            tutorial_highlight8 = Fore.YELLOW
-            tutorial_highlight7 = Fore.WHITE
-        else:
-            if load_data('tutorial') == 9:
-                print(f"{Fore.YELLOW}Type 7 to exit the shipyard.{Fore.WHITE}")
-            tutorial_highlight8 = Fore.WHITE
-            tutorial_highlight7 = Fore.WHITE
-        income_display()
-        print(f"Stargazer BP: {load_data('stargazer_blueprints')} || USS Grissom BP: {load_data('uss_grissom_blueprints')} || Fed. Shuttle. BP: {load_data('federation_shuttlecraft_blueprints')} || Galaxy C. BP: {load_data('galaxy_class_blueprints')}")
-        display_ship_menu()
 
-        choice = ask_sanitize(question_ask=f"\nOptions:\n1. View Ship Details\n2. Build Ship\n3. Equip Ship\n{tutorial_highlight7}4. Upgrade Ship{Fore.WHITE}\n{tutorial_highlight8}5. Change Crew on {load_data('ship')}{Fore.WHITE}\n6. View Ship Manifest\n7. Exit\nSelect an option: ")
+        # Tutorial logic
+        tutorial_step = load_data('tutorial')
+        if tutorial_step == 7:
+            print(f"{Fore.YELLOW}Welcome to the shipyard! You can see ship's details, build ships, equip them, change their crew, and upgrade it.\n"
+                  f"Right now, you are going to upgrade the Stargazer. Type 4 to upgrade a ship.{Fore.WHITE}")
+            time.sleep(2)
+            tutorial_highlight7, tutorial_highlight8 = Fore.YELLOW, Fore.WHITE
+        elif tutorial_step == 8:
+            print(f"{Fore.YELLOW}Great job upgrading your ship! As you get more blueprints, you will be able to upgrade your ship more. "
+                  f"Now that you have done that, let's assign some crew to your ship.\nSelect 5 to enter the crew menu.{Fore.WHITE}")
+            time.sleep(2)
+            tutorial_highlight7, tutorial_highlight8 = Fore.WHITE, Fore.YELLOW
+        else:
+            if tutorial_step == 9:
+                print(f"{Fore.YELLOW}Type 7 to exit the shipyard.{Fore.WHITE}")
+            tutorial_highlight7, tutorial_highlight8 = Fore.WHITE, Fore.WHITE
+
+        # Display income and ship blueprints
+        income_display()
+        ship_blueprints = " || ".join([f"{Fore.BLUE}{ship} BP:{Fore.WHITE} {load_data(ship.lower().replace(' ', '_') + '_blueprints')}" for ship in ships.values()])
+        center_text(ship_blueprints)
+        
+        # Display menu
+        display_ship_menu()
+        choice = ask_sanitize(
+            question_ask=f"\nOptions:\n1. View Ship Details\n2. Build Ship\n3. Equip Ship\n"
+                         f"{tutorial_highlight7}4. Upgrade Ship{Fore.WHITE}\n"
+                         f"{tutorial_highlight8}5. Change Crew on {load_data('ship')}{Fore.WHITE}\n"
+                         "6. View Ship Manifest\n7. Exit\nSelect an option: ")
+
+        def get_ship_name(ship_num):
+            return ships.get(ship_num, 'Stargazer')
 
         if choice == 1:
+            # View Ship Details
             clear()
             income_display()
             display_ship_menu()
-            ship_num = ask_sanitize(question_ask='What ship would you like to view? ')
-            if ship_num == 1:
-                ship_name = 'Stargazer'
-            elif ship_num == 2:
-                ship_name = 'USS Grissom'
-            elif ship_num == 3:
-                ship_name = 'Federation Shuttlecraft'
-            elif ship_num == 4:
-                ship_name = 'Galaxy Class'
-            else:
-                print('Defaulting to Stargazer...')
-                time.sleep(1)
-                ship_name = 'Stargazer'
+            ship_num = ask_sanitize("What ship would you like to view? ")
+            ship_name = get_ship_name(ship_num)
             clear()
             income_display()
             view_ship_details(ship_name)
 
         elif choice == 2:
+            # Build Ship
             clear()
             income_display()
             display_ship_menu()
-            ship_num = ask_sanitize(question_ask='What ship would you like to build? ')
-            if ship_num == 1:
-                ship_name = 'Stargazer'
-            elif ship_num == 2:
-                ship_name = 'USS Grissom'
-            elif ship_num == 3:
-                ship_name = 'Federation Shuttlecraft'
-            elif ship_num == 4:
-                ship_name = 'Galaxy Class'
+            ship_num = ask_sanitize("What ship would you like to build? ", valid_inputs=list(ships.keys()))
+            ship_name = get_ship_name(ship_num)
             buy_ship(ship_name, coins)
 
         elif choice == 3:
+            # Equip Ship
             clear()
             income_display()
             display_ship_menu()
-            ship_num = ask_sanitize(question_ask='What ship would you like to equip? ')
-            if ship_num == 1:
-                ship_name = 'Stargazer'
-            elif ship_num == 2:
-                ship_name = 'USS Grissom'
-            elif ship_num == 3:
-                ship_name = 'Federation Shuttlecraft'
-            elif ship_num == 4:
-                ship_name = 'Galaxy Class'
+            ship_num = ask_sanitize("What ship would you like to equip? ", valid_inputs=list(ships.keys()))
+            ship_name = get_ship_name(ship_num)
             equip_ship(ship_name)
 
         elif choice == 4:
+            # Upgrade Ship
             clear()
-            if load_data('tutorial') == 7:
-                print(f"{Fore.YELLOW}Upgrade the stargazer by typing 1.{Fore.WHITE}")
+            if tutorial_step == 7:
+                print(f"{Fore.YELLOW}Upgrade the Stargazer by typing 1.{Fore.WHITE}")
             income_display()
             display_ship_menu()
-            ship_num = ask_sanitize(question_ask='What ship would you like to upgrade? ')
-            if ship_num == 1:
-                ship_name = 'Stargazer'
-            elif ship_num == 2:
-                ship_name = 'USS Grissom'
-            elif ship_num == 3:
-                ship_name = 'Federation Shuttlecraft'
-            elif ship_num == 4:
-                ship_name = 'Galaxy Class'
-            if load_data('tutorial') == 7:
-                print(f"{Fore.YELLOW}Lets upgrade the warp range. Type 4.{Fore.WHITE}")
-            stat_num = ask_sanitize(f"Enter the stat to upgrade (1. Firepower, 2. Accuracy, 3. Evasion, {tutorial_highlight7}4. Warp Range{Fore.WHITE}, 5. Storage, 6. Mining Efficiency): ")
-            if stat_num == 1:
-                stat = 'firepower'
-            if stat_num == 2:
-                stat = 'accuracy'
-            if stat_num == 3:
-                stat = 'evasion'
-            if stat_num == 4:
-                stat = 'warp_range'
-            if stat_num == 5:
-                stat = 'storage'
-            if stat_num == 5:
-                stat = 'mining_efficiency'
+            ship_num = ask_sanitize("What ship would you like to upgrade? ", valid_inputs=list(ships.keys()))
+            ship_name = get_ship_name(ship_num)
+
+            if tutorial_step == 7:
+                print(f"{Fore.YELLOW}Let's upgrade the warp range. Type 4.{Fore.WHITE}")
+            stat_num = ask_sanitize(
+                "Enter the stat to upgrade (1. Firepower, 2. Accuracy, 3. Evasion, "
+                f"{tutorial_highlight7}4. Warp Range{Fore.WHITE}, 5. Storage, 6. Mining Efficiency): ",
+                valid_inputs=list(stats.keys())
+            )
+            stat = stats[stat_num]
             if ask(f"{Fore.YELLOW}Are you sure you want to upgrade {stat}? (Y/N): "):
                 upgrade_ship(ship_name, stat)
-                if load_data('tutorial') == 7:
+                if tutorial_step == 7:
                     save_data('tutorial', 8)
             else:
                 print(f"{Fore.RED}Upgrade Canceled.{Fore.WHITE}")
                 time.sleep(1)
 
-        #Crew for ships
         elif choice == 5:
+            # Assign Crew
             clear()
             income_display()
             assign_crew_and_adjust_stats("user_crew_data.json", "ship_save.json")
+
         elif choice == 6:
+            # View Ship Manifest
             clear()
             income_display()
             display_crew_assignments(ship_save)
-            if ask(f"{Fore.BLUE}Type any letter to exit {Fore.WHITE}"):
-                continue
+            ask(f"{Fore.BLUE}Type any letter to exit {Fore.WHITE}")
+
         elif choice == 7:
             break
+
         else:
             print("Invalid option. Please try again.")
             time.sleep(2)
+
 
 costs = {"Mining Laser": 15, "Health": 10, "Phaser": 20, "Warp Range": 15}
 deltas = {"Mining Laser": 1.5, "Health": 2, "Phaser": 2, "Warp Range": 2}
@@ -600,18 +642,42 @@ def main():
     game_state = initialize_game_data()
     crew_data = initialize_crew_data()
 
+    #crew that can be purchases
     available_crew = [
-        {"name": "Uhura", "skill_level": 10, "skill": "Communication", "rarity": "Rare", "price": 100},
-        {"name": "Sulu", "skill_level": 10, "skill": "Pilot", "rarity": "Common", "price": 50},
-        {"name": "Chekov", "skill_level": 10, "skill": "Navigation", "rarity": "Uncommon", "price": 70}
-    ]
+    {"name": "Uhura", "skill_level": 10, "skill": "Communication", "rarity": "Rare", "price": 100},
+    {"name": "Sulu", "skill_level": 10, "skill": "Pilot", "rarity": "Common", "price": 50},
+    {"name": "Chekov", "skill_level": 10, "skill": "Navigation", "rarity": "Uncommon", "price": 70},
+    {"name": "Kirk", "skill_level": 10, "skill": "Command", "rarity": "Common", "ability": {"stat": "firepower", "boost": 0.1}},
+    {"name": "Spock", "skill_level": 10, "skill": "Science", "rarity": "Common", "ability": {"stat": "mining_efficiency", "boost": 0.1}},
+    {"name": "Scotty", "skill_level": 10, "skill": "Engineering", "rarity": "Common", "ability": {"stat": "accuracy", "boost": 0.1}},
+    {"name": "McCoy", "skill_level": 10, "skill": "Medical", "rarity": "Common", "ability": {"stat": "max_health", "boost": 0.1}},
+    {"name": "Chapel", "skill_level": 9, "skill": "Medical", "rarity": "Uncommon", "price": 80},
+    {"name": "M'Benga", "skill_level": 12, "skill": "Medicine", "rarity": "Rare", "ability": {"stat": "crew_recovery_speed", "boost": 0.2}},
+    {"name": "LaForge", "skill_level": 11, "skill": "Engineering", "rarity": "Rare", "ability": {"stat": "evasion", "boost": 0.15}},
+    {"name": "Data", "skill_level": 13, "skill": "AI Systems", "rarity": "Epic", "ability": {"stat": "scanning_efficiency", "boost": 0.25}},
+    {"name": "T'Pol", "skill_level": 12, "skill": "Science", "rarity": "Rare", "ability": {"stat": "mining_output", "boost": 0.2}},
+    {"name": "Mayweather", "skill_level": 8, "skill": "Navigation", "rarity": "Common", "price": 60},
+    {"name": "Reed", "skill_level": 10, "skill": "Weapons", "rarity": "Uncommon", "ability": {"stat": "critical_hit_chance", "boost": 0.1}},
+    {"name": "Pike", "skill_level": 12, "skill": "Command", "rarity": "Rare", "ability": {"stat": "crew_morale", "boost": 0.2}},
+    {"name": "Archer", "skill_level": 13, "skill": "Diplomacy", "rarity": "Epic", "ability": {"stat": "trade_bonus", "boost": 0.3}},
+    {"name": "Hoshi", "skill_level": 11, "skill": "Linguistics", "rarity": "Rare", "ability": {"stat": "hailing_success_rate", "boost": 0.2}},
+    {"name": "Riker", "skill_level": 11, "skill": "Tactics", "rarity": "Rare", "ability": {"stat": "evasion", "boost": 0.2}},
+    {"name": "Troi", "skill_level": 10, "skill": "Empathy", "rarity": "Uncommon", "ability": {"stat": "crew_morale", "boost": 0.15}},
+    {"name": "Worf", "skill_level": 12, "skill": "Combat", "rarity": "Rare", "ability": {"stat": "boarding_damage", "boost": 0.2}},
+    {"name": "Seven of Nine", "skill_level": 14, "skill": "Borg Systems", "rarity": "Epic", "ability": {"stat": "efficiency", "boost": 0.3}},
+    {"name": "Paris", "skill_level": 10, "skill": "Pilot", "rarity": "Uncommon", "price": 85},
+    {"name": "Janeway", "skill_level": 13, "skill": "Leadership", "rarity": "Epic", "ability": {"stat": "max_shield", "boost": 0.3}},
+    {"name": "Tuvok", "skill_level": 12, "skill": "Security", "rarity": "Rare", "ability": {"stat": "resistance_to_hacking", "boost": 0.2}},
+    {"name": "Phlox", "skill_level": 12, "skill": "Medicine", "rarity": "Rare", "ability": {"stat": "healing_rate", "boost": 0.25}}
+]
+
 
     while True:
         clear()
         if load_data('tutorial') == 9:
-            print(f"{Fore.YELLOW}Select 1 to upgrade crew.{Fore.WHITE}")
+            print(f"{Fore.YELLOW}Select 1 to upgrade crew.\n{Fore.WHITE}")
         if load_data('tutorial') == 10:
-            print(f"{Fore.YELLOW}Type 3 to exit.{Fore.WHITE}")
+            print(f"{Fore.YELLOW}Type 3 to exit.\n{Fore.WHITE}")
         income_display()
         display_crew(crew_data)
 
@@ -809,7 +875,7 @@ def view_upgrades():
         time.sleep(0.001)
 
 def accept_mission(mission_id):
-    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Buy a new Ship', '8': 'Complete 2 Successful Trades', '9': 'Respond to the Distress Signal in Regula'}
+    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Buy a new Ship', '8': 'Complete 2 Successful Trades', '9': 'Respond to the Distress Signal in Regula', '10': 'Survey the Rings of Tarkalea XII'}
     missions = load_data('missions')
 
     mission_name = mission_list.get(mission_id)
@@ -829,7 +895,7 @@ def update_mission_progress(mission_name, progress_increment):
         missions[mission_name]['progress'] += progress_increment
         save_data('missions', missions)
         # Define mission completion targets in a dictionary
-        mission_targets = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 1, 'Defeat 3 Enemies': 3, 'Trade 200 Materials With a Ship': 200, 'Defeat 5 Enemies': 5, 'Explore 3 New Systems': 3, 'Buy a new Ship': 1, 'Complete 2 Successful Trades': 2, 'Respond to the Distress Signal in Regula': 5}
+        mission_targets = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 1, 'Defeat 3 Enemies': 3, 'Trade 200 Materials With a Ship': 200, 'Defeat 5 Enemies': 5, 'Explore 3 New Systems': 3, 'Buy a new Ship': 1, 'Complete 2 Successful Trades': 2, 'Respond to the Distress Signal in Regula': 5, 'Survey the Rings of Tarkalea XII': 3}
         # Check if mission meets completion criteria
         if mission_name in mission_targets and missions[mission_name]['progress'] >= mission_targets[mission_name]:
             complete_mission(mission_name)
@@ -977,6 +1043,15 @@ base_ship_stats = {
         "mining": 2,
         "warp": 4
     },
+    "Realta": {
+        "firepower": 2,
+        "accuracy": 2,
+        "evasion": 3,
+        "health": 1500,
+        "storage": 600,
+        "mining": 2,
+        "warp": 3
+    },
     "Federation Shuttlecraft": {
         "firepower": 1,
         "accuracy": 2,
@@ -986,6 +1061,33 @@ base_ship_stats = {
         "mining": 2,
         "warp": 4
     },
+    "Daedalus Class Medical": {
+        "firepower": 1,
+        "accuracy": 1,
+        "evasion": 2,
+        "health": 1000,
+        "storage": 500,
+        "mining": 1,
+        "warp": 3
+    },
+    "Ambassadors Shuttle": {
+        "firepower": 2,
+        "accuracy": 2,
+        "evasion": 3,
+        "health": 1200,
+        "storage": 600,
+        "mining": 1,
+        "warp": 4
+    },
+    "USS Constitution": {
+        "firepower": 3,
+        "accuracy": 4,
+        "evasion": 4,
+        "health": 2500,
+        "storage": 1000,
+        "mining": 3,
+        "warp": 6
+    },
     "Galaxy Class": {
         "firepower": 5,
         "accuracy": 6,
@@ -994,73 +1096,132 @@ base_ship_stats = {
         "storage": 2500,
         "mining": 4,
         "warp": 8
+    },
+    "Ferengi D'Kora": {
+        "firepower": 4,
+        "accuracy": 4,
+        "evasion": 5,
+        "health": 2200,
+        "storage": 1000,
+        "mining": 3,
+        "warp": 5
+    },
+    "Klingon K'Vort": {
+        "firepower": 6,
+        "accuracy": 5,
+        "evasion": 6,
+        "health": 3000,
+        "storage": 1500,
+        "mining": 4,
+        "warp": 7
+    },
+    "Romulan Warbird": {
+        "firepower": 8,
+        "accuracy": 7,
+        "evasion": 8,
+        "health": 4000,
+        "storage": 1800,
+        "mining": 5,
+        "warp": 10
+    },
+    "USS Excelsior": {
+        "firepower": 6,
+        "accuracy": 6,
+        "evasion": 7,
+        "health": 3500,
+        "storage": 1600,
+        "mining": 4,
+        "warp": 9
+    },
+    "USS Enterprise (NCC-1701 D)": {
+        "firepower": 10,
+        "accuracy": 9,
+        "evasion": 10,
+        "health": 6000,
+        "storage": 2500,
+        "mining": 6,
+        "warp": 12
     }
 }
 
 def check_health():
-    if (load_ship_stat(load_data('ship'), 'health')) <= 0:
+    ship_name = load_data('ship')  # Cache the ship name to avoid redundant load_data calls
+    if load_ship_stat(ship_name, 'health') <= 0:
         clear()
-        print(f"{Fore.RED}Ship {load_data('ship')} has been destroyed!{Fore.WHITE}")
-        print(f"{Fore.RED}Materials Lost: {load_ship_stat(ship_name=load_data('ship'), stat_key='parsteel_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='tritanium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='dilithium_storage') + load_ship_stat(ship_name=load_data('ship'), stat_key='latinum_storage')}{Fore.WHITE}")
-        save_ship_data(ship_name=load_data('ship'), stat_key='parsteel_storage', value=0)
-        save_ship_data(ship_name=load_data('ship'), stat_key='tritanium_storage', value=0)
-        save_ship_data(ship_name=load_data('ship'), stat_key='dilithium_storage', value=0)
-        save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=base_ship_stats[load_data('ship')]["storage"])
-        save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-        save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-        save_ship_data(ship_name=load_data('ship'), stat_key='health', value=base_ship_stats[load_data('ship')]["health"])
-        save_ship_data(ship_name=load_data('ship'), stat_key='firepower', value=base_ship_stats[load_data('ship')]["firepower"])
-        save_ship_data(ship_name=load_data('ship'), stat_key='accuracy', value=base_ship_stats[load_data('ship')]["accuracy"])
-        save_ship_data(ship_name=load_data('ship'), stat_key='evasion', value=base_ship_stats[load_data('ship')]["evasion"])
-        save_ship_data(ship_name=load_data('ship'), stat_key='mining_efficiency', value=base_ship_stats[load_data('ship')]["mining"])
-        save_ship_data(ship_name=load_data('ship'), stat_key='warp_range', value=base_ship_stats[load_data('ship')]["warp"])
-        save_ship_data(ship_name=load_data('ship'), stat_key='owned', value='false')
-        save_ship_data(ship_name=load_data('ship'), stat_key='equipped', value='false')
-        reset_crew_positions(load_data('ship'))
+        print(f"{Fore.RED}Ship {ship_name} has been destroyed!{Fore.WHITE}")
+        materials_lost = sum([
+            load_ship_stat(ship_name, stat) for stat in ['parsteel_storage', 'tritanium_storage', 'dilithium_storage', 'latinum_storage']
+        ])
+        print(f"{Fore.RED}Materials Lost: {materials_lost}{Fore.WHITE}")
+        reset_stats = {
+            'parsteel_storage': 0,
+            'tritanium_storage': 0,
+            'dilithium_storage': 0,
+            'latinum_storage': 0,
+            'storage': base_ship_stats[ship_name]["storage"],
+            'health': base_ship_stats[ship_name]["health"],
+            'firepower': base_ship_stats[ship_name]["firepower"],
+            'accuracy': base_ship_stats[ship_name]["accuracy"],
+            'evasion': base_ship_stats[ship_name]["evasion"],
+            'mining_efficiency': base_ship_stats[ship_name]["mining"],
+            'warp_range': base_ship_stats[ship_name]["warp"],
+            'owned': 'false',
+            'equipped': 'false'
+        }
+        for stat, value in reset_stats.items():
+            save_ship_data(ship_name, stat, value)
+        reset_crew_positions(ship_name)
         save_data('ship', 'Stargazer')
-        save_ship_data(ship_name='Stargazer', stat_key='owned', value='true')
-        save_ship_data(ship_name='Stargazer', stat_key='equipped', value='true')
+        save_ship_data('Stargazer', 'owned', 'true')
+        save_ship_data('Stargazer', 'equipped', 'true')
         time.sleep(5)
 
-def mining_deposit(mine_type, mine_num, mine_capitilize):
-    global tutorial_highlight1
-    global tutorial_highlight
+
+def mining_deposit(mine_type, mine_num, mine_capitalize):
+    global tutorial_highlight1, tutorial_highlight
     income_display()
-    if load_data('tutorial') == 0:
+
+    # Cache some frequently used values
+    current_system = load_data('current_system')
+    ship_name = load_data('ship')
+    tutorial_stage = load_data('tutorial')
+
+    # Tutorial messages
+    if tutorial_stage == 0:
         print(f"{Fore.YELLOW}Type y to enter mining mode, and then select how much parsteel you want to mine.\n{Fore.WHITE}")
-    if load_data('tutorial') == 6:
+    elif tutorial_stage == 6:
         print("Type y to enter mining mode, and then select how much tritanium you want to mine.\n")
-    print(f"You have approached a {mine_capitilize} Mine!")
-    deposit_materials = get_material_in_node(system_name=systems[load_data('current_system')], mine_name=mine_num)
-    mining_efficiency = research_multi('Mining Laser') * load_ship_stat(load_data('ship'), 'mining_efficiency')
+
+    print(f"You have approached a {mine_capitalize} Mine!")
+    deposit_materials = get_material_in_node(system_name=systems[current_system], mine_name=mine_num)
+    mining_efficiency = research_multi('Mining Laser') * load_ship_stat(ship_name, 'mining_efficiency')
     deposit_var = deposit_materials / mining_efficiency
     print(f"{Fore.BLUE}This mine has {deposit_materials} {mine_type}.{Fore.WHITE}")
     print(f"{Fore.GREEN}Estimated mining time: {deposit_var * 0.5} seconds{Fore.WHITE}")
     if ask(f'{Fore.RED}Would you like to mine? (Once you start mining, you cannot stop until finished) Y/N: {Fore.WHITE}'):
         mine_depo_mats = ask_sanitize(f'{Fore.GREEN}How much would you like to mine? (1 - {deposit_materials}){Fore.WHITE}')
-        while mine_depo_mats or get_material_in_node(system_name=systems[load_data('current_system')], mine_name=mine_num) <= 0:
+        while mine_depo_mats > 0 and get_material_in_node(system_name=systems[current_system], mine_name=mine_num) > 0:
             clear()
             print("Mining...")
-            print(f"{mine_capitilize} Remaining: {mine_depo_mats}")
-            print('Total Storage Remaining:', load_ship_stat(ship_name=load_data('ship'), stat_key='storage'))
+            print(f"{mine_capitalize} Remaining: {mine_depo_mats}")
+            print(f'Total Storage Remaining: {load_ship_stat(ship_name, "storage")}')
             materials_gathered = 1 * mining_efficiency
-            save_ship_data(ship_name=load_data('ship'), stat_key=f'{mine_type}_storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key=f'{mine_type}_storage') + materials_gathered)
-            save_ship_data(ship_name=load_data('ship'), stat_key='storage', value=load_ship_stat(ship_name=load_data('ship'), stat_key='storage') - materials_gathered)
+            save_ship_data(ship_name, f'{mine_type}_storage', load_ship_stat(ship_name, f'{mine_type}_storage') + materials_gathered)
+            save_ship_data(ship_name, 'storage', load_ship_stat(ship_name, 'storage') - materials_gathered)
             update_mission_progress('Mine 100 Materials', materials_gathered)
-            mine_depo_mats -= mining_efficiency
-            deposit_var = mine_depo_mats
-            estimated_time_remaining = (deposit_var / mining_efficiency) * 0.5
-            update_materials(system_name=systems[load_data('current_system')], mine_name=mine_num, amount=mining_efficiency)
-            print(f'{Fore.GREEN}Estimated Time remaining:', estimated_time_remaining, f'Seconds {Fore.WHITE}')
-            time.sleep(0.5)
+            update_materials(system_name=systems[current_system], mine_name=mine_num, amount=mining_efficiency)
+            estimated_time_remaining = (mine_depo_mats / mining_efficiency) * 0.5
+            print(f'{Fore.GREEN}Estimated Time remaining: {estimated_time_remaining} Seconds {Fore.WHITE}')
             if research_multi('Inventory Management Systems') < 0:
                 clear()
                 print(f'{Fore.RED}Your ship has run out of storage. Please return to drydock to empty your cargo to your station.{Fore.WHITE}')
                 time.sleep(2)
                 break
-        if load_data('tutorial') == 0:
+            mine_depo_mats -= mining_efficiency
+            time.sleep(0.5)
+        if tutorial_stage == 0:
             save_data('tutorial', 1)
-        if load_data('tutorial') == 6:
+        elif tutorial_stage == 6:
             save_data('tutorial', 7)
         tutorial_highlight1 = Fore.WHITE
         tutorial_highlight = Fore.WHITE
@@ -1205,19 +1366,22 @@ def load_user_data():
     user_data = {}
 
     try:
-        # Load relevant resource keys
-        user_data['parsteel'] = load_data('parsteel')
-        user_data['tritanium'] = load_data('tritanium')
-        user_data['dilithium'] = load_data('dilithium')
-        user_data['latinum'] = load_data('latinum')
-        user_data['recruit_tokens'] = load_data('recruit_tokens')
-        user_data['ship'] = load_data('ship')
-        user_data['current_system'] = load_data('current_system')
-        user_data['reputation'] = load_data('reputation')
-        user_data['galaxy_class_blueprints'] = load_data('galaxy_class_blueprints')
-        user_data['federation_shuttlecraft_blueprints'] = load_data('federation_shuttlecraft_blueprints')
-        user_data['stargazer_blueprints'] = load_data('stargazer_blueprints')
-        user_data['uss_grissom_blueprints'] = load_data('uss_grissom_blueprints')
+        # Load resource and user data keys
+        keys = [
+            'parsteel', 'tritanium', 'dilithium', 'latinum',
+            'recruit_tokens', 'ship', 'current_system', 'reputation', 
+            'stargazer_blueprints', 'uss_grissom_blueprints',
+            'federation_shuttlecraft_blueprints', 'galaxy_class_blueprints',
+            'realta_blueprints', 'daedalus_medical_blueprints',
+            'ambassadors_shuttle_blueprints', 'uss_constitution_blueprints',
+            'ferengi_dkora_blueprints', 'klingon_kvort_blueprints',
+            'romulan_warbird_blueprints', 'uss_excelsior_blueprints',
+            'ncc_1701_d_blueprints'
+        ]
+
+        # Dynamically load all keys
+        for key in keys:
+            user_data[key] = load_data(key)
 
         return user_data
     except Exception as e:
@@ -1227,19 +1391,9 @@ def load_user_data():
 # Save user resources back to user_data.json
 def save_user_data(user_data):
     try:
-        # Save relevant resource keys
-        save_data('parsteel', user_data['parsteel'])
-        save_data('tritanium', user_data['tritanium'])
-        save_data('dilithium', user_data['dilithium'])
-        save_data('latinum', user_data['latinum'])
-        save_data('recruit_tokens', user_data['recruit_tokens'])
-        save_data('ship', user_data['ship'])
-        save_data('current_system', user_data['current_system'])
-        save_data('reputation', user_data['reputation'])
-        save_data('uss_grissom_blueprints', user_data['uss_grissom_blueprints'])
-        save_data('galaxy_class_blueprints', user_data['galaxy_class_blueprints'])
-        save_data('federation_shuttlecraft_blueprints', user_data['federation_shuttlecraft_blueprints'])
-        save_data('stargazer_blueprints', user_data['stargazer_blueprints'])
+        # Get all keys from user_data and save them
+        for key, value in user_data.items():
+            save_data(key, value)  # Dynamically save each key-value pair
     except Exception as e:
         print(f"Error saving user data: {e}")
 
@@ -1262,24 +1416,41 @@ def save_shop(shop_data):
 def create_new_shop():
     # List of available shop items
     shop_items = [
-        {"item_name": f"{amount} {item} Blueprints", "price": price, "resource_key": item, "amount": amount}
+        {"item_name": f"{amount} {item} Blueprints", "price": price, "resource_key": item.lower().replace(' ', '_').replace("'", "") + '_blueprints', "amount": amount}
         for item, price, amounts in [
-            ("Recruit Tokens", 5, [50, 100, 200, 300, 400]),
-            ("Galaxy Class Blueprints", 40, [10, 20, 30, 50, 100]),
-            ("Federation Shuttlecraft Blueprints", 20, [5, 15, 30, 50, 100]),
-            ("Stargazer Blueprints", 10, [5, 10, 20, 50, 100]),
-            ("USS Grissom Blueprints", 10, [5, 15, 30, 60, 100]),
+            ("Stargazer", 10, [5, 10, 20, 50, 100]),
+            ("USS Grissom", 10, [5, 15, 30, 60, 100]),
+            ("Realta", 15, [5, 10, 20, 50, 100]),
+            ("Federation Shuttlecraft", 20, [5, 15, 30, 50, 100]),
+            ("Daedalus Class Medical", 25, [5, 10, 20, 50, 100]),
+            ("Ambassadors Shuttle", 30, [5, 10, 20, 50, 100]),
+            ("USS Constitution", 40, [5, 10, 20, 50, 100]),
+            ("Galaxy Class", 50, [10, 20, 30, 50, 100]),
+            ("Ferengi DKora", 60, [5, 10, 20, 50, 100]),
+            ("Klingon KVort", 70, [5, 10, 20, 50, 100]),
+            ("Romulan Warbird", 80, [5, 10, 20, 50, 100]),
+            ("USS Excelsior", 90, [5, 10, 20, 50, 100]),
+            ("USS Enterprise (NCC-1701 D)", 100, [10, 20, 30, 50, 100]),
+        ]
+        for amount in amounts
+    ]
+    
+    recruit_token_addon = [
+        {"item_name": f"{amount} {item}", "price": price, "resource_key": item.lower().replace(' ', '_').replace("'", ""), "amount": amount}
+        for item, price, amounts in [
+            ("Recruit Tokens", 5, [50, 100, 200, 300, 400])
         ]
         for amount in amounts
     ]
 
     # Randomly select 5-8 items
-    selected_items = random.sample(shop_items, random.randint(5, 8))
+    selected_items = random.sample(shop_items, random.randint(5, 8)) + random.sample(recruit_token_addon, random.randint(1, 1))
 
     # Create and save shop data
     shop_data = {"last_updated": str(datetime.now().date()), "items": selected_items}
     save_shop(shop_data)
     return shop_data
+
 
 # Update the shop daily (based on system date)
 def update_shop_daily():
@@ -2044,19 +2215,30 @@ def center_text(text):
     # Print the centered text
     print(centered_text)
 
-def regula_mission_briefing():
-    center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing ==========>{Fore.WHITE}")
-    center_text(f"{Fore.RED}A distress call has been received from the system Regula. (Warp range needs to be at least 6).{Fore.WHITE}")
-    time.sleep(2)
-    typing_animation("You must travel to the system Regula, explore the system, and you will find an option that says 'Respond to Distress call in Regula.' You will select that option, and complete that part of the mission. It may take you to other systems as you go.")
-    print()
-    time.sleep(2)
-    center_text("Good luck Captain.")
-    time.sleep(5)
-    center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing - END TRANSMISSION ==========>{Fore.WHITE}")
-    time.sleep(5)
-    update_mission_progress('Respond to the Distress Signal in Regula', 1)
-    clear()
+def mission_briefing():
+    if load_data('missions')['Respond to the Distress Signal in Regula']['accepted'] and not load_data('missions')['Respond to the Distress Signal in Regula']['completed'] and load_data('missions')['Respond to the Distress Signal in Regula']['progress'] == 0:
+        center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing ==========>{Fore.WHITE}")
+        center_text(f"{Fore.RED}A distress call has been received from the system Regula. (Warp range needs to be at least 6).{Fore.WHITE}")
+        time.sleep(2)
+        typing_animation("You must travel to the system Regula, explore the system, and you will find an option that says 'Respond to Distress call in Regula.' You will select that option, and complete that part of the mission. It may take you to other systems as you go.")
+        print()
+        time.sleep(2)
+        center_text("Good luck Captain.")
+        time.sleep(5)
+        center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing - END TRANSMISSION ==========>{Fore.WHITE}")
+        input("Press enter to exit.")
+        update_mission_progress('Respond to the Distress Signal in Regula', 1)
+        clear()
+    elif load_data('missions')['Survey the Rings of Tarkalea XII']['accepted'] and not load_data('missions')['Survey the Rings of Tarkalea XII']['completed'] and load_data('missions')['Survey the Rings of Tarkalea XII']['progress'] == 0:
+        center_text(f"{Fore.BLUE}<========== UFP Galactic Survey ==========>")
+        center_text("The UFPGS is calling independents to survey the rings of Tarkalea XII.")
+        time.sleep(2)
+        center_text("You must travel to Tarkalea XII and start the survey of the rings. Once you have completed that, you may return to drydock with your findings.")
+        time.sleep(3)
+        center_text("<========== End Transmission ==========>")
+        input("Press enter to exit.")
+        update_mission_progress('Survey the Rings of Tarkalea XII', 1)
+        clear()
 
 def distress_call_scenario_pt2():
     print("You have arrived at the coordinates of the unknown ship.")
@@ -2088,6 +2270,18 @@ def distress_call_scenario_pt2():
         time.sleep(2)
         print(f"{Fore.GREEN}The second ship is fleeing!\nVictory!{Fore.WHITE}")
         update_mission_progress('Respond to Distress Signal in Regula', 1)
+        time.sleep(2)
+
+def tarkalea_survey():
+    clear()
+    income_display()
+    if ask("Would you like to begin the survey? (y/n): "):
+        colored_gradient_loading_bar(duration=random.randint(10,25))
+        print(f"{Fore.GREEN}Survey complete! Return to your station with your findings.{Fore.WHITE}")
+        update_mission_progress('Survey the Rings of Tarkalea XII', 1)
+        time.sleep(2)
+    else:
+        print(f"{Fore.RED}Survey canceled. When you a ready, come back and take the survey.{Fore.WHITE}")
         time.sleep(2)
 
 # Xindi station will be part of v1 Galaxy Unleashed.
@@ -2166,7 +2360,16 @@ def tutorial():
                 "stargazer_blueprints": 25,
                 "uss_grissom_blueprints": 25,
                 "federation_shuttlecraft_blueprints": 25,
-                "galaxy_class_blueprints": 25,
+                "galaxy_class_blueprints": 50,
+                "realta_blueprints": 25,
+                "daedalus_class_medical_blueprints": 30,
+                "ambassadors_shuttle_blueprints": 40,
+                "uss_constitution_blueprints": 60,
+                "ferengi_dkora_blueprints": 60,
+                "klingon_kvort_blueprints": 60,
+                "romulan_warbird_blueprints": 70,
+                "uss_excelsior_blueprints": 70,
+                "uss_enterprise_(ncc-1701_d)_blueprints": 80,
                 "recruit_tokens": 50,
                 "latinum": 50,
             },
@@ -2285,11 +2488,697 @@ def process_tutorial_step():
         global_vars[var] = color
 
 
+# Systems functions
+
+def sol():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Ensure the current system is Sol
+    if current_system != 1:
+        return
+
+    current_system_explored = load_explored(systems[current_system])
+    tutorial_state = load_data('tutorial')
+
+    # Update tutorial highlights based on the tutorial state
+    tutorial_highlight = Fore.YELLOW if tutorial_state == 0 else Fore.WHITE
+    tutorial_highlight4 = Fore.YELLOW if tutorial_state == 2 else Fore.WHITE
+
+    # Display tutorial guidance if applicable
+    if tutorial_state == 0:
+        print(f"{tutorial_highlight}This is what the menu will look like. Navigate to a parsteel mine by typing 1 and pressing enter.{Fore.WHITE}")
+    elif tutorial_state == 2:
+        print(f"{Fore.YELLOW}Navigate to the enemy ship by typing 3.{Fore.WHITE}")
+
+    # Define menu options
+    system_findings = {
+        1: (f'{tutorial_highlight}Parsteel Mine{Fore.WHITE}', lambda: handle_mining('parsteel', ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3', 'parsteel_mine4', 'parsteel_mine5'], 'Parsteel')),
+        2: ('Mission Planet', handle_mission_planet),
+        3: (f'{tutorial_highlight4}Orion Pirate{Fore.WHITE}', lambda: handle_orion_pirate(tutorial_state))
+    }
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+    elif current_system_explored == 2:
+        # If unexplored, scan the system
+        income_display()
+        scan_system()
+
+
+# Helper Functions
+def handle_mining(resource, mining_locations, resource_name):
+    """Handles mining operations."""
+    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+        clear()
+        mining_deposit(resource, random.choice(mining_locations), resource_name)
+    else:
+        clear()
+        income_display()
+        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+
+
+def handle_mission_planet():
+    """Handles the Mission Planet interaction."""
+    clear()
+    income_display()
+    print('You have approached a Mission Planet!')
+    print(*mission_list_print, sep='\n')
+    print(f"{len(mission_list_print) + 1}: Exit")
+    accept_missions()
+
+
+def handle_orion_pirate(tutorial_state):
+    """Handles the Orion Pirate encounter."""
+    tut_health = 700 if tutorial_state == 2 else random.randint(500, 900)
+    clear()
+    income_display()
+    print('You have approached an Orion Pirate!')
+    print('What do you want to do?')
+    op_1 = [f'{Fore.YELLOW if tutorial_state == 2 else Fore.WHITE}1: Attack the Ship{Fore.WHITE}', '2: Hail the Ship']
+    print(*op_1, sep='\n')
+
+    ori_ship = ask_sanitize('What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=tut_health, opponent_name='Orion Pirate',
+            firepower=1, accuracy=1, evasion=1,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+def vulcan():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Ensure the current system is Vulcan
+    if current_system != 2:
+        return
+
+    current_system_explored = load_explored(systems[current_system])
+    tutorial_state = load_data('tutorial')
+
+    # Update tutorial highlight if needed
+    tutorial_highlight6 = Fore.YELLOW if tutorial_state == 6 else Fore.WHITE
+
+    # Define menu options
+    system_findings = {
+        1: ('Parsteel Mine', lambda: handle_mining('parsteel', ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3'], 'Parsteel')),
+        2: ('Mission Planet', handle_mission_planet),
+        3: ('Vulcan Dissident', handle_vulcan_dissident),
+        4: (f'{tutorial_highlight6}Tritanium Mine{Fore.WHITE}', lambda: handle_mining('tritanium', ['tritanium_mine1', 'tritanium_mine2', 'tritanium_mine3'], 'Tritanium'))
+    }
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+    elif current_system_explored == 2:
+        # If unexplored, scan system
+        income_display()
+        scan_system()
+
+
+# Helper Functions
+def handle_mining(resource, mining_locations, resource_name):
+    """Handles mining operations."""
+    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+        clear()
+        mining_deposit(resource, random.choice(mining_locations), resource_name)
+    else:
+        clear()
+        income_display()
+        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+
+
+def handle_mission_planet():
+    """Handles the Mission Planet interaction."""
+    clear()
+    income_display()
+    print('You have approached a Mission Planet!')
+    print(*mission_list_print, sep='\n')
+    print(f"{len(mission_list_print) + 1}: Exit")
+    accept_missions()
+
+
+def handle_vulcan_dissident():
+    """Handles the Vulcan Dissident encounter."""
+    clear()
+    income_display()
+    print('You have approached a Vulcan Dissident!')
+    print('What do you want to do?')
+    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
+    print(*op_1, sep='\n')
+
+    ori_ship = ask_sanitize('What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=random.randint(600, 1000),
+            opponent_name='Vulcan Dissident',
+            firepower=1, accuracy=2, evasion=1,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+
+def tellar():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Early return if the system is not fully explored
+    if load_explored(systems[current_system]) != 1:
+        if load_explored(systems[current_system]) == 2:
+            income_display()
+            scan_system()
+        return
+
+    # Define menu options
+    system_findings = {
+        1: ('Dilithium Mine', lambda: handle_mining('dilithium', ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4'], 'Dilithium')),
+        2: ('Mission Planet', handle_mission_planet),
+        3: ('Nausicaan Raider', handle_nausicaan_raider),
+        4: ('Tritanium Mine', lambda: handle_mining('tritanium', ['tritanium_mine1', 'tritanium_mine2'], 'Tritanium'))
+    }
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+
+
+# Helper Functions
+def handle_mission_planet():
+    """Handles the Mission Planet interaction."""
+    clear()
+    income_display()
+    print('You have approached a Mission Planet!')
+    print(*mission_list_print, sep='\n')
+    print(f"{len(mission_list_print) + 1}: Exit")
+    accept_missions()
+
+
+def handle_nausicaan_raider():
+    """Handles the Nausicaan Raider encounter."""
+    clear()
+    income_display()
+    print('You have approached a Nausicaan Raider!')
+    print('What do you want to do?')
+    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
+    print(*op_1, sep='\n')
+
+    ori_ship = ask_sanitize('What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=random.randint(700, 1100),
+            opponent_name='Nausicaan Raider',
+            firepower=2, accuracy=2, evasion=3,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+
+def handle_mining(resource, mining_locations, resource_name):
+    """Handles mining operations."""
+    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
+        clear()
+        mining_deposit(resource, random.choice(mining_locations), resource_name)
+    else:
+        clear()
+        income_display()
+        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
+
+
+def andor():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Early return if the system is not fully explored
+    if load_explored(systems[current_system]) != 1:
+        if load_explored(systems[current_system]) == 2:
+            income_display()
+            scan_system()
+        return
+
+    # Define menu options
+    system_findings = {
+        1: ('Dilithium Mine', lambda: handle_mining('dilithium', ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3'], 'Dilithium')),
+        2: ('Mission Planet', handle_mission_planet),
+        3: ('Tholian Incursion Ship', handle_tholian_ship),
+        4: ('Parsteel Mine', lambda: handle_mining('parsteel', ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3'], 'Parsteel'))
+    }
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+
+
+# Helper Functions
+def handle_mission_planet():
+    """Handles the Mission Planet interaction."""
+    clear()
+    income_display()
+    print('You have approached a Mission Planet!')
+    print(*mission_list_print, sep='\n')
+    print(f"{len(mission_list_print) + 1}: Exit")
+    accept_missions()
+
+
+def handle_tholian_ship():
+    """Handles the Tholian Incursion Ship encounter."""
+    clear()
+    income_display()
+    print('You have approached a Tholian Incursion Ship!')
+    print('What do you want to do?')
+    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
+    print(*op_1, sep='\n')
+
+    ori_ship = ask_sanitize('What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=random.randint(800, 1200),
+            opponent_name='Tholian Incursion Ship',
+            firepower=3, accuracy=3, evasion=3,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+
+def omicron_ii():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Early return if the system is not fully explored
+    if load_explored(systems[current_system]) != 1:
+        if load_explored(systems[current_system]) == 2:
+            income_display()
+            scan_system()
+        return
+
+    # Define menu options
+    system_findings = {
+        1: ('Dilithium Mine', lambda: handle_mining('dilithium', ['dilithium_mine1', 'dilithium_mine2'], 'Dilithium')),
+        2: ('Mission Planet', handle_mission_planet),
+        3: ('Tritanium Mine', lambda: handle_mining('tritanium', ['tritanium_mine1', 'tritanium_mine2'], 'Tritanium')),
+        4: ('Parsteel Mine', lambda: handle_mining('parsteel', ['parsteel_mine1', 'parsteel_mine2'], 'Parsteel')),
+        5: ('Latinum Mine', lambda: handle_mining('latinum', ['latinum_mine1', 'latinum_mine2'], 'Latinum'))
+    }
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+
+
+# Helper Functions
+def handle_mission_planet():
+    """Handles the Mission Planet interaction."""
+    clear()
+    income_display()
+    print('You have approached a Mission Planet!')
+    print(*mission_list_print, sep='\n')
+    print(f"{len(mission_list_print) + 1}: Exit")
+    accept_missions()
+
+
+def regula():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Early return if system not fully explored
+    if load_explored(systems[current_system]) != 1:
+        if load_explored(systems[current_system]) == 2:
+            income_display()
+            scan_system()
+        return
+
+    # Load mission data
+    mission_data = load_data('missions').get("Respond to the Distress Signal in Regula", {})
+    mission_available = mission_data.get("accepted") and mission_data.get("progress") == 1
+
+    # Define menu options
+    system_findings = {
+        1: ('Klingon Intelligence Operative', handle_klingon_operative),
+        2: ('Latinum Mine', lambda: handle_mining('latinum', ['latinum_mine1'], 'Latinum')),
+        3: ('Dilithium Mine', lambda: handle_mining('dilithium', ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4'], 'Dilithium'))
+    }
+
+    if mission_available:
+        system_findings[4] = ('Respond to Distress Call', distress_call_scenario)
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+
+
+# Helper Functions
+def handle_klingon_operative():
+    """Handles interaction with the Klingon Intelligence Operative."""
+    income_display()
+    print('You have approached a Klingon Intelligence Operative!')
+    print('What do you want to do?')
+    options = ['1: Attack the Ship', '2: Hail the Ship']
+    print(*options, sep='\n')
+    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=random.randint(900, 1300),
+            opponent_name='Klingon Intelligence Operative',
+            firepower=4,
+            accuracy=3,
+            evasion=4,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+
+def solaria():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Early return if system not fully explored
+    if load_explored(systems[current_system]) != 1:
+        if load_explored(systems[current_system]) == 2:
+            income_display()
+            scan_system()
+        return
+
+    # Load mission data
+    mission_data = load_data('missions').get("Respond to the Distress Signal in Regula", {})
+    mission_available = mission_data.get("accepted") and mission_data.get("progress") == 2
+
+    # Define menu options
+    system_findings = {
+        1: ('Hirogen Tracker', handle_hirogen_tracker),
+        2: ('Parsteel Mine', lambda: handle_mining('parsteel', ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3'], 'Parsteel')),
+        3: ('Tritanium Mine', lambda: handle_mining('tritanium', ['tritanium_mine1', 'tritanium_mine2', 'tritanium_mine3'], 'Tritanium'))
+    }
+
+    if mission_available:
+        system_findings[4] = (f'{Fore.YELLOW}Scan for the unknown ship{Fore.WHITE}', distress_call_scenario_pt2)
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+
+
+# Helper Functions
+def handle_hirogen_tracker():
+    """Handles the logic for engaging with a Hirogen Tracker."""
+    income_display()
+    print('You have approached a Hirogen Tracker!')
+    print('What do you want to do?')
+    options = ['1: Attack the Ship', '2: Hail the Ship']
+    print(*options, sep='\n')
+    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=random.randint(1000, 1400),
+            opponent_name='Hirogen Tracker',
+            firepower=4,
+            accuracy=5,
+            evasion=4,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+
+def tarkalea_xii():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Early return if system not fully explored
+    if load_explored(systems[current_system]) != 1:
+        if load_explored(systems[current_system]) == 2:
+            income_display()
+            scan_system()
+        return
+
+    # Load mission data
+    mission_data = load_data('missions').get("Survey the Rings of Tarkalea XII", {})
+    mission_available = mission_data.get("accepted") and mission_data.get("progress") == 1
+
+    # Define menu options
+    system_findings = {
+        1: ('Orion Slaver', handle_orion_slaver),
+        2: ('Dilithium Mine', lambda: handle_mining('dilithium', ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4'], 'Dilithium')),
+        3: ('Mission Planet', handle_mission_planet)
+    }
+
+    if mission_available:
+        system_findings[4] = (f'{Fore.YELLOW}Survey the Rings of Tarkalea XII{Fore.WHITE}', handle_survey_mission)
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+
+
+# Helper Functions
+def handle_orion_slaver():
+    """Handles the logic for engaging with an Orion Slaver."""
+    income_display()
+    print('You have approached an Orion Slaver!')
+    print('What do you want to do?')
+    options = ['1: Attack the Ship', '2: Hail the Ship']
+    print(*options, sep='\n')
+    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=random.randint(1100, 1500),
+            opponent_name='Orion Slaver',
+            firepower=5,
+            accuracy=5,
+            evasion=6,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+
+def handle_mission_planet():
+    """Handles the logic for navigating to a mission planet."""
+    income_display()
+    print('You have approached a Mission Planet!')
+    print(*mission_list_print, sep='\n')
+    print(f"{len(mission_list_print) + 1}: Exit")
+    accept_missions()
+
+
+def handle_survey_mission():
+    """Handles the logic for the Survey the Rings of Tarkalea XII mission."""
+    income_display()
+    tarkalea_survey()
+
+
+def xindi_starbase_9():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Early return if system not fully explored
+    if load_explored(systems[current_system]) != 1:
+        if load_explored(systems[current_system]) == 2:
+            income_display()
+            scan_system()
+        return
+
+    # Define menu options
+    system_findings = {
+        1: ('Xindi Patroller', handle_xindi_patroller),
+        2: ('Latinum Mine', lambda: handle_mining('latinum', ['latinum_mine1', 'latinum_mine2', 'latinum_mine3', 'latinum_mine4'], 'Latinum')),
+        3: ('Dock with the Starbase', handle_starbase_docking)
+    }
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+
+
+# Helper Functions
+def handle_xindi_patroller():
+    """Handles the logic for engaging with a Xindi Patroller."""
+    income_display()
+    print('You have approached an Xindi Patroller!')
+    print('What do you want to do?')
+    options = ['1: Attack the Ship', '2: Hail the Ship']
+    print(*options, sep='\n')
+    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=random.randint(1200, 1600),
+            opponent_name='Xindi Patroller',
+            firepower=6,
+            accuracy=7,
+            evasion=5,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+
+def handle_starbase_docking():
+    """Handles the logic for docking with the starbase."""
+    income_display()
+    print(f"{Fore.BLUE}Requesting permission for docking...{Fore.WHITE}")
+    time.sleep(2)
+    print(f"{Fore.RED}Request Denied. Turn back now.{Fore.WHITE}")
+    time.sleep(2)
+
+
+def altor_iv():
+    global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
+    current_system = load_data('current_system')
+
+    # Early return if system not fully explored
+    if load_explored(systems[current_system]) != 1:
+        if load_explored(systems[current_system]) == 2:
+            income_display()
+            scan_system()
+        return
+
+    # Define menu options
+    system_findings = {
+        1: ('Parsteel Mine', lambda: handle_mining('parsteel', ['parsteel_mine1'], 'Parsteel')),
+        2: ('Mission Planet', handle_mission_planet),
+        3: ('Latinum Mine', lambda: handle_mining('latinum', ['latinum_mine1'], 'Latinum')),
+        4: ('Jem\'Hadar Vanguard', handle_jemhadar_vanguard),
+        5: ('Tritanium Mine', lambda: handle_mining('tritanium', ['tritanium_mine1'], 'Tritanium')),
+    }
+
+    # Display menu
+    income_display()
+    print(f"What would you like to navigate to in {systems[current_system]}?")
+    for option, (description, _) in system_findings.items():
+        print(f"{option}. {description}")
+
+    # Get user choice and execute corresponding action
+    current_system_rand = ask_sanitize('Option: ')
+    if current_system_rand in system_findings:
+        clear()
+        action = system_findings[current_system_rand][1]
+        action()
+
+
+# Helper Functions
+def handle_mission_planet():
+    """Handles the logic for Mission Planet selection."""
+    income_display()
+    print('You have approached a Mission Planet!')
+    print(*mission_list_print, sep='\n')
+    print(f"{len(mission_list_print) + 1}: Exit")
+    accept_missions()
+
+
+def handle_jemhadar_vanguard():
+    """Handles the logic for Jem'Hadar Vanguard interaction."""
+    income_display()
+    print("You have approached a Jem'Hadar Vanguard!")
+    print('What do you want to do?')
+    options = ['1: Attack the Ship', '2: Hail the Ship']
+    print(*options, sep='\n')
+    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
+    if ori_ship == 1:
+        battle_stat(
+            opponent_health=random.randint(1300, 1700),
+            opponent_name="Jem'Hadar Vanguard",
+            firepower=8,
+            accuracy=7,
+            evasion=7,
+            income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100, 250))
+        )
+    elif ori_ship == 2:
+        hailing_frequency()
+
+
+
 finding_var = 0
 warp_time = 0
 
 clear()
-mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4: Trade 200 Materials With a Ship', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Buy a new Ship', '8: Complete 2 Successful Trades', '9: Respond to the Distress Signal in Regula']
+mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4: Trade 200 Materials With a Ship', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Buy a new Ship', '8: Complete 2 Successful Trades', '9: Respond to the Distress Signal in Regula', '10: Survey the Rings of Tarkalea XII']
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -2307,9 +3196,7 @@ while True:
     if (load_ship_stat(load_data('ship'), 'health')) <= 0:
         check_health()
     clear()
-    mission_data = load_data('missions').get("Respond to the Distress Signal in Regula", {})
-    if mission_data.get("accepted") and mission_data.get("progress") == 0:
-        regula_mission_briefing()
+    mission_briefing()
     tutorial()
     income_display()
     check_construction_completion()
@@ -2322,499 +3209,21 @@ while True:
     time.sleep(0.1)
     if option == 1:
         clear()
-        if load_data('current_system') == 1: #Sol
-            if load_explored(systems[load_data('current_system')]) == 1:
-                if load_data('tutorial') == 0:
-                    tutorial_highlight = Fore.YELLOW
-                    print(f"{Fore.YELLOW}This is what the menu will look like. Navigate to a parsteel mine by typing 1 and pressing enter.\n{Fore.WHITE}")
-                elif load_data('tutorial') == 2:
-                    print(f"{Fore.YELLOW}Navigate to the enemy ship by typing 3.{Fore.WHITE}")
-                    tutorial_highlight = Fore.WHITE
-                    tutorial_highlight4 = Fore.YELLOW
-                else:
-                    tutorial_highlight = Fore.WHITE
-                    tutorial_highlight4 = Fore.WHITE
-                system_findings = [f'{tutorial_highlight}1. Parsteel Mine{Fore.WHITE}', '2. Mission Planet', f'{tutorial_highlight4}3. Orion Pirate{Fore.WHITE}']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3', 'parsteel_mine4', 'parsteel_mine5']
-                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    if load_data('tutorial') == 2:
-                        print(f"{Fore.YELLOW}Type 1 to attack the ship.{Fore.WHITE}")
-                        tut_health = 700
-                    else:
-                        tut_health = random.randint(500, 900)
-                    clear()
-                    income_display()
-                    print('You have approached an Orion Pirate!')
-                    print('What do you want to do?')
-                    op_1 = [f'{tutorial_highlight4}1: Attack the Ship{Fore.WHITE}', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=tut_health, opponent_name='Orion Pirate', firepower=1, accuracy=1, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 2:
-                    clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 2: # Vulcan
-            if load_explored(systems[load_data('current_system')]) == 1:
-                if load_data('tutorial') == 6:
-                    print(f"{Fore.YELLOW}Navigate to a tritanium mine.{Fore.WHITE}")
-                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Vulcan Dissident', f'{tutorial_highlight6}4. Tritanium Mine{Fore.WHITE}']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3']
-                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 4:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['tritanium_mine1', 'tritanium_mine2', 'tritanium_mine3']
-                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    income_display()
-                    print('You have approached an Vulcan Dissident!')
-                    print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(600,1000), opponent_name='Vulcan Dissident', firepower=1, accuracy=2, evasion=1, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 2:
-                    clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 3: # Tellar
-            if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Nausicaan Raider', '4. Tritanium Mine']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4']
-                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 4:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['tritanium_mine1', 'tritanium_mine2']
-                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    income_display()
-                    print('You have approached an Nausicaan Raider!')
-                    print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(700,1100), opponent_name='Nausicaan Raider', firepower=2, accuracy=2, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 2:
-                    clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 4: # Andor
-            if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Tholian Incursion Ship', '4. Parsteel Mine']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3']
-                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 4:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3']
-                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    income_display()
-                    print('You have approached an Tholian Incursion Ship!')
-                    print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(800,1200), opponent_name='Tholian Incursion Ship', firepower=3, accuracy=3, evasion=3, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 2:
-                    clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 5: # Omicron II
-            if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Dilithium Mine', '2. Mission Planet', '3. Tritanium Mine', '4. Parsteel Mine', '5. Latinum Mine']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['dilithium_mine1', 'dilithium_mine2']
-                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 4:
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['parsteel_mine1', 'parsteel_mine2']
-                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['tritanium_mine1', 'tritanium_mine2']
-                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 2:
-                    clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
-                if current_system_rand == 5:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['latinum_mine1', 'latinum_mine2']
-                        mining_deposit('latinum', random.choice(rand_min), 'Latinum')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 6: # Regula
-            if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Klingon Intelligence Operative', '2. Latinum Mine', '3. Dilithium Mine']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                mission_data = load_data('missions').get("Respond to the Distress Signal in Regula", {})
-                if mission_data.get("accepted") and mission_data.get("progress") == 1:
-                    print(f'{Fore.YELLOW}4. Respond to Distress Call{Fore.WHITE}')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    clear()
-                    income_display()
-                    print('You have approached an Klingon Intelligence Operative!')
-                    print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(900,1300), opponent_name='Klingon Intelligence Operative', firepower=4, accuracy=3, evasion=4, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 2:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['latinum_mine1']
-                        mining_deposit('latinum', random.choice(rand_min), 'Latinum')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4']
-                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 4 and mission_data.get("accepted") and mission_data.get("progress") == 1:
-                    clear()
-                    income_display()
-                    distress_call_scenario()
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 7: # Solaria
-            if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Hirogen Tracker', '2. Parsteel Mine', '3. Tritanium Mine']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                mission_data = load_data('missions').get("Respond to the Distress Signal in Regula", {})
-                if mission_data.get("accepted") and mission_data.get("progress") == 2:
-                    print(f'{Fore.YELLOW}4. Scan for the unknown ship{Fore.WHITE}')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    clear()
-                    income_display()
-                    print('You have approached an Hirogen Tracker!')
-                    print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(1000,1400), opponent_name='Hirogen Tracker', firepower=4, accuracy=5, evasion=4, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 2:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3']
-                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['tritanium_mine1', 'tritanium_mine2', 'tritanium_mine3']
-                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 4 and mission_data.get("accepted") and mission_data.get("progress") == 2:
-                    clear()
-                    income_display()
-                    distress_call_scenario_pt2()
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 8: # Tarkalea XII
-            if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Orion Slaver', '2. Dilithium Mine', '3. Mission Planet']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    clear()
-                    income_display()
-                    print('You have approached an Orion Slaver!')
-                    print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(1100,1500), opponent_name='Orion Slaver', firepower=5, accuracy=5, evasion=6, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 2:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['dilithium_mine1', 'dilithium_mine2', 'dilithium_mine3', 'dilithium_mine4']
-                        mining_deposit('dilithium', random.choice(rand_min), 'Dilithium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 9: # Xindi Starbase 9
-            if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Xindi Patroller', '2. Latinum Mine', '3. Dock with the Starbase']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 1:
-                    clear()
-                    income_display()
-                    print('You have approached an Xindi Patroller!')
-                    print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(1200,1600), opponent_name='Xindi Patroller', firepower=6, accuracy=7, evasion=5, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 2:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['latinum_mine1', 'latinum_mine2', 'latinum_mine3', 'latinum_mine4']
-                        mining_deposit('latinum', random.choice(rand_min), 'Latinum')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    income_display()
-                    print(f"{Fore.BLUE}Requesting permission for docking...{Fore.WHITE}")
-                    time.sleep(2)
-                    print(f"{Fore.RED}Request Denied. Turn back now.{Fore.WHITE}")
-                    time.sleep(2)
-                    '''
-                    Developer Note: The code below is maitnence code. This is a preview of what will be here in v1.0 (Galaxy Unleashed), and during this time, the code is inactive so that the code can run as it should.
-                    It has been noted that this is currently a distractor from the code, and it will be removed a soon as possible for the next update.
-
-                    colored_gradient_loading_bar(duration=6)
-                    xindi_station()
-                    '''
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
-        if load_data('current_system') == 10: # Altor IV
-            if load_explored(systems[load_data('current_system')]) == 1:
-                system_findings = ['1. Parsteel Mine', '2. Mission Planet', '3. Latinum Mine', "4. Jem'Hadar Vanguard", '5. Tritanium Mine']
-                income_display()
-                print(f"What would you like to navigate to in {systems[load_data('current_system')]}?")
-                print(*system_findings, sep='\n')
-                current_system_rand = ask_sanitize('Option: ')
-                if current_system_rand == 2:
-                    clear()
-                    income_display()
-                    print('You have approached a Mission Planet!')
-                    print(*mission_list_print, sep = '\n')
-                    print(f"{len(mission_list_print) + 1}: Exit")
-                    accept_missions()
-                if current_system_rand == 4:
-                    clear()
-                    income_display()
-                    print("You have approached an Jem'Hadar Vanguard!")
-                    print('What do you want to do?')
-                    op_1 = ['1: Attack the Ship', '2: Hail the Ship']
-                    print(*op_1, sep='\n')
-                    ori_ship = ask_sanitize(question_ask='What would you like to do: ')
-                    if ori_ship == 1:
-                        battle_stat(opponent_health=random.randint(1300,1700), opponent_name="Jem'Hadar Vanguard", firepower=8, accuracy=7, evasion=7, income=((system_deltas['Enemy Ships Loot'] ** load_data('current_system')) * random.randint(100,250)))
-                    if ori_ship == 2:
-                        hailing_frequency()
-                if current_system_rand == 1:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['parsteel_mine1']
-                        mining_deposit('parsteel', random.choice(rand_min), 'Parsteel')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 5:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['tritanium_mine1']
-                        mining_deposit('tritanium', random.choice(rand_min), 'Tritanium')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-                if current_system_rand == 3:
-                    clear()
-                    if load_ship_stat(ship_name=load_data('ship'), stat_key='storage') > 0:
-                        clear()
-                        rand_min = ['latinum_mine1']
-                        mining_deposit('latinum', random.choice(rand_min), 'Latinum')
-                    else:
-                        clear()
-                        income_display()
-                        print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
-            elif load_explored(systems[load_data('current_system')]) == 2:
-                income_display()
-                scan_system()
+        system_functions = {
+        1: sol,
+        2: vulcan,
+        3: tellar,
+        4: andor,
+        5: omicron_ii,
+        6: regula,
+        7: solaria,
+        8: tarkalea_xii,
+        9: xindi_starbase_9,
+        10: altor_iv,
+        }
+        current_system = load_data('current_system')
+        if current_system in system_functions:
+            system_functions[current_system]()
     if option == 2:
         navigate()
     if option == 3:
@@ -2839,6 +3248,9 @@ while True:
             income_display()
             save_data('current_system', 1)
             process_tutorial_step()
+            mission_data = load_data('missions').get("Survey the Rings of Tarkalea XII", {})
+            if mission_data.get("accepted") and mission_data.get("progress") == 2:
+                update_mission_progress('Survey the Rings of Tarkalea XII', 1)
             drydock_option = [f'{tutorial_highlight3}1: Enter Station{Fore.WHITE}', f'{tutorial_highlight7}2: Enter Shipyard{Fore.WHITE}', '3: Open Research', f'{tutorial_highlight5}4: Repair Ship{Fore.WHITE}', '5: Exit']
             print(*drydock_option, sep='\n')
             drydock_selection = ask_sanitize('Option: ')
@@ -3025,4 +3437,3 @@ while True:
     if option == 5:
         clear()
         shop_loop()
-# 3000 lines!

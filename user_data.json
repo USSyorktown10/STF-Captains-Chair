@@ -15,6 +15,15 @@
     "uss_grissom_blueprints": 0,
     "federation_shuttlecraft_blueprints": 0,
     "galaxy_class_blueprints": 0,
+    "realta_blueprints": 0,
+    "daedalus_class_medical_blueprints": 0,
+    "ambassadors_shuttle_blueprints": 0,
+    "uss_constitution_blueprints": 0,
+    "ferengi_dkora_blueprints": 0,
+    "klingon_kvort_blueprints": 0,
+    "romulan_warbird_blueprints": 0,
+    "uss_excelsior_blueprints": 0,
+    "uss_enterprise_(ncc-1701_d)_blueprints": 0,
     "tutorial": 0,
     "missions": {
         "Mine 100 Materials": {
@@ -58,6 +67,11 @@
             "accepted": false
         },
         "Respond to the Distress Signal in Regula": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Survey the Rings of Tarkalea XII": {
             "progress": 0,
             "completed": false,
             "accepted": false
