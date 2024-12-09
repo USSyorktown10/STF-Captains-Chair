@@ -99,5 +99,6 @@
         "research": null,
         "start_time": null,
         "end_time": null
-    }
+    },
+    "next_update_time": ""
 }
