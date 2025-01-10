@@ -919,7 +919,7 @@ def view_upgrades():
         time.sleep(0.001)
 
 def accept_mission(mission_id):
-    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Buy a new Ship', '8': 'Complete 2 Successful Trades', '9': 'Respond to the Distress Signal in Regula', '10': 'Survey the Rings of Tarkalea XII'}
+    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Buy a new Ship', '8': 'Complete 2 Successful Trades', '9': 'Respond to the Distress Signal in Regula', '10': 'Survey the Rings of Tarkalea XII', '11': 'Protect Dilithium Convoy', '12': 'Scan for Anomalies', '13': 'Recover Lost Data', '14': 'The Starship Graveyard', '15': 'First Contact', '16': 'Sabatoge Mission', '17': 'Emergency Supply Run', '18': 'Latinum Heist', '19': 'Minefield Mapping', '20': 'The Alien Probe', '21': 'Temporal Anomaly'}
     missions = cache['missions']
     mission_name = mission_list.get(mission_id)
     if mission_name and not missions[mission_name]['completed']:
@@ -938,7 +938,7 @@ def update_mission_progress(mission_name, progress_increment):
         missions[mission_name]['progress'] += progress_increment
         cache['missions'] = missions
         # Define mission completion targets in a dictionary
-        mission_targets = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 1, 'Defeat 3 Enemies': 3, 'Trade 200 Materials With a Ship': 200, 'Defeat 5 Enemies': 5, 'Explore 3 New Systems': 3, 'Buy a new Ship': 1, 'Complete 2 Successful Trades': 2, 'Respond to the Distress Signal in Regula': 5, 'Survey the Rings of Tarkalea XII': 3}
+        mission_targets = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 1, 'Defeat 3 Enemies': 3, 'Trade 200 Materials With a Ship': 200, 'Defeat 5 Enemies': 5, 'Explore 3 New Systems': 3, 'Buy a new Ship': 1, 'Complete 2 Successful Trades': 2, 'Respond to the Distress Signal in Regula': 1, 'Survey the Rings of Tarkalea XII': 1, 'Protect Dilithium Convoy': 4, 'Scan for Anomalies': 3, 'Recover Lost Data': 1, 'The Starship Graveyard': 1, 'First Contact': 1, 'Sabatoge Mission': 1, 'Emergency Supply Run': 1, 'Latinum Heist': 1, 'Minefield Mapping': 1, 'The Alien Probe': 1, 'Temporal Anomaly': 1}
         # Check if mission meets completion criteria
         if mission_name in mission_targets and missions[mission_name]['progress'] >= mission_targets[mission_name]:
             complete_mission(mission_name)
@@ -947,7 +947,7 @@ def update_mission_progress(mission_name, progress_increment):
 
 
 def complete_mission(mission_name):
-    mission_rewards = {'Mine 100 Materials': 10, 'Defeat 1 Enemy': 10, 'Defeat 3 Enemies': 20, 'Deliver 200 Materials to a Trading Post': 25, 'Defeat 5 Enemies': 40, 'Explore 3 New Systems': 40, 'Buy a new Ship': 50, 'Complete 2 Sucessful Trades': 70, 'Respond to the Distress Signal in Regula': 50}
+    mission_rewards = {'Mine 100 Materials': 10, 'Defeat 1 Enemy': 10, 'Defeat 3 Enemies': 20, 'Trade 200 Materials With a Ship': 25, 'Defeat 5 Enemies': 40, 'Explore 3 New Systems': 40, 'Buy a new Ship': 50, 'Complete 2 Successful Trades': 70, 'Respond to the Distress Signal in Regula': 50, 'Survey the Rings of Tarkalea XII': 50, 'Protect Dilithium Convoy': 75, 'Scan for Anomalies': 50, 'Recover Lost Data': 50, 'The Starship Graveyard': 70, 'First Contact': 80, 'Sabatoge Mission': 60, 'Emergency Supply Run': 40, 'Latinum Heist': 120, 'Minefield Mapping': 60, 'The Alien Probe': 100, 'Temporal Anomaly': 140}
     missions = cache['missions']
     coins = cache['latinum']
 
@@ -1005,12 +1005,22 @@ def save_explored(system):
 def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, evasion):
     if cache['tutorial'] == 2:
         print(f"{Fore.YELLOW}Type y and start the battle! The computer will fight for you based on your stats.{Fore.WHITE}")
-    print(f'{Fore.YELLOW}You are attacking the {opponent_name}! This ship has {opponent_health} health, and if you win, you get {income} materials.{Fore.WHITE}')
+    print(f'{Fore.RED}You are attacking the {opponent_name}! This ship has {opponent_health} health, and if you win, you get {income} materials.{Fore.WHITE}')
     time.sleep(3)
     print(f"{Fore.YELLOW}YELLOW ALERT{Fore.WHITE}")
+    time.sleep(2)
     print(f"{Fore.BLUE}Your ship stats:\nFirepower: {(research_multi('Phaser Calibration') * load_ship_stat(ship_name=cache['ship'], stat_key='firepower'))}\nAccuracy: {(research_multi('Targeting Matrix') * load_ship_stat(ship_name=cache['ship'], stat_key='accuracy'))}\nEvasion: {(research_multi('Evasive Maneuvers') * load_ship_stat(ship_name=cache['ship'], stat_key='evasion'))}{Fore.WHITE}")
     print(f"{Fore.YELLOW}Enemy ships stats:\nFirepower: {firepower}\nAccuracy: {accuracy}\nEvasion: {evasion}{Fore.WHITE}")
-    if ask('Do you want to battle this enemy? '):
+    if cache['missions']['Respond to the Distress Signal in Regula']['progress'] == 2 or cache['missions']['Protect Dilithium Convoy']['progress'] == 1:
+        time.sleep(3)
+        input("Press Enter to Fight... ")
+        fight = 1
+    else:
+        if ask('Do you want to battle this enemy? '):
+            fight = 1
+        else:
+            fight = 2
+    if fight == 1:
         clear()
         print(f"{Fore.RED}RED ALERT{Fore.WHITE}")
         while (load_ship_stat(ship_name=cache['ship'], stat_key='health')) > 0 or opponent_health > 0:
@@ -1047,6 +1057,7 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 break
     if (load_ship_stat(cache['ship'], 'health')) <= 0:
             check_health()
+            return
     if opponent_health <= 0:
                 clear()
                 if cache['tutorial'] == 2:
@@ -1064,131 +1075,36 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 update_mission_progress('Defeat 1 Enemy', 1)
                 update_mission_progress('Defeat 3 Enemies', 1)
                 update_mission_progress('Defeat 5 Enemies', 1)
+                update_mission_progress('Protect Dilithium Convoy', 1)
                 cache['tutorial'] = 3
                 time.sleep(5)
 
+ship_attributes = ["firepower", "accuracy", "evasion", "health", "storage", "mining", "warp"]
+
 base_ship_stats = {
-    "Stargazer": {
-        "firepower": 1,
-        "accuracy": 1,
-        "evasion": 1,
-        "health": 1000,
-        "storage": 750,
-        "mining": 1,
-        "warp": 2
-    },
-    "USS Grissom": {
-        "firepower": 1,
-        "accuracy": 2,
-        "evasion": 2,
-        "health": 2000,
-        "storage": 800,
-        "mining": 2,
-        "warp": 4
-    },
-    "Realta": {
-        "firepower": 2,
-        "accuracy": 2,
-        "evasion": 3,
-        "health": 1500,
-        "storage": 600,
-        "mining": 2,
-        "warp": 3
-    },
-    "Federation Shuttlecraft": {
-        "firepower": 1,
-        "accuracy": 2,
-        "evasion": 3,
-        "health": 3500,
-        "storage": 750,
-        "mining": 2,
-        "warp": 4
-    },
-    "Daedalus Class Medical": {
-        "firepower": 1,
-        "accuracy": 1,
-        "evasion": 2,
-        "health": 1000,
-        "storage": 500,
-        "mining": 1,
-        "warp": 3
-    },
-    "Ambassadors Shuttle": {
-        "firepower": 2,
-        "accuracy": 2,
-        "evasion": 3,
-        "health": 1200,
-        "storage": 600,
-        "mining": 1,
-        "warp": 4
-    },
-    "USS Constitution": {
-        "firepower": 3,
-        "accuracy": 4,
-        "evasion": 4,
-        "health": 2500,
-        "storage": 1000,
-        "mining": 3,
-        "warp": 6
-    },
-    "Galaxy Class": {
-        "firepower": 5,
-        "accuracy": 6,
-        "evasion": 5,
-        "health": 5000,
-        "storage": 2500,
-        "mining": 4,
-        "warp": 8
-    },
-    "Ferengi D'Kora": {
-        "firepower": 4,
-        "accuracy": 4,
-        "evasion": 5,
-        "health": 2200,
-        "storage": 1000,
-        "mining": 3,
-        "warp": 5
-    },
-    "Klingon K'Vort": {
-        "firepower": 6,
-        "accuracy": 5,
-        "evasion": 6,
-        "health": 3000,
-        "storage": 1500,
-        "mining": 4,
-        "warp": 7
-    },
-    "Romulan Warbird": {
-        "firepower": 8,
-        "accuracy": 7,
-        "evasion": 8,
-        "health": 4000,
-        "storage": 1800,
-        "mining": 5,
-        "warp": 10
-    },
-    "USS Excelsior": {
-        "firepower": 6,
-        "accuracy": 6,
-        "evasion": 7,
-        "health": 3500,
-        "storage": 1600,
-        "mining": 4,
-        "warp": 9
-    },
-    "USS Enterprise (NCC-1701 D)": {
-        "firepower": 10,
-        "accuracy": 9,
-        "evasion": 10,
-        "health": 6000,
-        "storage": 2500,
-        "mining": 6,
-        "warp": 12
-    }
+    "Stargazer": (1, 1, 1, 1000, 750, 1, 2),
+    "USS Grissom": (1, 2, 2, 2000, 800, 2, 4),
+    "Realta": (2, 2, 3, 1500, 600, 2, 3),
+    "Federation Shuttlecraft": (1, 2, 3, 3500, 750, 2, 4),
+    "Daedalus Class Medical": (1, 1, 2, 1000, 500, 1, 3),
+    "Ambassadors Shuttle": (2, 2, 3, 1200, 600, 1, 4),
+    "USS Constitution": (3, 4, 4, 2500, 1000, 3, 6),
+    "Galaxy Class": (5, 6, 5, 5000, 2500, 4, 8),
+    "Ferengi D'Kora": (4, 4, 5, 2200, 1000, 3, 5),
+    "Klingon K'Vort": (6, 5, 6, 3000, 1500, 4, 7),
+    "Romulan Warbird": (8, 7, 8, 4000, 1800, 5, 10),
+    "USS Excelsior": (6, 6, 7, 3500, 1600, 4, 9),
+    "USS Enterprise (NCC-1701 D)": (10, 9, 10, 6000, 2500, 6, 12)
 }
 
+def get_ship_stats(ship_name):
+    stats = base_ship_stats.get(ship_name)
+    if stats:
+        return dict(zip(ship_attributes, stats))
+    return None
+
 def check_health():
-    ship_name = cache['ship']  # Cache the ship name to avoid redundant load_data calls
+    ship_name = cache['ship']
     if load_ship_stat(ship_name, 'health') <= 0:
         clear()
         print(f"{Fore.RED}Ship {ship_name} has been destroyed!{Fore.WHITE}")
@@ -1196,23 +1112,22 @@ def check_health():
             load_ship_stat(ship_name, stat) for stat in ['parsteel_storage', 'tritanium_storage', 'dilithium_storage', 'latinum_storage']
         ])
         print(f"{Fore.RED}Materials Lost: {materials_lost}{Fore.WHITE}")
-        reset_stats = {
-            'parsteel_storage': 0,
-            'tritanium_storage': 0,
-            'dilithium_storage': 0,
-            'latinum_storage': 0,
-            'storage': base_ship_stats[ship_name]["storage"],
-            'health': base_ship_stats[ship_name]["health"],
-            'firepower': base_ship_stats[ship_name]["firepower"],
-            'accuracy': base_ship_stats[ship_name]["accuracy"],
-            'evasion': base_ship_stats[ship_name]["evasion"],
-            'mining_efficiency': base_ship_stats[ship_name]["mining"],
-            'warp_range': base_ship_stats[ship_name]["warp"],
-            'owned': 'false',
-            'equipped': 'false'
-        }
-        for stat, value in reset_stats.items():
-            save_ship_data(ship_name, stat, value)
+        
+        reset_stats = get_ship_stats(ship_name)
+        if reset_stats:
+            reset_stats.update({
+                'parsteel_storage': 0,
+                'tritanium_storage': 0,
+                'dilithium_storage': 0,
+                'latinum_storage': 0,
+                'mining_efficiency': reset_stats.pop('mining'),
+                'warp_range': reset_stats.pop('warp'),
+                'owned': 'false',
+                'equipped': 'false'
+            })
+            for stat, value in reset_stats.items():
+                save_ship_data(ship_name, stat, value)
+        
         reset_crew_positions(ship_name)
         cache['ships'] = 'Stargazer'
         save_ship_data('Stargazer', 'owned', 'true')
@@ -1387,10 +1302,7 @@ def navigate():
                     warp_time = abs(cache['current_system'] - target_system) * 10
                     print(f'{Fore.RED}Traveling to {reachable_systems[target_system]}. Estimated time: {warp_time} seconds.{Fore.WHITE}')
                     time.sleep(1)
-                    for i in range(warp_time):
-                        clear()
-                        print(f'{Fore.BLUE}Warping... Time Remaining: {warp_time - i}{Fore.WHITE}')
-                        time.sleep(1)
+                    travel_bar(systems[cache['current_system']], systems[target_system], warp_time, 30)
                     cache['current_system'] = target_system
                     print(f"Arrived at {systems[cache['current_system']]}.")
                     if cache['current_system'] == 2 and cache['tutorial'] == 5:
@@ -2282,6 +2194,21 @@ def mission_briefing():
         input("Press enter to exit.")
         update_mission_progress('Survey the Rings of Tarkalea XII', 1)
         clear()
+    elif cache['missions']['Scan for Anomalies']['accepted'] and not cache['missions']['Scan for Anomalies']['completed'] and cache['missions']['Scan for Anomalies']['progress'] == 0:
+        center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing ==========>")
+        print("")
+        center_text(f"{Fore.BLUE}Starfleet Command has tasked your crew with scanning and analyzing unexplored anomalies in nearby sectors.{Fore.GREEN}\nThese phenomena hold the potential to uncover scientific breakthroughs and enhance our understanding of the galaxy.{Fore.YELLOW}\nEquip your sensors, navigate with precision, and report all findings back to Starfleet for further study.{Fore.RED}\nProceed with caution, as anomalies may pose unexpected challenges.{Fore.WHITE}")
+        print("")
+        time.sleep(3)
+        center_text("Travel to Omicron II for this mission.")
+        print("")
+        time.sleep(2)
+        center_text(f"{Fore.BLUE}<========== End Transmission ==========>{Fore.WHITE}")
+        time.sleep(2)
+        input("Press enter to exit.")
+        update_mission_progress('Scan for Anomalies', 1)
+        clear()
+        
 
 def distress_call_scenario_pt2():
     print("You have arrived at the coordinates of the unknown ship.")
@@ -2314,6 +2241,22 @@ def distress_call_scenario_pt2():
         print(f"{Fore.GREEN}The second ship is fleeing!\nVictory!{Fore.WHITE}")
         update_mission_progress('Respond to Distress Signal in Regula', 1)
         time.sleep(2)
+
+def dilithium_convoypt1():
+    mission_stage = cache['missions']['Protect Dilithium Convoy']['progress']
+    if cache['missions']['Protect Dilithium Convoy']['completed'] == False and cache['missions']['Protect Dilithium Convoy']['accepted'] == True:
+        if mission_stage == 0:
+            center_text(f"{Fore.BLUE}<=============== Incoming Transmission ===============>")
+            time.sleep(2)
+            center_text(f"Starfleet Command\n{Fore.WHITE}")
+            time.sleep(1)
+            center_text(f"{Fore.YELLOW}You have accepted Starfleet Command's assignment to protect their dilithium convoy.\n{Fore.WHITE}")
+            time.sleep(2)
+            center_text(f"{Fore.GREEN}Make sure your ship is battle ready in case pirates attack the freighters. Then, travel to {Fore.YELLOW}Andor{Fore.GREEN} and acomppany the convoy through Andor to ---.\nYou will pass though an Astroid Feild on the way there.\nYou will be rewarded 75 latinum for your efforts.\nGood Luck captian.{Fore.WHITE}")
+            time.sleep(5)
+            input("Press enter to continue... ")
+            update_mission_progress('Protect Dilithium Convoy', 1)
+            clear()
 
 def tarkalea_survey():
     clear()
@@ -2559,6 +2502,42 @@ def transfer_resources_to_storage():
     max_storage = load_ship_stat(ship_name=ship_name, stat_key='max_storage')
     new_storage = research_multi('Inventory Management Systems') * max_storage
     save_ship_data(ship_name=ship_name, stat_key='storage', value=new_storage)
+
+import time
+import sys
+
+def travel_bar(start_label="Start", end_label="End", travel_time=10, bar_length=30):
+    """
+    Displays a travel progress bar in the console.
+    
+    Args:
+        start_label (str): Label for the starting position.
+        end_label (str): Label for the ending position.
+        travel_time (int): Total travel time in seconds.
+        bar_length (int): The length of the progress bar in characters.
+    """
+    for i in range(bar_length + 1):
+        # Calculate current progress
+        progress = (i / bar_length) * travel_time
+        
+        if cache['missions']['Protect Dilithium Convoy']['progress'] == 1:
+            if progress == 4:
+                break
+        
+        # Render the progress bar
+        bar = f"{start_label} ("
+        bar += "-" * i + "0" + "-" * (bar_length - i)
+        bar += f") {end_label}"
+        
+        # Display the bar and progress
+        sys.stdout.write(f"\r{bar} {progress:.1f}s elapsed")
+        sys.stdout.flush()
+        
+        # Wait before updating
+        time.sleep(travel_time / bar_length)
+    
+    # End the progress display with a newline
+    print()
 
 # Systems functions
 
@@ -2828,6 +2807,9 @@ def andor():
         4: ('Parsteel Mine', lambda: handle_mining('parsteel', ['parsteel_mine1', 'parsteel_mine2', 'parsteel_mine3'], 'Parsteel'))
     }
 
+    if cache['missions']['Protect Dilithium Convoy']['accepted'] == True and cache['missions']['Protect Dilithium Convoy']['progress'] == 1:
+        system_findings[5] = (f'{Fore.YELLOW}Protect Dilithium Convoy{Fore.WHITE}', handle_dilithium_convoy)
+
     # Display menu
     income_display()
     print(f"What would you like to navigate to in {systems[current_system]}?")
@@ -2873,6 +2855,69 @@ def handle_tholian_ship():
     elif ori_ship == 2:
         hailing_frequency()
 
+def handle_dilithium_convoy():
+    """Handles the Dilithium Convoy Mission"""
+    clear()
+    income_display()
+    while True:
+        mission_step = cache['missions']['Protect Dilithium Convoy']['progress']
+        if mission_step == 1:
+            typing_animation(f"Federation Destroyer: Thank you for the support, independent. We will support you if you need, but your {cache['ship']} appears to be stronger than our destroyers.")
+            typing_animation("Hopefully this will be smooth sailing. Lets move.")
+            travel_bar("Andor", "Astroid Field", 60, 30)
+            typing_animation(f"{Fore.RED}Federation Destroyer: Pirate has been spotted on sensors. Go to red alert. Charge weapons.")
+            time.sleep(2)
+            battle_stat(1000, 'Shadow of Praxis Pirate', ((system_deltas['Enemy Ships Loot'] ** cache['current_system']) * random.randint(100, 250)), 2, 3, 2)
+        elif mission_step == 2:
+            clear()
+            income_display()
+            typing_animation(f"{Fore.GREEN}Federation Destroyer: I owe you one, captain. Lets keep moving. Once we get to the astroid field, pirates wont bother us anymore.{Fore.WHITE}")
+            time.sleep(2)
+            travel_bar("Andor", "Astroid Field", 54, 30)
+            typing_animation("Federation Destroyer: We have made it to the astroid field. Should be smooth sailing from here. If you want to gather some science on the astroid field, go ahead.")
+            if ask("Would you like to take a risk and possibly gather valuables from the science? (Y/N): "):
+                colored_gradient_loading_bar(duration=15)
+                asteroid_find = [
+                    {"description": "Mineralogical Breakthrough: Discover a new alloy.", "type": "good", "reward": {"tritanium": 50}},
+                    {"description": "Rare Isotopes: Boost warp core efficiency.", "type": "good", "reward": {"dilithium": 40}},
+                    {"description": "Micrometeorite Storm: Damages ship systems.", "type": "bad", "penalty": {"health": -20}},
+                    {"description": "Radiation Exposure: Compromises crew health.", "type": "bad", "penalty": {"health": -10}},
+                    {"description": "Dilithium Deposits: Rich resource bonus.", "type": "good", "reward": {"dilithium": 100}},
+                    {"description": "Explosive Gas Pockets: Causes hull damage.", "type": "bad", "penalty": {"health": -30}},
+                    {"description": "Ancient Artifact: Unlocks cultural insights.", "type": "good", "reward": {"latinum": 20}},
+                    {"description": "Gravitational Anomaly: Risks collision.", "type": "bad", "penalty": {"health": -15}},
+                ]
+
+                materials = {"tritanium": load_ship_stat(cache['ship'], 'tritanium_storage'), "dilithium": load_ship_stat(cache['ship'], 'dilithium_storage'), "health": load_ship_stat(cache['ship'], 'health')}
+
+                def explore_asteroid_field():
+                    outcome = random.choice(asteroid_find)
+                    print(f"Outcome: {outcome['description']}")
+                    if outcome["type"] == "good":
+                        for key, value in outcome["reward"].items():
+                            save_ship_data(cache['ship'], key, materials.get(key, 0) + value)
+                            print(f"Reward: {value} {key}")
+                            time.sleep(2)
+                    elif outcome["type"] == "bad":
+                        for key, value in outcome["penalty"].items():
+                            save_ship_data(cache['ship'], key, materials.get(key, 0) + value)
+                            print(f"Penalty: {value} {key}")
+                            time.sleep(2)
+                            
+                explore_asteroid_field()
+            else:
+                print("You have missed an oppurtunity to gain, but you could have lost things too.")
+                time.sleep(3)
+            update_mission_progress('Protect Dilithium Convoy', 1)
+        elif mission_step == 3:
+                clear()
+                income_display()
+                travel_bar("Astroid Feild", "Tellar", 20, 30)
+                cache['current_system'] = 3
+                typing_animation("Federation Destroyer: Thanks for the help independent. We could not have done it without you. Here is your reward for helping us out.")
+                update_mission_progress('Protect Dilithium Convoy', 1)
+        else:
+            return
 
 def omicron_ii():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
@@ -2893,6 +2938,9 @@ def omicron_ii():
         4: ('Parsteel Mine', lambda: handle_mining('parsteel', ['parsteel_mine1', 'parsteel_mine2'], 'Parsteel')),
         5: ('Latinum Mine', lambda: handle_mining('latinum', ['latinum_mine1', 'latinum_mine2'], 'Latinum'))
     }
+    
+    if cache['missions']['Scan for Anomalies']['accepted'] == True and cache['missions']['Scan for Anomalies']['progress'] == 1:
+        system_findings[6] = (f'{Fore.YELLOW}Scan for Anomalies{Fore.WHITE}', scan_for_anomalies)
 
     # Display menu
     income_display()
@@ -2918,7 +2966,36 @@ def handle_mission_planet():
     print(f"{len(mission_list_print) + 1}: Exit")
     accept_missions()
 
-
+def scan_for_anomalies():
+    """Handles the Mission to scan for anomalies"""
+    while True:
+        clear()
+        income_display()
+        if cache['missions']['Scan for Anomalies']['progress'] == 1:
+            print("Calibrating Sensors to Start Scans...")
+            colored_gradient_loading_bar(duration=18)
+            print(f"{Fore.GREEN}Calibration Complete!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.BLUE}Starting Scan of Anamoly...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=15)
+            print(f"{Fore.GREEN}Scan Complete!{Fore.WHITE}")
+            time.sleep(2)
+            print("Return to drydock to report your findings to Starfleet.")
+            time.sleep(2)
+            input("Press enter to continue...")
+            update_mission_progress('Scan for Anomalies', 1)
+        elif cache['missions']['Scan for Anomalies']['progress'] == 2:
+            print(f"{Fore.BLUE}Sending data to Starfleet...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=14)
+            print(f"{Fore.GREEN}Upload Complete!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Starfleet appriciates your work. They reward you with 50 latinum.{Fore.WHITE}")
+            update_mission_progress('Scan for Anomalies', 1)
+            time.sleep(2)
+            input("Press enter to exit...")
+        else:
+            return
+            
 def regula():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
@@ -2942,7 +3019,7 @@ def regula():
     }
 
     if mission_available:
-        system_findings[4] = ('Respond to Distress Call', distress_call_scenario)
+        system_findings[4] = (f'{Fore.YELLOW}Respond to Distress Call{Fore.WHITE}', distress_call_scenario)
 
     # Display menu
     income_display()
@@ -3270,6 +3347,7 @@ while True:
     clear()
     mission_briefing()
     tutorial()
+    dilithium_convoypt1()
     income_display()
     check_construction_completion()
     check_update_mats()
@@ -3302,17 +3380,17 @@ while True:
     if option == 3:
         if ask(f"{Fore.RED}Are you sure you want to travel back to Sol? (Y/N) {Fore.WHITE}"):
             warp_time = abs(cache['current_system'] - 1) * 10
-            while warp_time > 0:
-                clear()
-                print(f"{Fore.BLUE}Time remaining: {warp_time}{Fore.WHITE}")
-                time.sleep(1)
-                warp_time -= 1
+            clear()
+            income_display()
+            print(f"{Fore.BLUE}Traveling...{Fore.WHITE}")
+            travel_bar(systems[cache['current_system']], "Sol", warp_time, 30)
             clear()
             cache['current_system'] = 1
             transfer_resources_to_storage()
             income_display()
             cache['current_system'] = 1
             process_tutorial_step()
+            scan_for_anomalies()
             mission_data = cache['missions'].get("Survey the Rings of Tarkalea XII", {})
             if mission_data.get("accepted") and mission_data.get("progress") == 2:
                 update_mission_progress('Survey the Rings of Tarkalea XII', 1)

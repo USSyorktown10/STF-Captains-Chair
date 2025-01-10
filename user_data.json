@@ -75,6 +75,61 @@
             "progress": 0,
             "completed": false,
             "accepted": false
+        },
+        "Protect Dilithium Convoy": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Scan for Anomalies": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Recover Lost Data": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "The Starship Graveyard": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "First Contact": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Sabatoge Mission": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Emergency Supply Run": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Latinum Heist": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Minefield Mapping": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "The Alien Probe": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
+        },
+        "Temporal Anomaly": {
+            "progress": 0,
+            "completed": false,
+            "accepted": false
         }
     },
     "explored": {
