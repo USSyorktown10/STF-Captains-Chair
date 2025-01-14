@@ -41,7 +41,7 @@ def load_json_user_data():
         print("Error: JSON file not found.")
         return None
 
-# load a specfic peice of data from user_data.json
+# load a specific piece of data from user_data.json
 def load_data(key):
     try:
         with open(user_game_file_path, 'r') as file:
@@ -60,7 +60,7 @@ def load_data(key):
 # save a specific value directly to user_data.json
 def save_data(key, value):
     try:
-        # writes and reads as r+ so that it dosent rewrite the entire file
+        # writes and reads as r+ so that it doesn't rewrite the entire file
         with open(user_game_file_path, 'r+') as file:
             data = json.load(file)
             if key in data:
@@ -102,7 +102,7 @@ def check_update_mats():
     # Check if it's time to update
     if next_update_time <= current_time:
         update_mats()  # Perform your material update logic
-        new_next_update_time = current_time + timedelta(seconds=60)
+        new_next_update_time = current_time + timedelta(seconds=30)
         save_data('next_update_time', new_next_update_time.isoformat())  # Save new update time
 
 
@@ -165,7 +165,7 @@ def ask_sanitize(question_ask, follow_up_question=None):
                 continue
         return response
 
-# input for an int but for the lobby so that the player knows what intigers to input for future refernece too.
+# input for an int but for the lobby so that the player knows what integers to input for future reference too.
 def ask_sanitize_lobby(question_ask, follow_up_question=None, valid_options=None):
     if follow_up_question is None:
         follow_up_question = question_ask
@@ -830,7 +830,7 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
                 time.sleep(2)
                 return
             if cache['tutorial'] == 8:
-                print(f"{Fore.YELLOW}Select any crew memeber to assign.{Fore.WHITE}")
+                print(f"{Fore.YELLOW}Select any crew member to assign.{Fore.WHITE}")
             print("\nOwned Crew Members:")
             for idx, member in enumerate(owned_crew, start=1):
                 ability = format_ability(member['ability']['stat'])
@@ -919,7 +919,7 @@ def view_upgrades():
         time.sleep(0.001)
 
 def accept_mission(mission_id):
-    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Buy a new Ship', '8': 'Complete 2 Successful Trades', '9': 'Respond to the Distress Signal in Regula', '10': 'Survey the Rings of Tarkalea XII', '11': 'Protect Dilithium Convoy', '12': 'Scan for Anomalies', '13': 'Recover Lost Data', '14': 'The Starship Graveyard', '15': 'First Contact', '16': 'Sabatoge Mission', '17': 'Emergency Supply Run', '18': 'Latinum Heist', '19': 'Minefield Mapping', '20': 'The Alien Probe', '21': 'Temporal Anomaly'}
+    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Buy a new Ship', '8': 'Complete 2 Successful Trades', '9': 'Respond to the Distress Signal in Regula', '10': 'Survey the Rings of Tarkalea XII', '11': 'Protect Dilithium Convoy', '12': 'Scan for Anomalies', '13': 'Recover Lost Data', '14': 'The Starship Graveyard', '15': 'First Contact', '16': 'Sabotage Mission', '17': 'Emergency Supply Run', '18': 'Latinum Heist', '19': 'Minefield Mapping', '20': 'The Alien Probe', '21': 'Temporal Anomaly'}
     missions = cache['missions']
     mission_name = mission_list.get(mission_id)
     if mission_name and not missions[mission_name]['completed']:
@@ -938,7 +938,7 @@ def update_mission_progress(mission_name, progress_increment):
         missions[mission_name]['progress'] += progress_increment
         cache['missions'] = missions
         # Define mission completion targets in a dictionary
-        mission_targets = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 1, 'Defeat 3 Enemies': 3, 'Trade 200 Materials With a Ship': 200, 'Defeat 5 Enemies': 5, 'Explore 3 New Systems': 3, 'Buy a new Ship': 1, 'Complete 2 Successful Trades': 2, 'Respond to the Distress Signal in Regula': 1, 'Survey the Rings of Tarkalea XII': 1, 'Protect Dilithium Convoy': 4, 'Scan for Anomalies': 3, 'Recover Lost Data': 1, 'The Starship Graveyard': 1, 'First Contact': 1, 'Sabatoge Mission': 1, 'Emergency Supply Run': 1, 'Latinum Heist': 1, 'Minefield Mapping': 1, 'The Alien Probe': 1, 'Temporal Anomaly': 1}
+        mission_targets = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 1, 'Defeat 3 Enemies': 3, 'Trade 200 Materials With a Ship': 200, 'Defeat 5 Enemies': 5, 'Explore 3 New Systems': 3, 'Buy a new Ship': 1, 'Complete 2 Successful Trades': 2, 'Respond to the Distress Signal in Regula': 1, 'Survey the Rings of Tarkalea XII': 1, 'Protect Dilithium Convoy': 4, 'Scan for Anomalies': 3, 'Recover Lost Data': 5, 'The Starship Graveyard': 3, 'First Contact': 4, 'Sabotage Mission': 1, 'Emergency Supply Run': 1, 'Latinum Heist': 1, 'Minefield Mapping': 1, 'The Alien Probe': 1, 'Temporal Anomaly': 1}
         # Check if mission meets completion criteria
         if mission_name in mission_targets and missions[mission_name]['progress'] >= mission_targets[mission_name]:
             complete_mission(mission_name)
@@ -947,7 +947,7 @@ def update_mission_progress(mission_name, progress_increment):
 
 
 def complete_mission(mission_name):
-    mission_rewards = {'Mine 100 Materials': 10, 'Defeat 1 Enemy': 10, 'Defeat 3 Enemies': 20, 'Trade 200 Materials With a Ship': 25, 'Defeat 5 Enemies': 40, 'Explore 3 New Systems': 40, 'Buy a new Ship': 50, 'Complete 2 Successful Trades': 70, 'Respond to the Distress Signal in Regula': 50, 'Survey the Rings of Tarkalea XII': 50, 'Protect Dilithium Convoy': 75, 'Scan for Anomalies': 50, 'Recover Lost Data': 50, 'The Starship Graveyard': 70, 'First Contact': 80, 'Sabatoge Mission': 60, 'Emergency Supply Run': 40, 'Latinum Heist': 120, 'Minefield Mapping': 60, 'The Alien Probe': 100, 'Temporal Anomaly': 140}
+    mission_rewards = {'Mine 100 Materials': 10, 'Defeat 1 Enemy': 10, 'Defeat 3 Enemies': 20, 'Trade 200 Materials With a Ship': 25, 'Defeat 5 Enemies': 40, 'Explore 3 New Systems': 40, 'Buy a new Ship': 50, 'Complete 2 Successful Trades': 70, 'Respond to the Distress Signal in Regula': 50, 'Survey the Rings of Tarkalea XII': 50, 'Protect Dilithium Convoy': 75, 'Scan for Anomalies': 50, 'Recover Lost Data': 100, 'The Starship Graveyard': 35, 'First Contact': 80, 'Sabotage Mission': 60, 'Emergency Supply Run': 40, 'Latinum Heist': 120, 'Minefield Mapping': 60, 'The Alien Probe': 100, 'Temporal Anomaly': 140}
     missions = cache['missions']
     coins = cache['latinum']
 
@@ -957,6 +957,7 @@ def complete_mission(mission_name):
         reward = load_building_data('buildings')['starbase']['upgrades']['Ops'] * mission_rewards[mission_name]
         coins += reward
         cache['missions'] = missions
+        save_data('missions', missions)
         cache['latinum'] = coins
         print(f"{Fore.GREEN}Mission '{mission_name}' completed! You earned {reward} latinum.{Fore.WHITE}")
         time.sleep(2)
@@ -1061,7 +1062,7 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
     if opponent_health <= 0:
                 clear()
                 if cache['tutorial'] == 2:
-                    print(f"{Fore.GREEN}Great job! You won the battle. In a moment, you will get the rewards for your battle. You have 5 seconds to veiw them, then you automatticaly exit.\nAfter these rewards, return to drydock.{Fore.WHITE}")
+                    print(f"{Fore.GREEN}Great job! You won the battle. In a moment, you will get the rewards for your battle. You have 5 seconds to view them, then you automatically exit.\nAfter these rewards, return to drydock.{Fore.WHITE}")
                     time.sleep(3)
                 print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
                 print(f'{Fore.BLUE}Parsteel Gained: {Fore.WHITE}', income)
@@ -1197,7 +1198,7 @@ def accept_missions():
 def scan_system():
     exploration_time = random.randint(10, 60)
     if cache['tutorial'] == 6:
-        print(f"{Fore.YELLOW}When you come across a new system and you havent explored it, you need to scan the system. Type y to explore it.{Fore.WHITE}")
+        print(f"{Fore.YELLOW}When you come across a new system and you haven't explored it, you need to scan the system. Type y to explore it.{Fore.WHITE}")
         time.sleep(2)
     if ask(f"{Fore.RED}System {systems[cache['current_system']]} has not been explored. Would you like to scan this system? This will take you {exploration_time} seconds. (Y/N): {Fore.WHITE}"):
         while exploration_time > 0:
@@ -1973,7 +1974,7 @@ def display_available_research():
             ]
             unavailable_research.append((name, details, missing_prereqs))
     if cache['tutorial'] == 4:
-        print(f"{Fore.YELLOW}Now select 1 and start the resarch, because you have this one ready. As you go through research, more will become avalible as you progress through the research tree.{Fore.WHITE}")
+        print(f"{Fore.YELLOW}Now select 1 and start the research, because you have this one ready. As you go through research, more will become avalible as you progress through the research tree.{Fore.WHITE}")
     # Display available research
     print("\nAvailable Research:")
     for index, (name, details) in enumerate(available_research, start=1):
@@ -2122,6 +2123,13 @@ def typing_animation(text, delay=0.06):
         sys.stdout.flush()
         time.sleep(delay)
     sys.stdout.write("\n")
+    
+def typing_animation_fast(text, delay=0.02):
+    for char in text:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(delay)
+    sys.stdout.write("\n")
 
 def distress_call_scenario():
     print(f"{Fore.YELLOW}You have arrived at the coordinates for the distress call.{Fore.WHITE}")
@@ -2208,6 +2216,49 @@ def mission_briefing():
         input("Press enter to exit.")
         update_mission_progress('Scan for Anomalies', 1)
         clear()
+    elif cache['missions']['Recover Lost Data']['accepted'] and not cache['missions']['Recover Lost Data']['completed'] and cache['missions']['Recover Lost Data']['progress'] == 0:
+        center_text(f"{Fore.BLUE}<========== Incoming Transmission ==========>{Fore.WHITE}")
+        center_text(f"{Fore.RED}Source: Vulcan Science Academy{Fore.WHITE}")
+        time.sleep(2)
+        center_text(f"{Fore.YELLOW}We have lost contact with a research vessel in the system of Vulcan. We need you to travel to the system and recover the lost data from the ship.{Fore.WHITE}")
+        time.sleep(2)
+        center_text(f"{Fore.GREEN}The data is vital to the Vulcan Science Academy, and we need it back as soon as possible.{Fore.WHITE}")
+        time.sleep(2)
+        center_text(f"{Fore.BLUE}Travel to Vulcan to begin the mission.{Fore.WHITE}")
+        time.sleep(2)
+        center_text(f"{Fore.BLUE}<========== End Transmission ==========>{Fore.WHITE}")
+        time.sleep(2)
+        input("Press enter to exit.")
+        update_mission_progress('Recover Lost Data', 1)
+        clear()
+    elif cache['missions']['The Starship Graveyard']['accepted'] and not cache['missions']['The Starship Graveyard']['completed'] and cache['missions']['The Starship Graveyard']['progress'] == 0:
+        center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing ==========>")
+        print("")
+        center_text(f"{Fore.BLUE}Starfleet Command has tasked your crew with exploring the Mutara Nebula in the Solaria system.{Fore.GREEN}\nThe long-forgotten Talarian Conflict took place here, and scans have shown there are still components of starships in the nebula.{Fore.YELLOW}\nYou must retrieve vital pieces of the destroyed starships, and bring them back to Sol for Federation inspection.{Fore.RED}\nTo retrieve these pieces you must preform EVAs, as transporters are non-functional within the nebula.{Fore.WHITE}")
+        print("")
+        time.sleep(3)
+        center_text("Travel to Solaria for this mission.")
+        print("")
+        time.sleep(2)
+        center_text(f"{Fore.BLUE}<========== End Transmission ==========>{Fore.WHITE}")
+        time.sleep(2)
+        input("Press enter to exit.")
+        update_mission_progress('The Starship Graveyard', 1)
+        clear()
+    elif cache['missions']['First Contact']['accepted'] and not cache['missions']['First Contact']['completed'] and cache['missions']['First Contact']['progress'] == 0:
+        center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing ==========>{Fore.WHITE}")
+        time.sleep(2)
+        center_text(f"{Fore.BLUE}Starfleet has found possible evidence for an emerging warp-capable technology civilization.{Fore.GREEN}\nStarfleet thinks initiating First Contact procedures with the civlization.{Fore.YELLOW}\nWe want you to be a liaison to represent the UFP.{Fore.WHITE}")
+        time.sleep(3)
+        center_text(f"{Fore.RED}If anything goes wrong, contact Starfleet immidatley. DO NOT USE WEAPONS UNLESS YOU AND YOUR CREW ARE IN JEOPARDY.{Fore.WHITE}")
+        time.sleep(2)
+        center_text("Travel to Altor IV for this mission")
+        print("")
+        time.sleep(2)
+        center_text(f"{Fore.BLUE}<========== End Transmission ==========>{Fore.WHITE}")
+        input("Press enter to exit.")
+        update_mission_progress('First Contact', 1)
+        clear()
         
 
 def distress_call_scenario_pt2():
@@ -2252,7 +2303,7 @@ def dilithium_convoypt1():
             time.sleep(1)
             center_text(f"{Fore.YELLOW}You have accepted Starfleet Command's assignment to protect their dilithium convoy.\n{Fore.WHITE}")
             time.sleep(2)
-            center_text(f"{Fore.GREEN}Make sure your ship is battle ready in case pirates attack the freighters. Then, travel to {Fore.YELLOW}Andor{Fore.GREEN} and acomppany the convoy through Andor to ---.\nYou will pass though an Astroid Feild on the way there.\nYou will be rewarded 75 latinum for your efforts.\nGood Luck captian.{Fore.WHITE}")
+            center_text(f"{Fore.GREEN}Make sure your ship is battle ready in case pirates attack the freighters. Then, travel to {Fore.YELLOW}Andor{Fore.GREEN} and accompany the convoy through Andor to ---.\nYou will pass though an Astroid Felid on the way there.\nYou will be rewarded 75 latinum for your efforts.\nGood Luck capitan.{Fore.WHITE}")
             time.sleep(5)
             input("Press enter to continue... ")
             update_mission_progress('Protect Dilithium Convoy', 1)
@@ -2286,7 +2337,7 @@ def xindi_station():
         if xindi_option == 6:
             clear()
             income_display()
-            typing_animation("Acessing LCARS...")
+            typing_animation("Accessing LCARS...")
             time.sleep(2)
             typing_animation("All information will be displayed in 5 seconds.")
             time.sleep(5)
@@ -2544,6 +2595,7 @@ def travel_bar(start_label="Start", end_label="End", travel_time=10, bar_length=
 def sol():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Ensure the current system is Sol
     if current_system != 1:
@@ -2568,6 +2620,9 @@ def sol():
         2: ('Mission Planet', handle_mission_planet),
         3: (f'{tutorial_highlight4}Orion Pirate{Fore.WHITE}', lambda: handle_orion_pirate(tutorial_state))
     }
+    
+    if cache['missions']['The Starship Graveyard']['accepted'] == True and cache['missions']['The Starship Graveyard']['progress'] == 2:
+        system_findings[4] = (f'{Fore.YELLOW}Give Components to Starfleet Command{Fore.WHITE}', starship_graveyard)
 
     # Display menu
     income_display()
@@ -2632,6 +2687,7 @@ def handle_orion_pirate(tutorial_state):
 def vulcan():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Ensure the current system is Vulcan
     if current_system != 2:
@@ -2650,6 +2706,9 @@ def vulcan():
         3: ('Vulcan Dissident', handle_vulcan_dissident),
         4: (f'{tutorial_highlight6}Tritanium Mine{Fore.WHITE}', lambda: handle_mining('tritanium', ['tritanium_mine1', 'tritanium_mine2', 'tritanium_mine3'], 'Tritanium'))
     }
+    
+    if cache['missions']['Recover Lost Data']['accepted'] == True and cache['missions']['Recover Lost Data']['progress'] in [1, 2]:
+        system_findings[5] = (f'{Fore.YELLOW}Recover Lost Data{Fore.WHITE}', recover_lost_data)
 
     # Display menu
     income_display()
@@ -2711,10 +2770,71 @@ def handle_vulcan_dissident():
     elif ori_ship == 2:
         hailing_frequency()
 
+def recover_lost_data():
+    while True:
+        clear()
+        income_display()
+        if cache['missions']['Recover Lost Data']['progress'] == 1:
+            print(f"{Fore.GREEN}You have arrived at the coordinates of the lost data.")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Scanning the area...")
+            colored_gradient_loading_bar(duration=6)
+            print(f"{Fore.RED}Scans have located the data core of the ship.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Transporting data core on board...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=5)
+            print(f"{Fore.GREEN}Transport Complete!{Fore.WHITE}")
+            time.sleep(2)
+            update_mission_progress('Recover Lost Data', 1)
+        if cache['missions']['Recover Lost Data']['progress'] == 2:
+            print(f"{Fore.RED}Sensors are picking up an enemy ship!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.RED}The ship has fired on you!{Fore.WHITE}")
+            save_ship_data(cache['ship'], 'health', load_ship_stat(cache['ship'], 'health') - random.randint(50, 200))
+            print("Prepare for battle!")
+            time.sleep(2)
+            battle_stat(2000, 'Unknown Ship', random.randint(300, 500), 6, 5, 5)
+            if load_ship_stat(cache['ship'], 'health') <= 0:
+                return
+            print(f"{Fore.GREEN}You have defeated the enemy ship!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.BLUE}Return to drydock to decode the data core.{Fore.WHITE}")
+            update_mission_progress('Recover Lost Data', 1)
+            break
+        if cache['missions']['Recover Lost Data']['progress'] == 3 and cache['current_system'] == 1:
+            if ask("Would you like to decode the data core? (y/n): "):
+                print(f"{Fore.GREEN}Decoding data core...{Fore.WHITE}")
+                colored_gradient_loading_bar(duration=10)
+                print(f"{Fore.GREEN}Data core successfully decoded.{Fore.WHITE}")
+                time.sleep(2)
+                print(f"{Fore.BLUE}Return to Vulcan to give the data to the Vulcan Science Academy.{Fore.WHITE}")
+                time.sleep(2)
+                update_mission_progress('Recover Lost Data', 1)
+                break
+            else:
+                print(f"{Fore.RED}Data core decoding canceled. You may decode at any time.{Fore.WHITE}")
+                time.sleep(2)
+                break
+        if cache['missions']['Recover Lost Data']['progress'] == 4 and cache['current_system'] == 2:
+            print(f"{Fore.GREEN}You have arrived at Vulcan with the data core.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Delivering data core to Vulcan Science Academy...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=5)
+            print(f"{Fore.GREEN}Data core delivered!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}The Vulcan Science Academy thanks you for your help.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}You have been rewarded 100 latinum for your efforts.{Fore.WHITE}")
+            time.sleep(2)
+            update_mission_progress('Recover Lost Data', 1)
+            break
+            
+        
 
 def tellar():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Early return if the system is not fully explored
     if load_explored(systems[current_system]) != 1:
@@ -2791,6 +2911,7 @@ def handle_mining(resource, mining_locations, resource_name):
 def andor():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Early return if the system is not fully explored
     if load_explored(systems[current_system]) != 1:
@@ -2906,13 +3027,13 @@ def handle_dilithium_convoy():
                             
                 explore_asteroid_field()
             else:
-                print("You have missed an oppurtunity to gain, but you could have lost things too.")
+                print("You have missed an opportunity to gain, but you could have lost things too.")
                 time.sleep(3)
             update_mission_progress('Protect Dilithium Convoy', 1)
         elif mission_step == 3:
                 clear()
                 income_display()
-                travel_bar("Astroid Feild", "Tellar", 20, 30)
+                travel_bar("Astroid Felid", "Tellar", 20, 30)
                 cache['current_system'] = 3
                 typing_animation("Federation Destroyer: Thanks for the help independent. We could not have done it without you. Here is your reward for helping us out.")
                 update_mission_progress('Protect Dilithium Convoy', 1)
@@ -2922,6 +3043,7 @@ def handle_dilithium_convoy():
 def omicron_ii():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Early return if the system is not fully explored
     if load_explored(systems[current_system]) != 1:
@@ -2976,7 +3098,7 @@ def scan_for_anomalies():
             colored_gradient_loading_bar(duration=18)
             print(f"{Fore.GREEN}Calibration Complete!{Fore.WHITE}")
             time.sleep(2)
-            print(f"{Fore.BLUE}Starting Scan of Anamoly...{Fore.WHITE}")
+            print(f"{Fore.BLUE}Starting Scan of Anomaly...{Fore.WHITE}")
             colored_gradient_loading_bar(duration=15)
             print(f"{Fore.GREEN}Scan Complete!{Fore.WHITE}")
             time.sleep(2)
@@ -2989,7 +3111,7 @@ def scan_for_anomalies():
             colored_gradient_loading_bar(duration=14)
             print(f"{Fore.GREEN}Upload Complete!{Fore.WHITE}")
             time.sleep(2)
-            print(f"{Fore.GREEN}Starfleet appriciates your work. They reward you with 50 latinum.{Fore.WHITE}")
+            print(f"{Fore.GREEN}Starfleet appreciates your work. They reward you with 50 latinum.{Fore.WHITE}")
             update_mission_progress('Scan for Anomalies', 1)
             time.sleep(2)
             input("Press enter to exit...")
@@ -2999,6 +3121,7 @@ def scan_for_anomalies():
 def regula():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Early return if system not fully explored
     if load_explored(systems[current_system]) != 1:
@@ -3060,6 +3183,7 @@ def handle_klingon_operative():
 def solaria():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Early return if system not fully explored
     if load_explored(systems[current_system]) != 1:
@@ -3081,6 +3205,8 @@ def solaria():
 
     if mission_available:
         system_findings[4] = (f'{Fore.YELLOW}Scan for the unknown ship{Fore.WHITE}', distress_call_scenario_pt2)
+    if cache['missions']['The Starship Graveyard']['accepted'] == True and cache['missions']['The Starship Graveyard']['progress'] == 1:
+        system_findings[5] = (f'{Fore.YELLOW}Enter Mutara Nebula{Fore.WHITE}', starship_graveyard)
 
     # Display menu
     income_display()
@@ -3117,10 +3243,43 @@ def handle_hirogen_tracker():
     elif ori_ship == 2:
         hailing_frequency()
 
+def starship_graveyard():
+        clear()
+        income_display()
+        if cache['missions']['The Starship Graveyard']['progress'] == 1:
+            print(f"{Fore.RED}Sensors and Transporters have gone offline!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.YELLOW}Veiwscreen shows remains of a starship. It appears to be at the designated coordinates.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}You have arrived at the Starship Graveyard.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.BLUE}Beginning EVAs to investigate the wreckage...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=13)
+            print(f"{Fore.GREEN}Investigation of area complete. Beginning to extract major parts...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=20)
+            print(f"{Fore.GREEN}Extraction complete!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Return to Sol to give the pieces to Starfleet Command.{Fore.WHITE}")
+            time.sleep(2)
+            update_mission_progress('The Starship Graveyard', 1)
+        elif cache['missions']['The Starship Graveyard']['progress'] == 2 and cache['current_system'] == 1:
+            print(f"{Fore.GREEN}You have arrived at Sol with the parts.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Delivering parts to Starfleet Command...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=5)
+            print(f"{Fore.GREEN}Parts delivered!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Starfleet Command thanks you for your help.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}You have been rewarded 35 latinum for your efforts.{Fore.WHITE}")
+            time.sleep(2)
+            update_mission_progress('The Starship Graveyard', 1)
+            input("Press enter to exit...")
 
 def tarkalea_xii():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Early return if system not fully explored
     if load_explored(systems[current_system]) != 1:
@@ -3197,6 +3356,7 @@ def handle_survey_mission():
 def xindi_starbase_9():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Early return if system not fully explored
     if load_explored(systems[current_system]) != 1:
@@ -3260,6 +3420,7 @@ def handle_starbase_docking():
 def altor_iv():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
     current_system = cache['current_system']
+    check_update_mats()
 
     # Early return if system not fully explored
     if load_explored(systems[current_system]) != 1:
@@ -3276,6 +3437,9 @@ def altor_iv():
         4: ('Jem\'Hadar Vanguard', handle_jemhadar_vanguard),
         5: ('Tritanium Mine', lambda: handle_mining('tritanium', ['tritanium_mine1'], 'Tritanium')),
     }
+    
+    if cache['missions']['First Contact']['accepted'] == True:
+        system_findings[6] = (f'{Fore.YELLOW}Establish First Contact{Fore.WHITE}', first_contact)
 
     # Display menu
     income_display()
@@ -3321,13 +3485,77 @@ def handle_jemhadar_vanguard():
     elif ori_ship == 2:
         hailing_frequency()
 
+def first_contact():
+    while True:
+        clear()
+        income_display()
+        if cache['missions']['First Contact']['progress'] == 1:
+            clear()
+            income_display()
+            print(f"{Fore.YELLOW}You have arrived at the planet Altor IV. The planet is inhabited by a humanoid species.{Fore.WHITE}")
+            time.sleep(1)
+            print(f"{Fore.YELLOW}The inhabitants of Altor IV are hailing you.{Fore.WHITE}")
+            time.sleep(1)
+            typing_animation("Altor IV: Unknown ship, please identify yourself.")
+            time.sleep(1)
+            typing_animation("You: We are explorers from the United Federation of Planets. We come in peace. We would like to establish a diplomatic relationship with your people.")
+            time.sleep(1)
+            typing_animation("Altor IV: Welcome. We are cautious of outsiders. What are your true intentions?")
+            time.sleep(1)
+            typing_animation("You: Our goal is to share knowledge and culture. We believe both our civilizations can benefit from each other.")
+            time.sleep(1)
+            typing_animation("Altor IV: Knowledge can be powerful. How can we be sure it will not disrupt our way of life?")
+            time.sleep(1)
+            typing_animation("You: We are committed to respecting your traditions. We can offer technologies that enhance your current practices sustainably.")
+            time.sleep(1)
+            typing_animation("Altor IV: Sustainable technologies sound promising. But how can we maintain our independence while using them?")
+            time.sleep(1)
+            typing_animation("You: We can provide knowledge transfer, allowing your scientists to adapt any technology to suit your needs without reliance on outside help.")
+            time.sleep(1)
+            typing_animation("Altor IV: That is a fair approach. Though, we also value our culture deeply. Will you ensure it is respected during any exchanges?")
+            time.sleep(1)
+            typing_animation("You: Absolutely. Cultural exchange is vital. We want to learn from you and share our own traditions without imposing our ways.")
+            time.sleep(1)
+            typing_animation("Altor IV: I appreciate that perspective. Perhaps we could arrange to introduce you to our elders for further discussions?")
+            time.sleep(1)
+            typing_animation("You: I would be honored to meet your elders. Their wisdom will guide our discussions.")
+            time.sleep(1)
+            typing_animation("Altor IV: Very well, Cpatain. Let’s proceed with caution and mutual respect. Our future may depend on it.")
+            update_mission_progress('First Contact', 1)  
+        if cache['missions']['First Contact']['progress'] == 2:
+            print(f"{Fore.YELLOW}You meet with the elders of Altor IV in a grand chamber adorned with rich tapestries.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.YELLOW}Time acceleration has been engaged and negotiations will run faster.{Fore.WHITE}")
+            time.sleep(2)
+            typing_animation_fast("Elder Zorak: Captain, we have heard about your intentions. What assurances can you provide us?")
+            typing_animation_fast("You: We respect your sovereignty and aim to enhance your way of life without interference.")
+            typing_animation_fast("Elder Zorak: Many outsiders make grand promises but do not deliver. How will you prove your sincerity?")
+            typing_animation_fast("You: We come with our technology and knowledge, ready to demonstrate their potential benefits for your people.")
+            typing_animation_fast("Elder Vela: Demonstrations are useful, but we seek to understand your culture. What values guide the Federation?")
+            typing_animation_fast("You: The Federation values diversity, cooperation, and the pursuit of knowledge. We believe that all cultures enrich one another.")
+            typing_animation_fast("Elder Vela: Words are powerful, but actions speak louder. If we proceed, can we set terms that protect our culture?")
+            typing_animation_fast("You: Absolutely. We propose a formal agreement ensuring that your cultural practices are upheld and respected.")
+            typing_animation_fast("Elder Zorak: Those terms sound reasonable. However, we will require time to consider and consult among ourselves.")
+            typing_animation_fast("You: Take all the time you need. We are here to support you through this process.")
+            typing_animation_fast("Elder Vela: We will reconvene shortly. Your patience is noted, Captain. May wisdom guide our decisions.")
+            typing_animation_fast("You: Thank you, Elders. I look forward to working together as partners in this endeavor.")
+            update_mission_progress('First Contact', 1)
+            input("Press enter to exit...")
+        if cache['missions']['First Contact']['progress'] == 3:
+            print(f"{Fore.GREEN}You have successfully established First Contact with the inhabitants of Altor IV.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}The Federation has recognized your efforts and rewarded you with 80 latinum.{Fore.WHITE}")
+            update_mission_progress('First Contact', 1)
+            time.sleep(2)
+            input("Press enter to exit...")
+            break
 
 
 finding_var = 0
 warp_time = 0
 
 clear()
-mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4: Trade 200 Materials With a Ship', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Buy a new Ship', '8: Complete 2 Successful Trades', '9: Respond to the Distress Signal in Regula', '10: Survey the Rings of Tarkalea XII']
+mission_list_print = ['1: Mine 100 Materials', '2: Defeat 1 Enemy', '3: Defeat 3 Enemies', '4: Trade 200 Materials With a Ship', '5: Defeat 5 Enemies', '6: Explore 3 New Systems', '7: Buy a new Ship', '8: Complete 2 Successful Trades', '9: Respond to the Distress Signal in Regula', '10: Survey the Rings of Tarkalea XII', '11: Protect Dilithium Convoy', '12: Scan for Anomalies', '13: Recover Lost Data', '14: The Starship Graveyard', '15: First Contact']
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -3391,6 +3619,7 @@ while True:
             cache['current_system'] = 1
             process_tutorial_step()
             scan_for_anomalies()
+            recover_lost_data()
             mission_data = cache['missions'].get("Survey the Rings of Tarkalea XII", {})
             if mission_data.get("accepted") and mission_data.get("progress") == 2:
                 update_mission_progress('Survey the Rings of Tarkalea XII', 1)
