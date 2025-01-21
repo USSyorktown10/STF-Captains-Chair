@@ -919,7 +919,7 @@ def view_upgrades():
         time.sleep(0.001)
 
 def accept_mission(mission_id):
-    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Buy a new Ship', '8': 'Complete 2 Successful Trades', '9': 'Respond to the Distress Signal in Regula', '10': 'Survey the Rings of Tarkalea XII', '11': 'Protect Dilithium Convoy', '12': 'Scan for Anomalies', '13': 'Recover Lost Data', '14': 'The Starship Graveyard', '15': 'First Contact', '16': 'Sabotage Mission', '17': 'Emergency Supply Run', '18': 'Latinum Heist', '19': 'Minefield Mapping', '20': 'The Alien Probe', '21': 'Temporal Anomaly'}
+    mission_list = {'1': 'Mine 100 Materials', '2': 'Defeat 1 Enemy', '3': 'Defeat 3 Enemies', '4': 'Trade 200 Materials With a Ship', '5': 'Defeat 5 Enemies', '6': 'Explore 3 New Systems', '7': 'Buy a new Ship', '8': 'Complete 2 Successful Trades', '9': 'Respond to the Distress Signal in Regula', '10': 'Survey the Rings of Tarkalea XII', '11': 'Protect Dilithium Convoy', '12': 'Scan for Anomalies', '13': 'Recover Lost Data', '14': 'The Starship Graveyard', '15': 'First Contact', '16': 'Sabotage Mission', '17': 'Emergency Supply Run'}
     missions = cache['missions']
     mission_name = mission_list.get(mission_id)
     if mission_name and not missions[mission_name]['completed']:
@@ -938,7 +938,7 @@ def update_mission_progress(mission_name, progress_increment):
         missions[mission_name]['progress'] += progress_increment
         cache['missions'] = missions
         # Define mission completion targets in a dictionary
-        mission_targets = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 1, 'Defeat 3 Enemies': 3, 'Trade 200 Materials With a Ship': 200, 'Defeat 5 Enemies': 5, 'Explore 3 New Systems': 3, 'Buy a new Ship': 1, 'Complete 2 Successful Trades': 2, 'Respond to the Distress Signal in Regula': 1, 'Survey the Rings of Tarkalea XII': 1, 'Protect Dilithium Convoy': 4, 'Scan for Anomalies': 3, 'Recover Lost Data': 5, 'The Starship Graveyard': 3, 'First Contact': 4, 'Sabotage Mission': 1, 'Emergency Supply Run': 1, 'Latinum Heist': 1, 'Minefield Mapping': 1, 'The Alien Probe': 1, 'Temporal Anomaly': 1}
+        mission_targets = {'Mine 100 Materials': 100, 'Defeat 1 Enemy': 1, 'Defeat 3 Enemies': 3, 'Trade 200 Materials With a Ship': 200, 'Defeat 5 Enemies': 5, 'Explore 3 New Systems': 3, 'Buy a new Ship': 1, 'Complete 2 Successful Trades': 2, 'Respond to the Distress Signal in Regula': 1, 'Survey the Rings of Tarkalea XII': 1, 'Protect Dilithium Convoy': 4, 'Scan for Anomalies': 3, 'Recover Lost Data': 5, 'The Starship Graveyard': 3, 'First Contact': 4, 'Sabotage Mission': 4, 'Emergency Supply Run': 3}
         # Check if mission meets completion criteria
         if mission_name in mission_targets and missions[mission_name]['progress'] >= mission_targets[mission_name]:
             complete_mission(mission_name)
@@ -947,7 +947,7 @@ def update_mission_progress(mission_name, progress_increment):
 
 
 def complete_mission(mission_name):
-    mission_rewards = {'Mine 100 Materials': 10, 'Defeat 1 Enemy': 10, 'Defeat 3 Enemies': 20, 'Trade 200 Materials With a Ship': 25, 'Defeat 5 Enemies': 40, 'Explore 3 New Systems': 40, 'Buy a new Ship': 50, 'Complete 2 Successful Trades': 70, 'Respond to the Distress Signal in Regula': 50, 'Survey the Rings of Tarkalea XII': 50, 'Protect Dilithium Convoy': 75, 'Scan for Anomalies': 50, 'Recover Lost Data': 100, 'The Starship Graveyard': 35, 'First Contact': 80, 'Sabotage Mission': 60, 'Emergency Supply Run': 40, 'Latinum Heist': 120, 'Minefield Mapping': 60, 'The Alien Probe': 100, 'Temporal Anomaly': 140}
+    mission_rewards = {'Mine 100 Materials': 10, 'Defeat 1 Enemy': 10, 'Defeat 3 Enemies': 20, 'Trade 200 Materials With a Ship': 25, 'Defeat 5 Enemies': 40, 'Explore 3 New Systems': 40, 'Buy a new Ship': 50, 'Complete 2 Successful Trades': 70, 'Respond to the Distress Signal in Regula': 50, 'Survey the Rings of Tarkalea XII': 50, 'Protect Dilithium Convoy': 75, 'Scan for Anomalies': 50, 'Recover Lost Data': 100, 'The Starship Graveyard': 35, 'First Contact': 80, 'Sabotage Mission': 60, 'Emergency Supply Run': 35}
     missions = cache['missions']
     coins = cache['latinum']
 
@@ -2259,7 +2259,38 @@ def mission_briefing():
         input("Press enter to exit.")
         update_mission_progress('First Contact', 1)
         clear()
-        
+    elif cache['missions']['Sabatoge Mission']['accepted'] and not cache['missions']['Sabatoge Mission']['completed'] and cache['missions']['Sabatoge Mission']['progress'] == 0:
+        center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing ==========>{Fore.WHITE}")
+        time.sleep(2)
+        print("")
+        center_text(f"{Fore.RED}Starfleet has received information that a rouge group has been stealing replicator technology from the UFP.{Fore.GREEN}\nWe have tracked them to the system of Regula, and we need you to go there and stop them.{Fore.YELLOW}\nYour task is to breach their station undetected, sabatoge their key systems while reclaiming our technology, and escape the station before its collapse.{Fore.WHITE}")
+        time.sleep(4)
+        center_text(f"{Fore.RED}This mission is dangerous, and you must be prepared for anything.{Fore.WHITE}")
+        time.sleep(2)
+        center_text("Travel to Regula for this mission.")
+        print("")
+        time.sleep(2)
+        center_text(f"{Fore.BLUE}<========== End Transmission ==========>{Fore.WHITE}")
+        input("Press enter to exit.")
+        update_mission_progress('Sabatoge Mission', 1)
+        clear()
+    elif cache['missions']['Emergency Supply Run']['accepted'] and not cache['missions']['Emergency Supply Run']['completed'] and cache['missions']['Emergency Supply Run']['progress'] == 0:
+        center_text(f"{Fore.BLUE}<========== Starfleet Mission Briefing ==========>{Fore.WHITE}")
+        time.sleep(2)
+        print("")
+        center_text(f"{Fore.RED}Starfleet has received a distress call from a colony in the system of Tellar.{Fore.GREEN}\nThey are in need of emergency supplies, and we need you to deliver them.{Fore.YELLOW}\nYour task is to travel to the system of Tellar, and deliver the supplies to the colony.{Fore.WHITE}")
+        time.sleep(3)
+        center_text(f"{Fore.YELLOW}You first need to pick up the medical supplies from a medical center in Vulcan.{Fore.WHITE}")
+        time.sleep(2)
+        print("")
+        center_text("After you have the supplies, travel to Tellar for this mission.")
+        print("")
+        time.sleep(2)
+        center_text(f"{Fore.BLUE}<========== End Transmission ==========>{Fore.WHITE}")
+        input("Press enter to exit.")
+        update_mission_progress('Emergency Supply Run', 1)
+        clear()
+                
 
 def distress_call_scenario_pt2():
     print("You have arrived at the coordinates of the unknown ship.")
@@ -2709,6 +2740,8 @@ def vulcan():
     
     if cache['missions']['Recover Lost Data']['accepted'] == True and cache['missions']['Recover Lost Data']['progress'] in [1, 2]:
         system_findings[5] = (f'{Fore.YELLOW}Recover Lost Data{Fore.WHITE}', recover_lost_data)
+    if cache['missions']['Emergency Supply Run']['accepted'] == True and cache['missions']['Emergency Supply Run']['progress'] == 1:
+        system_findings[5] = (f'{Fore.YELLOW}Pick up Medical Supplies{Fore.WHITE}', emergency_supply_run)
 
     # Display menu
     income_display()
@@ -2851,6 +2884,9 @@ def tellar():
         4: ('Tritanium Mine', lambda: handle_mining('tritanium', ['tritanium_mine1', 'tritanium_mine2'], 'Tritanium'))
     }
 
+    if cache['missions']['Emergency Supply Run']['accepted'] == True and cache['missions']['Emergency Supply Run']['progress'] == 2:
+        system_findings[5] = (f'{Fore.YELLOW}Drop off Medical Supplies{Fore.WHITE}', emergency_supply_run)
+        
     # Display menu
     income_display()
     print(f"What would you like to navigate to in {systems[current_system]}?")
@@ -2907,6 +2943,37 @@ def handle_mining(resource, mining_locations, resource_name):
         income_display()
         print(f'{Fore.RED}You do not have enough storage to mine. Please return to drydock and empty your storage.{Fore.WHITE}')
 
+def emergency_supply_run():
+    while True:
+        clear()
+        income_display()
+        if cache['missions']['Emergency Supply Run']['progress'] == 1 and cache['current_system'] == 2:
+            print(f"{Fore.GREEN}You have arrived at the coordinates of the medical supplies.")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Opening hailing frequency with Vulcan...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=4)
+            print(f"{Fore.GREEN}Transporting medical supplies on board...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=5)
+            print(f"{Fore.GREEN}Transport Complete!\n{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.BLUE}Travel to Tellar.{Fore.WHITE}")
+            time.sleep(3)
+            update_mission_progress('Emergency Supply Run', 1)
+            break
+        if cache['missions']['Emergency Supply Run']['progress'] == 2 and cache['current_system'] == 3:
+            print(f"{Fore.GREEN}You have arrived at Tellar with the medical supplies.\n{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Beaming medical supplies to Tellar...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=7)
+            print(f"{Fore.GREEN}Medical supplies delivered!\n{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Tellar thanks you for your help.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}You have been rewarded 35 latinum for your efforts.{Fore.WHITE}")
+            time.sleep(4)
+            update_mission_progress('Emergency Supply Run', 1)
+            input("Press enter to exit... ")
+            break
 
 def andor():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
@@ -3143,6 +3210,8 @@ def regula():
 
     if mission_available:
         system_findings[4] = (f'{Fore.YELLOW}Respond to Distress Call{Fore.WHITE}', distress_call_scenario)
+    if cache['missions']['Sabatoge Mission']['accepted'] == True and cache['missions']['Sabatoge Mission']['progress'] == 1:
+        system_findings[4] = (f'{Fore.YELLOW}Breach the Station{Fore.WHITE}', sabatoge_mission)
 
     # Display menu
     income_display()
@@ -3179,6 +3248,54 @@ def handle_klingon_operative():
     elif ori_ship == 2:
         hailing_frequency()
 
+def sabatoge_mission():
+    while True:
+        clear()
+        income_display()
+        if cache['missions']['Sabatoge Mission']['progress'] == 1:
+            print(f"{Fore.GREEN}You have arrived at the Regula Station.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Beginning EVAs to infiltrate the station...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=13)
+            print(f"{Fore.GREEN}Infiltration of station complete. We are not being scanned.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Operatives have gave you the acess of the stations central computer.{Fore.WHITE}")
+            time.sleep(1)
+            print(f"{Fore.GREEN}Disabling the stations security systems...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=10)
+            print(f"{Fore.GREEN}Security systems disabled.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Replicator components have been located. Beaming them on board...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=10)
+            print(f"{Fore.GREEN}Components beamed on board. Operatives returning to ship...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=13)
+            print(f"{Fore.GREEN}Operatives have returned to the ship.{Fore.WHITE}")
+            update_mission_progress('Sabatoge Mission', 1)
+        elif cache['missions']['Sabatoge Mission']['progress'] == 2:
+            print(f"{Fore.RED}Enemy ships have been detected!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.RED}The ships are charging their weapons. Prepare for battle.{Fore.WHITE}")
+            battle_stat(2000, 'Unknown Ship', random.randint(300, 500), 6, 5, 5)
+            if load_ship_stat(cache['ship'], 'health') <= 0:
+                check_health()
+                return
+            print(f"{Fore.GREEN}You have defeated the enemy ship.{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.BLUE}Return to drydock to report your findings to Starfleet.{Fore.WHITE}")
+            update_mission_progress('Sabatoge Mission', 1)
+            break
+        elif cache['missions']['Sabatoge Mission']['progress'] == 3 and cache['current_system'] == 1:
+            print(f"{Fore.GREEN}Starting transfer of components to Starfleet...{Fore.WHITE}")
+            colored_gradient_loading_bar(duration=15)
+            print(f"{Fore.GREEN}Transfer complete!{Fore.WHITE}")
+            time.sleep(2)
+            print(f"{Fore.GREEN}Starfleet thanks you for your help. You have been rewarded 60 latinum.{Fore.WHITE}")
+            time.sleep(2)
+            update_mission_progress('Sabatoge Mission', 1)
+            input("Press enter to exit...") #Mission finished
+            break
+        else:
+            return
 
 def solaria():
     global tutorial_highlight3, tutorial_highlight5, tutorial_highlight7, tutorial_highlight9, tutorial_highlight4
@@ -3620,6 +3737,7 @@ while True:
             process_tutorial_step()
             scan_for_anomalies()
             recover_lost_data()
+            sabatoge_mission()
             mission_data = cache['missions'].get("Survey the Rings of Tarkalea XII", {})
             if mission_data.get("accepted") and mission_data.get("progress") == 2:
                 update_mission_progress('Survey the Rings of Tarkalea XII', 1)

@@ -110,26 +110,6 @@
             "progress": 0,
             "completed": false,
             "accepted": false
-        },
-        "Latinum Heist": {
-            "progress": 0,
-            "completed": false,
-            "accepted": false
-        },
-        "Minefield Mapping": {
-            "progress": 0,
-            "completed": false,
-            "accepted": false
-        },
-        "The Alien Probe": {
-            "progress": 0,
-            "completed": false,
-            "accepted": false
-        },
-        "Temporal Anomaly": {
-            "progress": 0,
-            "completed": false,
-            "accepted": false
         }
     },
     "explored": {

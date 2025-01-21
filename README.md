@@ -9,14 +9,14 @@ Please open an issue if you find any bugs!
 
 - ### Game Stats
     - Current Version: `ALPHA`
-    - Sub Version: `BETA dev 1.13`
+    - Sub Version: `BETA dev 1.14`
     - Bug Amount: Low
     - Non-Optimized Code: Low
 - ### Startup
   - Using VScode:
       - Install the `Python` extension.
       - Find the play button in the top right corner and click it
-          - If you cant find it, go to the terminal and type `python3 stf_main.py` or `python stf_main.py`
+          - If you cant find it, go to the terminal and type `python3 STF_Main/stf_main.py` or `python STF_Main/stf_main.py`
       - The game will automatically install pips, and will pull data from the JSON files.
       - Use the keys and press enter to play!
 - ### How to Play
