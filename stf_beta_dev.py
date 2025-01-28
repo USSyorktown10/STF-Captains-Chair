@@ -86,6 +86,7 @@ def initialize_cache():
 
 # Initialize cache
 cache = initialize_cache()
+time.sleep(0.001)
 
 def check_update_mats():
     current_time = datetime.now()
@@ -102,7 +103,7 @@ def check_update_mats():
     # Check if it's time to update
     if next_update_time <= current_time:
         update_mats()  # Perform your material update logic
-        new_next_update_time = current_time + timedelta(seconds=30)
+        new_next_update_time = current_time + timedelta(seconds=10)
         save_data('next_update_time', new_next_update_time.isoformat())  # Save new update time
 
 
@@ -161,6 +162,9 @@ def ask_sanitize(question_ask, follow_up_question=None):
                 response = int(response)
                 break
             except ValueError:
+                response = input(follow_up_question)
+                continue
+            except KeyError:
                 response = input(follow_up_question)
                 continue
         return response
@@ -452,7 +456,7 @@ def display_ship_menu():
             data = json.load(file)
         print('')
         for i, ship in enumerate(data[ship_sel], 1):
-            print(f"{i}. {ship['name']} (Owned: {ship.get('owned', False)})")
+            print(f"{i}. {Fore.BLUE}{ship['name']} {Fore.YELLOW}(Owned: {ship.get('owned', False)}){Fore.WHITE}")
 
     except FileNotFoundError:
         print("Ship data file not found.")
@@ -506,6 +510,7 @@ def ship_management_menu(coins):
         else:
             if tutorial_step == 9:
                 print(f"{Fore.YELLOW}Type 7 to exit the shipyard.{Fore.WHITE}")
+                time.sleep(2)
             tutorial_highlight7, tutorial_highlight8 = Fore.WHITE, Fore.WHITE
 
         # Display income and ship blueprints
@@ -529,7 +534,7 @@ def ship_management_menu(coins):
             clear()
             income_display()
             display_ship_menu()
-            ship_num = ask_sanitize("What ship would you like to view? ")
+            ship_num = ask_sanitize_lobby("What ship would you like to view? ", valid_options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
             ship_name = get_ship_name(ship_num)
             clear()
             income_display()
@@ -540,7 +545,7 @@ def ship_management_menu(coins):
             clear()
             income_display()
             display_ship_menu()
-            ship_num = ask_sanitize("What ship would you like to build? ", valid_inputs=list(ships.keys()))
+            ship_num = ask_sanitize_lobby("What ship would you like to build? ", valid_options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
             ship_name = get_ship_name(ship_num)
             buy_ship(ship_name, coins)
 
@@ -549,7 +554,7 @@ def ship_management_menu(coins):
             clear()
             income_display()
             display_ship_menu()
-            ship_num = ask_sanitize("What ship would you like to equip? ", valid_inputs=list(ships.keys()))
+            ship_num = ask_sanitize_lobby("What ship would you like to equip? ", valid_options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
             ship_name = get_ship_name(ship_num)
             equip_ship(ship_name)
 
@@ -558,17 +563,17 @@ def ship_management_menu(coins):
             clear()
             if tutorial_step == 7:
                 print(f"{Fore.YELLOW}Upgrade the Stargazer by typing 1.{Fore.WHITE}")
+                time.sleep(2)
             income_display()
             display_ship_menu()
-            ship_num = ask_sanitize("What ship would you like to upgrade? ", valid_inputs=list(ships.keys()))
+            ship_num = ask_sanitize_lobby("What ship would you like to upgrade? ", valid_options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
             ship_name = get_ship_name(ship_num)
 
             if tutorial_step == 7:
                 print(f"{Fore.YELLOW}Let's upgrade the warp range. Type 4.{Fore.WHITE}")
-            stat_num = ask_sanitize(
+            stat_num = ask_sanitize_lobby(
                 "Enter the stat to upgrade (1. Firepower, 2. Accuracy, 3. Evasion, "
-                f"{tutorial_highlight7}4. Warp Range{Fore.WHITE}, 5. Storage, 6. Mining Efficiency): ",
-                valid_inputs=list(stats.keys())
+                f"{tutorial_highlight7}4. Warp Range{Fore.WHITE}, 5. Storage, 6. Mining Efficiency): ", valid_options=[1, 2, 3, 4, 5, 6]
             )
             stat = stats[stat_num]
             if ask(f"{Fore.YELLOW}Are you sure you want to upgrade {stat}? (Y/N): "):
@@ -722,6 +727,7 @@ def main():
             print(f"{Fore.YELLOW}Select 1 to upgrade crew.\n{Fore.WHITE}")
         if cache['tutorial'] == 10:
             print(f"{Fore.YELLOW}Type 3 to exit.\n{Fore.WHITE}")
+            time.sleep(2)
         income_display()
         display_crew(crew_data)
 
@@ -867,7 +873,8 @@ def assign_crew_and_adjust_stats(user_crew_file, ship_file):
             json.dump(ship_data, ship_file, indent=4)
             ship_file.truncate()
             print(f"{Fore.BLUE}\nAssigned {selected_crew} to {format_position(position_choice)} on {selected_ship['name']} and increased {format_ability(stat_key)} by {stat_boost * 100}%.{Fore.WHITE}")
-            cache['tutorial'] = 9
+            if cache['tutorial'] == 8:
+                cache['tutorial'] = 9
             time.sleep(3)
 
     except FileNotFoundError as e:
@@ -904,7 +911,7 @@ def format_position(position):
         return position.capitalize().replace('bridge', 'Bridge')
 
 def income_display():
-     print(f"{Fore.YELLOW}Parsteel:{Fore.WHITE} {cache['parsteel']} || {Fore.GREEN}Tritanium:{Fore.WHITE} {cache['tritanium']} || {Fore.CYAN}Dilithium:{Fore.WHITE} {cache['dilithium']} || {Fore.YELLOW}Latinum:{Fore.WHITE} {cache['latinum']} || {Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {cache['ship']} || {Fore.LIGHTBLUE_EX}Current System:{Fore.WHITE} {systems[cache['current_system']]} || {Fore.BLUE}Health:{Fore.WHITE} {load_ship_stat(ship_name=cache['ship'], stat_key='health') * research_multi('Sheild Dynamics')}/{research_multi('Sheild Dynamics') * load_ship_stat(ship_name=cache['ship'], stat_key='max_health')} || {Fore.GREEN}Storage Avalible:{Fore.WHITE} {load_ship_stat(ship_name=cache['ship'], stat_key='storage')}/{research_multi('Inventory Management Systems') * load_ship_stat(ship_name=cache['ship'], stat_key='max_storage')}")
+     print(f"{Fore.YELLOW}Parsteel:{Fore.WHITE} {int(cache['parsteel'])} || {Fore.GREEN}Tritanium:{Fore.WHITE} {int(cache['tritanium'])} || {Fore.CYAN}Dilithium:{Fore.WHITE} {int(cache['dilithium'])} || {Fore.YELLOW}Latinum:{Fore.WHITE} {int(cache['latinum'])} || {Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {cache['ship']} || {Fore.LIGHTBLUE_EX}Current System:{Fore.WHITE} {systems[cache['current_system']]} || {Fore.BLUE}Health:{Fore.WHITE} {round(load_ship_stat(ship_name=cache['ship'], stat_key='health')) * research_multi('Sheild Dynamics')}/{research_multi('Sheild Dynamics') * load_ship_stat(ship_name=cache['ship'], stat_key='max_health')} || {Fore.GREEN}Storage Avalible:{Fore.WHITE} {round(load_ship_stat(ship_name=cache['ship'], stat_key='storage'))}/{research_multi('Inventory Management Systems') * load_ship_stat(ship_name=cache['ship'], stat_key='max_storage')}")
 
 def ask(question):
         response = input(question)
@@ -1027,8 +1034,8 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
         while (load_ship_stat(ship_name=cache['ship'], stat_key='health')) > 0 or opponent_health > 0:
             turn = 'player'
             if turn == 'player':
-                if random.uniform(0, 1) < (research_multi('Targeting Matrix') / evasion + 1):
-                    damage = research_multi('Phaser Calibration') * random.uniform(50, 200)
+                if random.uniform(0, 1) < ((research_multi('Targeting Matrix') * load_ship_stat(cache['ship'], 'accuracy')) / evasion + 1):
+                    damage = (research_multi('Phaser Calibration') * load_ship_stat(cache['ship'], 'firepower')) * random.uniform(50, 200)
                     opponent_health -= damage
                     print(f"{Fore.GREEN}Enemy Hit! {opponent_name} took {damage:.2f} damage. Enemy health: {opponent_health:.2f}{Fore.WHITE}")
                     time.sleep(3)
@@ -1042,7 +1049,7 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
             if opponent_health <= 0:
                 break
             if turn == 'enemy':
-                if random.uniform(0, 1) < (accuracy / (research_multi('Targeting Matrix') + 1)):
+                if random.uniform(0, 1) < (accuracy / ((research_multi('Targeting Matrix') * load_ship_stat(cache['ship'], 'evasion')) + 1)):
                     damage = firepower * random.uniform(50, 150)
                     save_ship_data(stat_key='health', value=round(load_ship_stat(cache['ship'], 'health') - damage), ship_name=cache['ship'])
                     print(f"{Fore.RED}You have been hit! You took {damage:.2f} damage. Your health: {load_ship_stat(cache['ship'], 'health'):.2f}{Fore.WHITE}")
@@ -1063,6 +1070,7 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 clear()
                 if cache['tutorial'] == 2:
                     print(f"{Fore.GREEN}Great job! You won the battle. In a moment, you will get the rewards for your battle. You have 5 seconds to view them, then you automatically exit.\nAfter these rewards, return to drydock.{Fore.WHITE}")
+                    cache['tutorial'] = 3
                     time.sleep(3)
                 print(f'{Fore.GREEN}You Win!{Fore.WHITE}')
                 print(f'{Fore.BLUE}Parsteel Gained: {Fore.WHITE}', income)
@@ -1077,8 +1085,13 @@ def battle_stat(opponent_health, opponent_name, income, accuracy, firepower, eva
                 update_mission_progress('Defeat 3 Enemies', 1)
                 update_mission_progress('Defeat 5 Enemies', 1)
                 update_mission_progress('Protect Dilithium Convoy', 1)
-                cache['tutorial'] = 3
                 time.sleep(5)
+                if cache['tutorial'] == 2:
+                    print(f"{Fore.YELLOW}Return to Drydock now.{Fore.WHITE}")
+                    time.sleep(2)
+                    input("Press Enter to Continue... ")
+                    cache['tutorial'] = 3
+                    return
 
 ship_attributes = ["firepower", "accuracy", "evasion", "health", "storage", "mining", "warp"]
 
@@ -1178,6 +1191,7 @@ def mining_deposit(mine_type, mine_num, mine_capitalize):
                 break
             mine_depo_mats -= mining_efficiency
             time.sleep(0.5)
+        check_update_mats()
         if tutorial_stage == 0:
             cache['tutorial'] = 1
         elif tutorial_stage == 6:
@@ -1201,13 +1215,10 @@ def scan_system():
         print(f"{Fore.YELLOW}When you come across a new system and you haven't explored it, you need to scan the system. Type y to explore it.{Fore.WHITE}")
         time.sleep(2)
     if ask(f"{Fore.RED}System {systems[cache['current_system']]} has not been explored. Would you like to scan this system? This will take you {exploration_time} seconds. (Y/N): {Fore.WHITE}"):
-        while exploration_time > 0:
-            clear()
-            income_display()
-            print(f"{Fore.GREEN}Scanning {systems[cache['current_system']]}...{Fore.WHITE}")
-            print(f"{Fore.YELLOW}Time Remaining: {exploration_time}{Fore.WHITE}")
-            exploration_time -= 0.5
-            time.sleep(0.5)
+        clear()
+        income_display()
+        print(f"{Fore.GREEN}Scanning {systems[cache['current_system']]}...{Fore.WHITE}")
+        colored_gradient_loading_bar(exploration_time, 60)
         print(f"{Fore.GREEN}Scan complete! You may now navigate the system.{Fore.WHITE}")
         update_mission_progress('Explore 3 New Systems', 1)
         save_explored(systems[cache['current_system']])
@@ -1424,6 +1435,10 @@ def update_shop_daily():
 def display_shop(shop_data):
     clear()
     income_display()
+    print("")
+    if cache['tutorial'] == 11:
+        print(f"{Fore.YELLOW}This is the shop! Here, everything costs latinum. To get latinum, you need to complete missions by exploring a system, and accepting missions from a mission planet.\n{Fore.WHITE}")
+
     print(f"\n{Fore.BLUE}Daily Shop{Fore.WHITE}")
     print('')
     for index, item in enumerate(shop_data["items"], start=1):
@@ -1480,8 +1495,6 @@ def shop_loop():
     shop_data = update_shop_daily()
 
     while True:
-        if cache['tutorial'] == 11:
-            print(f"{Fore.YELLOW}This is the ship! Here, everything costs latinum. To get latinum, you need to complete missions by exploring a system, and accepting missions from a mission planet.{Fore.WHITE}")
         display_shop(shop_data)
         command = input("Enter the number to buy, or 'e' to leave: ")
 
@@ -1712,12 +1725,12 @@ def check_construction_completion():
             apply_upgrade(building_name, upgrade_part)
 
             # Reset the construction queue to null after completion
-            cache['construction_queue'] = ('construction_queue', {
+            cache['construction_queue'] = {
                 'building': None,
                 'start_time': None,
                 'end_time': None,
                 'upgrade_part': None
-            })
+            }
 
             time.sleep(2)
 
@@ -1798,7 +1811,7 @@ def background_production():
     # Check if last_production_time is empty (""), and if so, set it to the current time
     if cache['last_production_time'] == "":
         last_production_time = current_time.isoformat()
-        cache['last_production_time'] = last_production_time
+        save_data('last_production_time', last_production_time)
         print("Last production time was empty. Setting to current time.")
 
     # Calculate the time difference since the last production update
@@ -1808,9 +1821,9 @@ def background_production():
     # Check if 1 minute (or your desired interval) has passed
     if time_diff >= timedelta(minutes=1):
         # Load saved storage values (check if there's any saved material)
-        parsteel_storage = cache['parsteel_storage'] or 0
-        tritanium_storage = cache['tritanium_storage'] or 0
-        dilithium_storage = cache['dilithium_storage'] or 0
+        parsteel_storage = cache['parsteel_storage_gen'] or 0
+        tritanium_storage = cache['tritanium_storage_gen'] or 0
+        dilithium_storage = cache['dilithium_storage_gen'] or 0
 
         # Load the upgrade levels from the buildings data
         generators_upgrades = load_building_data('buildings')['generators']['upgrades']
@@ -1826,9 +1839,9 @@ def background_production():
         dilithium_storage += dilithium_prod
 
         # Save the updated storage values
-        cache['parsteel_storage'] = parsteel_storage
-        cache['tritanium_storage'] = tritanium_storage
-        cache['dilithium_storage'] = dilithium_storage
+        cache['parsteel_storage_gen'] = parsteel_storage
+        cache['tritanium_storage_gen'] = tritanium_storage
+        cache['dilithium_storage_gen'] = dilithium_storage
 
         # Save the current time as the last production time
         last_production_time = current_time.isoformat()
@@ -1837,9 +1850,9 @@ def background_production():
 
 def claim_resources():
     # Load stored materials and actual materials from user data
-    parsteel_storage = cache['parsteel_storage'] or 0
-    tritanium_storage = cache['tritanium_storage'] or 0
-    dilithium_storage = cache['dilithium_storage'] or 0
+    parsteel_storage = cache['parsteel_storage_gen'] or 0
+    tritanium_storage = cache['tritanium_storage_gen'] or 0
+    dilithium_storage = cache['dilithium_storage_gen'] or 0
 
     parsteel = cache['parsteel'] or 0
     tritanium = cache['tritanium'] or 0
@@ -1856,9 +1869,9 @@ def claim_resources():
     cache['dilithium'] = dilithium
 
     # Reset the storage to 0
-    cache['parsteel_storage'] = 0
-    cache['tritanium_storage'] = 0
-    cache['dilithium_storage'] = 0
+    cache['parsteel_storage_gen'] = 0
+    cache['tritanium_storage_gen'] = 0
+    cache['dilithium_storage_gen'] = 0
 
     print(f"{Fore.GREEN}All resources have been claimed. Parsteel claimed: {parsteel_storage} | Tritanium claimed: {tritanium_storage} | Dilithium claimed: {dilithium_storage}{Fore.WHITE}")
     if cache['tutorial'] == 10:
@@ -1935,11 +1948,11 @@ def check_research_completion():
             research_name = research_data['research']
             apply_research(research_name)
 
-            cache['research_queue'] = ('research_queue', {
+            cache['research_queue'] = {
                 'research': None,
                 'start_time': None,
                 'end_time': None
-            })
+            }
             print(f"{Fore.GREEN}Research of {research_name} is complete.{Fore.WHITE}")
             time.sleep(2)
         else:
@@ -1954,7 +1967,7 @@ def apply_research(research_name):
     if research_data and research_data['level'] >= 0:
         research_data['level'] += 1
         save_research_data('level', research_data['level'], research_name)
-        save_research_data('cost', round((research_data['cost'] ** 1.5)), research_name)
+        save_research_data('cost', round((research_data['cost'] * 2)), research_name)
         print(f"{research_name} level increased to {research_data['level']}.")
 
 def display_available_research():
@@ -2010,6 +2023,7 @@ def display_available_research():
                 print(f"{Fore.GREEN}Great work! Research will improve your stats on what you are researching. Look at the Wiki to see what each part of the research tree affects.{Fore.WHITE}")
                 cache['tutorial'] = 5
             time.sleep(2)
+            input("Press enter to exit...")
         else:
             print(f"{Fore.RED}Not enough dilithium to start this research.{Fore.WHITE}")
             time.sleep(2)
@@ -2383,6 +2397,7 @@ tutorial_highlight4 = False
 tutorial_highlight6 = False
 
 def tutorial():
+    check_update_mats()
     global tutorial_highlight1, tutorial_highlight2, tutorial_highlight4, tutorial_highlight6, tutorial_highlight11
 
     # Define tutorial steps
@@ -2409,7 +2424,50 @@ def tutorial():
             ),
             "highlights": {"tutorial_highlight2": Fore.YELLOW, "tutorial_highlight4": Fore.YELLOW},
         },
-        # Add more steps here in similar format...
+        4: {
+            "message": (
+                f"{Fore.YELLOW}Re-enter your drydock now. Its time to do some research.\n{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight1": Fore.YELLOW},
+        },
+        5: {
+            "message": (
+                f"{Fore.YELLOW}Great job starting research! Next, you will navigate to another system. Type 2 to navigate to another system.{Fore.WHITE}"
+            ), 
+            "highlights": {"tutorial_highlight6": Fore.YELLOW},
+        },
+        6: {
+            "message": (
+                f"{Fore.YELLOW}You have arrived at Vulcan! Now explore the system. Since you have never been to this system, you will have to scan it first.{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight2": Fore.YELLOW}
+        },
+        7: {
+            "message": (
+                f"{Fore.YELLOW}Great job! You have scanned the system. Now that you know how to explore systems and warp to them, its time to upgrade your ship.\n"
+                f"Type 3 to return to drydock.{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight1": Fore.YELLOW},
+        },
+        9: {
+            "message": (
+                f"{Fore.YELLOW}Great job! You have upgraded your ship. Return to drydock again to upgrade crew.{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight1": Fore.YELLOW},
+        },
+        10: {
+            "message": (
+                f"{Fore.YELLOW}Great job! You have upgraded your crew. Remember the generators you upgraded earlier? Now you can claim their material!\n"
+                f"Type 3 to return to drydock.{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight1": Fore.YELLOW},
+        },
+        11: {
+            "message": (
+                f"{Fore.YELLOW}Awesome! The tutorial is almost complete. Type 5 to check out the shop.{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight11": Fore.YELLOW},
+        },
         12: {
             "message": (
                 f"{Fore.WHITE}Great job! You have finished the tutorial.\n"
@@ -2417,7 +2475,7 @@ def tutorial():
                 f"and buy more crew.\n{Fore.YELLOW}Also, if you approach a ship, type 2 to hail it, and if it's friendly, you can trade with it.\n"
                 f"{Fore.GREEN}Once again, great job with the tutorial, Commander! If you have any questions, ideas, or bugs, please report an issue on GitHub. "
                 f"Check the wiki for more info on the whole game.{Fore.WHITE}\n\n"
-                f"{Fore.GREEN}This counts as your first mission, so here are some rewards!{Fore.WHITE}\n"
+                f"{Fore.BLUE}This counts as your first mission, so here are some rewards!{Fore.WHITE}\n"
                 f"{Fore.GREEN}Parsteel Reward: 300 | Tritanium Reward: 200 | Dilithium Reward: 100 | All types of BP's: 25 | Recruit Tokens: 50 | Latinum: 50{Fore.WHITE}"
             ),
             "highlights": {},
@@ -2445,7 +2503,7 @@ def tutorial():
         },
     }
 
-    tutorial_step = load_data("tutorial")
+    tutorial_step = cache['tutorial']
     step_data = tutorial_steps.get(tutorial_step)
 
     if step_data:
@@ -2542,7 +2600,7 @@ def process_tutorial_step():
     }
 
     # Get the current tutorial step
-    tutorial_step = load_data("tutorial")
+    tutorial_step = cache['tutorial']
     step_data = tutorial_steps.get(tutorial_step, {"highlights": {}})
 
     # Print the message if it exists
@@ -2721,11 +2779,15 @@ def vulcan():
     check_update_mats()
 
     # Ensure the current system is Vulcan
-    if current_system != 2:
-        return
-
     current_system_explored = load_explored(systems[current_system])
     tutorial_state = cache['tutorial']
+    if current_system != 2:
+        return
+    if current_system_explored == 2:
+        # If unexplored, scan system
+        income_display()
+        scan_system()
+        return
 
     # Update tutorial highlight if needed
     tutorial_highlight6 = Fore.YELLOW if tutorial_state == 6 else Fore.WHITE
@@ -2755,10 +2817,6 @@ def vulcan():
         clear()
         action = system_findings[current_system_rand][1]
         action()
-    elif current_system_explored == 2:
-        # If unexplored, scan system
-        income_display()
-        scan_system()
 
 
 # Helper Functions
@@ -2861,6 +2919,8 @@ def recover_lost_data():
             time.sleep(2)
             update_mission_progress('Recover Lost Data', 1)
             break
+        else:
+            break
             
         
 
@@ -2870,10 +2930,12 @@ def tellar():
     check_update_mats()
 
     # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 1:
-        if load_explored(systems[current_system]) == 2:
-            income_display()
-            scan_system()
+    if load_explored(systems[current_system]) != 3:
+        return
+    
+    if load_explored(systems[current_system]) == 2:
+        income_display()
+        scan_system()
         return
 
     # Define menu options
@@ -2981,10 +3043,12 @@ def andor():
     check_update_mats()
 
     # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 1:
-        if load_explored(systems[current_system]) == 2:
-            income_display()
-            scan_system()
+    if load_explored(systems[current_system]) != 4:
+        return
+    
+    if load_explored(systems[current_system]) == 2:
+        income_display()
+        scan_system()
         return
 
     # Define menu options
@@ -3113,10 +3177,12 @@ def omicron_ii():
     check_update_mats()
 
     # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 1:
-        if load_explored(systems[current_system]) == 2:
-            income_display()
-            scan_system()
+    if load_explored(systems[current_system]) != 5:
+        return
+    
+    if load_explored(systems[current_system]) == 2:
+        income_display()
+        scan_system()
         return
 
     # Define menu options
@@ -3190,11 +3256,13 @@ def regula():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if system not fully explored
-    if load_explored(systems[current_system]) != 1:
-        if load_explored(systems[current_system]) == 2:
-            income_display()
-            scan_system()
+    # Early return if the system is not fully explored
+    if load_explored(systems[current_system]) != 6:
+        return
+    
+    if load_explored(systems[current_system]) == 2:
+        income_display()
+        scan_system()
         return
 
     # Load mission data
@@ -3249,6 +3317,8 @@ def handle_klingon_operative():
         hailing_frequency()
 
 def sabatoge_mission():
+    if not cache['missions']['Sabatoge Mission']['accepted']:
+        return
     while True:
         clear()
         income_display()
@@ -3302,11 +3372,13 @@ def solaria():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if system not fully explored
-    if load_explored(systems[current_system]) != 1:
-        if load_explored(systems[current_system]) == 2:
-            income_display()
-            scan_system()
+    # Early return if the system is not fully explored
+    if load_explored(systems[current_system]) != 7:
+        return
+    
+    if load_explored(systems[current_system]) == 2:
+        income_display()
+        scan_system()
         return
 
     # Load mission data
@@ -3398,11 +3470,13 @@ def tarkalea_xii():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if system not fully explored
-    if load_explored(systems[current_system]) != 1:
-        if load_explored(systems[current_system]) == 2:
-            income_display()
-            scan_system()
+    # Early return if the system is not fully explored
+    if load_explored(systems[current_system]) != 8:
+        return
+    
+    if load_explored(systems[current_system]) == 2:
+        income_display()
+        scan_system()
         return
 
     # Load mission data
@@ -3475,11 +3549,13 @@ def xindi_starbase_9():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if system not fully explored
-    if load_explored(systems[current_system]) != 1:
-        if load_explored(systems[current_system]) == 2:
-            income_display()
-            scan_system()
+    # Early return if the system is not fully explored
+    if load_explored(systems[current_system]) != 9:
+        return
+    
+    if load_explored(systems[current_system]) == 2:
+        income_display()
+        scan_system()
         return
 
     # Define menu options
@@ -3539,11 +3615,13 @@ def altor_iv():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if system not fully explored
-    if load_explored(systems[current_system]) != 1:
-        if load_explored(systems[current_system]) == 2:
-            income_display()
-            scan_system()
+    # Early return if the system is not fully explored
+    if load_explored(systems[current_system]) != 10:
+        return
+    
+    if load_explored(systems[current_system]) == 2:
+        income_display()
+        scan_system()
         return
 
     # Define menu options
@@ -3724,20 +3802,23 @@ while True:
         navigate()
     if option == 3:
         if ask(f"{Fore.RED}Are you sure you want to travel back to Sol? (Y/N) {Fore.WHITE}"):
-            warp_time = abs(cache['current_system'] - 1) * 10
+            if cache['current_system'] != 1:
+                warp_time = abs(cache['current_system'] - 1) * 10
+            else:
+                warp_time = 2
             clear()
             income_display()
             print(f"{Fore.BLUE}Traveling...{Fore.WHITE}")
-            travel_bar(systems[cache['current_system']], "Sol", warp_time, 30)
+            travel_bar(systems[cache['current_system']], "Drydock", warp_time, 30)
             clear()
             cache['current_system'] = 1
             transfer_resources_to_storage()
             income_display()
-            cache['current_system'] = 1
-            process_tutorial_step()
             scan_for_anomalies()
             recover_lost_data()
+            process_tutorial_step()
             sabatoge_mission()
+            check_update_mats()
             mission_data = cache['missions'].get("Survey the Rings of Tarkalea XII", {})
             if mission_data.get("accepted") and mission_data.get("progress") == 2:
                 update_mission_progress('Survey the Rings of Tarkalea XII', 1)
@@ -3784,10 +3865,13 @@ while True:
                         generator_upgrade = ask_sanitize(f"{Fore.BLUE}What would you like to do: {Fore.WHITE}")
                         if generator_upgrade == 1:
                             upgrade_generator('Parsteel Generator')
+                            check_update_mats()
                         elif generator_upgrade == 2:
                             upgrade_generator('Tritanium Generator')
+                            check_update_mats()
                         elif generator_upgrade == 3:
                             upgrade_generator('Dilithium Generator')
+                            check_update_mats()
                         elif generator_upgrade == 4:
                             continue
                     if generator_option == 3:
@@ -3804,6 +3888,7 @@ while True:
                             cache['parsteel'] -= round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 10)
                             cache['tritanium'] -= round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 5)
                             start_construction('starbase', (load_specific_upgrade('starbase', 'Shipyard') ** shipyard_delta) * 10, 'Shipyard')
+                            check_update_mats()
                         else:
                             print(f"{Fore.RED}You either canceled the upgrade, or you do not have enough parsteel or tritanium.{Fore.WHITE}")
                             time.sleep(2)
@@ -3833,6 +3918,7 @@ while True:
                             cache['parsteel'] -= round(((load_specific_upgrade('starbase', 'R&D') * rd_delta) ** rd_delta) * 10)
                             cache['tritanium'] -= round(((load_specific_upgrade('starbase', 'R&D') * rd_delta) ** rd_delta) * 5)
                             start_construction('starbase', (load_specific_upgrade('starbase', 'R&D') ** rd_delta) * 10, 'R&D')
+                            check_update_mats()
                         else:
                             print(f"{Fore.RED}You have either canceled the upgrade, or do not have enough parsteel or tritanium.{Fore.WHITE}")
                             time.sleep(2)
@@ -3858,6 +3944,7 @@ while True:
                             cache['parsteel'] -= round(((load_specific_upgrade('starbase', 'Academy') * academy_delta) ** academy_delta) * 10)
                             cache['tritanium'] -= round(((load_specific_upgrade('starbase', 'Academy') * academy_delta) ** academy_delta) * 5)
                             start_construction('starbase', (load_specific_upgrade('starbase', 'Academy') ** academy_delta) * 10, 'Academy')
+                            check_update_mats()
                         else:
                             print(f"{Fore.RED}You have either canceled the upgrade, or do not have enough parsteel or tritanium.{Fore.WHITE}")
                             time.sleep(2)
@@ -3874,6 +3961,7 @@ while True:
                             cache['parsteel'] -= round(((load_specific_upgrade('starbase', 'Ops') * ops_delta) ** ops_delta) * 10)
                             cache['tritanium'] -= round(((load_specific_upgrade('starbase', 'Ops') * ops_delta) ** ops_delta) * 5)
                             start_construction('starbase', (load_specific_upgrade('starbase', 'Ops') ** ops_delta) * 10, 'Ops')
+                            check_update_mats()
                         else:
                             print(f"{Fore.RED}You either canceled the upgrade, or do not have enough parsteel or tritanium.{Fore.WHITE}")
                             time.sleep(2)
@@ -3891,6 +3979,7 @@ while True:
                         cache['parsteel'] -= round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 10)
                         cache['tritanium'] -= round(((load_specific_upgrade('starbase', 'Shipyard') * shipyard_delta) ** shipyard_delta) * 5)
                         start_construction('starbase', (load_specific_upgrade('starbase', 'Shipyard') ** shipyard_delta) * 10, 'Shipyard')
+                        check_update_mats()
                     else:
                         print(f"{Fore.RED}You either canceled the upgrade, or you do not have enough parsteel or tritanium.{Fore.WHITE}")
                         time.sleep(2)
@@ -3909,6 +3998,7 @@ while True:
                     cache['parsteel'] -= calculate_repair_cost(round(research_multi('Sheild Dynamics') * (load_ship_stat(ship_name=cache['ship'], stat_key='max_health') - load_ship_stat(ship_name=cache['ship'], stat_key='health')) / 5))
                     save_ship_data(ship_name=cache['ship'], stat_key='health', value=(research_multi('Sheild Dynamics') * load_ship_stat(ship_name=cache['ship'], stat_key='max_health')))
                     print(f"{Fore.GREEN}Repair Completed. You now have {load_ship_stat(cache['ship'], 'health')} health.{Fore.WHITE}")
+                    check_update_mats()
                     if cache['tutorial'] == 3:
                         cache['tutorial'] = 4
                     time.sleep(2)
@@ -3928,3 +4018,4 @@ while True:
     if option == 5:
         clear()
         shop_loop()
+#STF: Final Frontier Coming soon! Play online and conquor the Galaxy!

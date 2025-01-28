@@ -1,29 +1,17 @@
 {
-    "last_updated": "2024-12-05",
+    "last_updated": "2025-01-28",
     "items": [
         {
-            "item_name": "5 Stargazer Blueprints",
+            "item_name": "5 USS Grissom Blueprints",
             "price": 10,
-            "resource_key": "stargazer_blueprints",
+            "resource_key": "uss_grissom_blueprints",
             "amount": 5
         },
         {
-            "item_name": "100 USS Enterprise (NCC-1701 D) Blueprints",
-            "price": 100,
-            "resource_key": "uss_enterprise_(ncc-1701_d)_blueprints",
+            "item_name": "100 Klingon KVort Blueprints",
+            "price": 70,
+            "resource_key": "klingon_kvort_blueprints",
             "amount": 100
-        },
-        {
-            "item_name": "10 USS Enterprise (NCC-1701 D) Blueprints",
-            "price": 100,
-            "resource_key": "uss_enterprise_(ncc-1701_d)_blueprints",
-            "amount": 10
-        },
-        {
-            "item_name": "50 USS Enterprise (NCC-1701 D) Blueprints",
-            "price": 100,
-            "resource_key": "uss_enterprise_(ncc-1701_d)_blueprints",
-            "amount": 50
         },
         {
             "item_name": "5 Ambassadors Shuttle Blueprints",
@@ -32,28 +20,22 @@
             "amount": 5
         },
         {
-            "item_name": "60 USS Grissom Blueprints",
-            "price": 10,
-            "resource_key": "uss_grissom_blueprints",
-            "amount": 60
-        },
-        {
-            "item_name": "100 Romulan Warbird Blueprints",
-            "price": 80,
-            "resource_key": "romulan_warbird_blueprints",
-            "amount": 100
-        },
-        {
             "item_name": "50 Ambassadors Shuttle Blueprints",
             "price": 30,
             "resource_key": "ambassadors_shuttle_blueprints",
             "amount": 50
         },
         {
-            "item_name": "50 Recruit Tokens",
+            "item_name": "50 USS Excelsior Blueprints",
+            "price": 90,
+            "resource_key": "uss_excelsior_blueprints",
+            "amount": 50
+        },
+        {
+            "item_name": "300 Recruit Tokens",
             "price": 5,
             "resource_key": "recruit_tokens",
-            "amount": 50
+            "amount": 300
         }
     ]
 }

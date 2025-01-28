@@ -2,16 +2,16 @@
     "system data": [
         {
             "name": "Sol",
-            "parsteel_mine1": 467,
-            "parsteel_mine2": 592,
+            "parsteel_mine1": 462,
+            "parsteel_mine2": 558,
             "parsteel_mine3": 434,
-            "parsteel_mine4": 748,
+            "parsteel_mine4": 736,
             "parsteel_mine5": 529
         },
         {
             "name": "Vulcan",
             "parsteel_mine1": 675,
-            "tritanium_mine1": 587,
+            "tritanium_mine1": 575,
             "parsteel_mine2": 492,
             "tritanium_mine2": 374,
             "parsteel_mine3": 689,
