@@ -1,35 +1,41 @@
 {
-    "last_updated": "2025-01-28",
+    "last_updated": "2025-01-30",
     "items": [
         {
-            "item_name": "5 USS Grissom Blueprints",
-            "price": 10,
-            "resource_key": "uss_grissom_blueprints",
-            "amount": 5
-        },
-        {
-            "item_name": "100 Klingon KVort Blueprints",
-            "price": 70,
-            "resource_key": "klingon_kvort_blueprints",
+            "item_name": "100 USS Enterprise (NCC-1701 D) Blueprints",
+            "price": 100,
+            "resource_key": "uss_enterprise_(ncc-1701_d)_blueprints",
             "amount": 100
         },
         {
-            "item_name": "5 Ambassadors Shuttle Blueprints",
-            "price": 30,
-            "resource_key": "ambassadors_shuttle_blueprints",
-            "amount": 5
+            "item_name": "20 Ferengi DKora Blueprints",
+            "price": 60,
+            "resource_key": "ferengi_dkora_blueprints",
+            "amount": 20
         },
         {
-            "item_name": "50 Ambassadors Shuttle Blueprints",
-            "price": 30,
-            "resource_key": "ambassadors_shuttle_blueprints",
-            "amount": 50
+            "item_name": "100 Federation Shuttlecraft Blueprints",
+            "price": 20,
+            "resource_key": "federation_shuttlecraft_blueprints",
+            "amount": 100
         },
         {
-            "item_name": "50 USS Excelsior Blueprints",
-            "price": 90,
-            "resource_key": "uss_excelsior_blueprints",
-            "amount": 50
+            "item_name": "100 Daedalus Class Medical Blueprints",
+            "price": 25,
+            "resource_key": "daedalus_class_medical_blueprints",
+            "amount": 100
+        },
+        {
+            "item_name": "30 USS Grissom Blueprints",
+            "price": 10,
+            "resource_key": "uss_grissom_blueprints",
+            "amount": 30
+        },
+        {
+            "item_name": "10 Ferengi DKora Blueprints",
+            "price": 60,
+            "resource_key": "ferengi_dkora_blueprints",
+            "amount": 10
         },
         {
             "item_name": "300 Recruit Tokens",

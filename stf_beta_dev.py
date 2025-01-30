@@ -911,7 +911,7 @@ def format_position(position):
         return position.capitalize().replace('bridge', 'Bridge')
 
 def income_display():
-     print(f"{Fore.YELLOW}Parsteel:{Fore.WHITE} {int(cache['parsteel'])} || {Fore.GREEN}Tritanium:{Fore.WHITE} {int(cache['tritanium'])} || {Fore.CYAN}Dilithium:{Fore.WHITE} {int(cache['dilithium'])} || {Fore.YELLOW}Latinum:{Fore.WHITE} {int(cache['latinum'])} || {Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {cache['ship']} || {Fore.LIGHTBLUE_EX}Current System:{Fore.WHITE} {systems[cache['current_system']]} || {Fore.BLUE}Health:{Fore.WHITE} {round(load_ship_stat(ship_name=cache['ship'], stat_key='health')) * research_multi('Sheild Dynamics')}/{research_multi('Sheild Dynamics') * load_ship_stat(ship_name=cache['ship'], stat_key='max_health')} || {Fore.GREEN}Storage Avalible:{Fore.WHITE} {round(load_ship_stat(ship_name=cache['ship'], stat_key='storage'))}/{research_multi('Inventory Management Systems') * load_ship_stat(ship_name=cache['ship'], stat_key='max_storage')}")
+     print(f"{Fore.YELLOW}Parsteel:{Fore.WHITE} {int(cache['parsteel'])} || {Fore.GREEN}Tritanium:{Fore.WHITE} {int(cache['tritanium'])} || {Fore.CYAN}Dilithium:{Fore.WHITE} {int(cache['dilithium'])} || {Fore.YELLOW}Latinum:{Fore.WHITE} {int(cache['latinum'])} || {Fore.LIGHTBLUE_EX}Current Ship:{Fore.WHITE} {cache['ship']} || {Fore.LIGHTBLUE_EX}Current System:{Fore.WHITE} {systems[cache['current_system']]} || {Fore.BLUE}Health:{Fore.WHITE} {round(load_ship_stat(ship_name=cache['ship'], stat_key='health')) * research_multi('Sheild Dynamics')}/{int(research_multi('Sheild Dynamics') * load_ship_stat(ship_name=cache['ship'], stat_key='max_health'))} || {Fore.GREEN}Storage Avalible:{Fore.WHITE} {round(load_ship_stat(ship_name=cache['ship'], stat_key='storage'))}/{int(research_multi('Inventory Management Systems') * load_ship_stat(ship_name=cache['ship'], stat_key='max_storage'))}")
 
 def ask(question):
         response = input(question)
@@ -1218,7 +1218,7 @@ def scan_system():
         clear()
         income_display()
         print(f"{Fore.GREEN}Scanning {systems[cache['current_system']]}...{Fore.WHITE}")
-        colored_gradient_loading_bar(exploration_time, 60)
+        colored_gradient_loading_bar(60, exploration_time)
         print(f"{Fore.GREEN}Scan complete! You may now navigate the system.{Fore.WHITE}")
         update_mission_progress('Explore 3 New Systems', 1)
         save_explored(systems[cache['current_system']])
@@ -1249,6 +1249,7 @@ def execute_trade(storage_type, trade_am, item_name, give_am, trade_type):
 
 
 def trading(dil_trade_am, tri_trade_am, par_trade_am):
+    clear()
     income_display()
     print('Available Items:')
     avalible = [
@@ -1539,11 +1540,18 @@ def ship_reply(choice, ship_type, progress):
     income_display()
     return reply
 
+# Constants
+SHIP_TYPES = ["friendly", "neutral", "hostile"]
+OPTIONS = {
+    1: "Greet the ship",
+    2: "Ask to trade",
+    3: "Exit the conversation"
+}
+
 def hailing_frequency():
     global player_reputation
 
-    ship_types = ["friendly", "neutral", "hostile"]
-    current_ship = random.choice(ship_types)
+    current_ship = random.choice(SHIP_TYPES)
 
     # Reputation affects initial ship behavior
     if current_ship == "hostile" and player_reputation > 70:
@@ -1558,17 +1566,22 @@ def hailing_frequency():
 
     print(f"{Fore.GREEN}Hailing frequency opened. You've encountered a {current_ship} ship.{Fore.WHITE}")
 
+    def handle_ship_reply(choice, current_ship, progress):
+        npc_reply = ship_reply(choice, current_ship, progress)
+        print(f"{Fore.YELLOW}Ship: {npc_reply}{Fore.WHITE}")
+
     # Handle the conversation
     while True:
         print("\nWhat would you like to say?")
-        print("1. Greet the ship")
-        print("2. Ask to trade")
-        print("3. Exit the conversation")
+        for key, value in OPTIONS.items():
+            print(f"{key}. {value}")
 
         try:
             choice = int(input("\nSelect an option by entering the number: "))
+            if choice not in OPTIONS:
+                raise ValueError
         except ValueError:
-            print("Invalid input. Please enter a number.")
+            print("Invalid input. Please enter a number between 1 and 3.")
             continue
 
         if choice == 3:
@@ -1576,17 +1589,23 @@ def hailing_frequency():
             time.sleep(2)
             break
 
-        if choice in [1, 2]:
-            npc_reply = ship_reply(choice, current_ship, progress)
-            print(f"{Fore.YELLOW}Ship: {npc_reply}{Fore.WHITE}")
+        if choice == 1:
+            if progress['greeted']:
+                if current_ship == "friendly":
+                    print("The ship is beginning to trust you.")
+                    player_reputation += 5
+                    cache['reputation'] = player_reputation
+                    handle_ship_reply(choice, current_ship, progress)
+                elif current_ship == "hostile":
+                    print("The hostile ship is not interested in talking.")
+                    handle_ship_reply(choice, current_ship, progress)
+            else:
+                print("The ship has greeted you.")
+                handle_ship_reply(choice, current_ship, progress)
+                progress['greeted'] = True
 
-            # Handle player reputation and progress
-            if choice == 1 and progress['greeted'] and current_ship == "friendly":
-                print("The ship is beginning to trust you.")
-                player_reputation += 5
-                cache['reputation'] = player_reputation
-
-            elif choice == 2 and current_ship == "neutral" and progress['greeted']:
+        elif choice == 2:
+            if current_ship in ["neutral", "friendly"] and progress['greeted']:
                 print("The neutral ship is considering trading with you.")
                 # Randomize the trade amounts
                 dil_trade_am = random.randint(10, 100)
@@ -1596,9 +1615,10 @@ def hailing_frequency():
                 trading(dil_trade_am, tri_trade_am, par_trade_am)
                 player_reputation += 5
                 cache['reputation'] = player_reputation
-
             else:
-                print(f"Current Reputation: {player_reputation}")
+                print("The ship is not interested in trading.")
+            handle_ship_reply(choice, current_ship, progress)
+
         else:
             print("Invalid option. Please select a number between 1 and 3.")
 
@@ -1803,13 +1823,13 @@ def calculate_production(upgrade_level):
 
 def background_production():
     global last_production_time
-    last_production_time = cache['last_production_time']
+    last_production_time = load_data('last_production_time')
 
     # Get the current time
     current_time = datetime.now()
 
     # Check if last_production_time is empty (""), and if so, set it to the current time
-    if cache['last_production_time'] == "":
+    if load_data('last_production_time') == "":
         last_production_time = current_time.isoformat()
         save_data('last_production_time', last_production_time)
         print("Last production time was empty. Setting to current time.")
@@ -1821,9 +1841,9 @@ def background_production():
     # Check if 1 minute (or your desired interval) has passed
     if time_diff >= timedelta(minutes=1):
         # Load saved storage values (check if there's any saved material)
-        parsteel_storage = cache['parsteel_storage_gen'] or 0
-        tritanium_storage = cache['tritanium_storage_gen'] or 0
-        dilithium_storage = cache['dilithium_storage_gen'] or 0
+        parsteel_storage = load_data('parsteel_storage_gen') or 0
+        tritanium_storage = load_data('tritanium_storage_gen') or 0
+        dilithium_storage = load_data('dilithium_storage_gen') or 0
 
         # Load the upgrade levels from the buildings data
         generators_upgrades = load_building_data('buildings')['generators']['upgrades']
@@ -1839,20 +1859,20 @@ def background_production():
         dilithium_storage += dilithium_prod
 
         # Save the updated storage values
-        cache['parsteel_storage_gen'] = parsteel_storage
-        cache['tritanium_storage_gen'] = tritanium_storage
-        cache['dilithium_storage_gen'] = dilithium_storage
+        save_data('parsteel_storage_gen', parsteel_storage)
+        save_data('tritanium_storage_gen', tritanium_storage)
+        save_data('dilithium_storage_gen', dilithium_storage)
 
         # Save the current time as the last production time
         last_production_time = current_time.isoformat()
-        cache['last_production_time'] = last_production_time
+        save_data('last_production_time', last_production_time)
 
 
 def claim_resources():
     # Load stored materials and actual materials from user data
-    parsteel_storage = cache['parsteel_storage_gen'] or 0
-    tritanium_storage = cache['tritanium_storage_gen'] or 0
-    dilithium_storage = cache['dilithium_storage_gen'] or 0
+    parsteel_storage = load_data('parsteel_storage_gen') or 0
+    tritanium_storage = load_data('tritanium_storage_gen') or 0
+    dilithium_storage = load_data('dilithium_storage_gen') or 0
 
     parsteel = cache['parsteel'] or 0
     tritanium = cache['tritanium'] or 0
@@ -1869,9 +1889,9 @@ def claim_resources():
     cache['dilithium'] = dilithium
 
     # Reset the storage to 0
-    cache['parsteel_storage_gen'] = 0
-    cache['tritanium_storage_gen'] = 0
-    cache['dilithium_storage_gen'] = 0
+    save_data('parsteel_storage_gen', 0)
+    save_data('tritanium_storage_gen', 0)
+    save_data('dilithium_storage_gen', 0)
 
     print(f"{Fore.GREEN}All resources have been claimed. Parsteel claimed: {parsteel_storage} | Tritanium claimed: {tritanium_storage} | Dilithium claimed: {dilithium_storage}{Fore.WHITE}")
     if cache['tutorial'] == 10:
@@ -2424,6 +2444,12 @@ def tutorial():
             ),
             "highlights": {"tutorial_highlight2": Fore.YELLOW, "tutorial_highlight4": Fore.YELLOW},
         },
+        3: {
+            "message": (
+                f"{Fore.YELLOW}After battle, your ship is damaged. Return to drydock to repair.{Fore.WHITE}"
+            ),
+            "highlights": {"tutorial_highlight1": Fore.YELLOW},
+        },
         4: {
             "message": (
                 f"{Fore.YELLOW}Re-enter your drydock now. Its time to do some research.\n{Fore.WHITE}"
@@ -2930,8 +2956,6 @@ def tellar():
     check_update_mats()
 
     # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 3:
-        return
     
     if load_explored(systems[current_system]) == 2:
         income_display()
@@ -3043,8 +3067,6 @@ def andor():
     check_update_mats()
 
     # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 4:
-        return
     
     if load_explored(systems[current_system]) == 2:
         income_display()
@@ -3176,10 +3198,6 @@ def omicron_ii():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 5:
-        return
-    
     if load_explored(systems[current_system]) == 2:
         income_display()
         scan_system()
@@ -3256,10 +3274,6 @@ def regula():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 6:
-        return
-    
     if load_explored(systems[current_system]) == 2:
         income_display()
         scan_system()
@@ -3372,10 +3386,6 @@ def solaria():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 7:
-        return
-    
     if load_explored(systems[current_system]) == 2:
         income_display()
         scan_system()
@@ -3470,10 +3480,6 @@ def tarkalea_xii():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 8:
-        return
-    
     if load_explored(systems[current_system]) == 2:
         income_display()
         scan_system()
@@ -3549,10 +3555,6 @@ def xindi_starbase_9():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 9:
-        return
-    
     if load_explored(systems[current_system]) == 2:
         income_display()
         scan_system()
@@ -3615,10 +3617,6 @@ def altor_iv():
     current_system = cache['current_system']
     check_update_mats()
 
-    # Early return if the system is not fully explored
-    if load_explored(systems[current_system]) != 10:
-        return
-    
     if load_explored(systems[current_system]) == 2:
         income_display()
         scan_system()

@@ -3,15 +3,15 @@
         {
             "name": "Sol",
             "parsteel_mine1": 462,
-            "parsteel_mine2": 558,
-            "parsteel_mine3": 434,
+            "parsteel_mine2": 541,
+            "parsteel_mine3": 234.0,
             "parsteel_mine4": 736,
             "parsteel_mine5": 529
         },
         {
             "name": "Vulcan",
             "parsteel_mine1": 675,
-            "tritanium_mine1": 575,
+            "tritanium_mine1": 560,
             "parsteel_mine2": 492,
             "tritanium_mine2": 374,
             "parsteel_mine3": 689,
@@ -19,8 +19,8 @@
         },
         {
             "name": "Tellar",
-            "tritanium_mine1": 636,
-            "tritanium_mine2": 448,
+            "tritanium_mine1": 386.0,
+            "tritanium_mine2": 398.0,
             "dilithium_mine1": 594,
             "dilithium_mine2": 453,
             "dilithium_mine3": 737,

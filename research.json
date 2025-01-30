@@ -1,20 +1,20 @@
 {
     "research": {
         "Warp Mathematics": {
-            "level": 0,
-            "cost": 20,
+            "level": 1,
+            "cost": 10,
             "prerequisites": []
         },
         "Mining Laser": {
             "level": 0,
-            "cost": 30,
+            "cost": 20,
             "prerequisites": [
                 "Warp Mathematics"
             ]
         },
         "Inventory Management Systems": {
             "level": 0,
-            "cost": 40,
+            "cost": 30,
             "prerequisites": [
                 "Mining Laser"
             ]
